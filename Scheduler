@@ -1,0 +1,156 @@
+#!/usr/bin/perl
+package Bob;
+
+
+use warnings;
+use strict;
+
+use lib "./";
+
+use Mojolicious::Lite;
+
+use SaveRestore;
+
+
+my @Slots;
+
+#------------------------------------------------------------------------------
+#  get '/slots'
+#------------------------------------------------------------------------------
+get '/slots' => sub
+{
+	my $self = shift;
+
+	@Slots = readSlots();
+
+	$self->stash( slots=>\@Slots);
+
+	$self->render( "slots");
+
+};
+
+#------------------------------------------------------------------------------
+#  post '/removePosition
+#  		This call deletes the provided title entry from the positions table
+#------------------------------------------------------------------------------
+post '/removePosition' => sub
+{
+	my $self = shift;
+
+	my $json = $self->req->json();
+	my $title = $json->{title};
+	
+	removeSlot( $title);
+
+	@Slots = readSlots();
+	$self->stash( slots=>\@Slots);
+
+	$self->render( 'slots');
+};
+
+
+#------------------------------------------------------------------------------
+#  websocket '/getPositionInfo'
+#  		This call gets the information about the position at the specified
+#  		index in the list.
+#------------------------------------------------------------------------------
+websocket '/getPositionInfo' => sub
+{
+	my $self = shift;
+
+	##
+	##  See if we received a message
+	##:w
+	$self->on( message => sub
+				{
+					my ($self, $posIndex) = @_;
+
+					##
+					##  Send back info
+					##
+					$self->send( { json=> {	title => $Slots[$posIndex]->{title},
+											dayOfWeek =>$Slots[$posIndex]->{dayOfWeek},
+											time => $Slots[$posIndex]->{time}, 
+											numberNeeded => $Slots[$posIndex]->{numberNeeded}
+										  }
+								  }
+								);
+				}
+			 );
+	
+};
+
+#------------------------------------------------------------------------------
+#  websocket '/addPosition'
+#  		This call adds the provided entry to the position table
+#------------------------------------------------------------------------------
+websocket '/addPosition' => sub
+{
+	my $self = shift;
+
+	##
+	##  See if we received a message
+	##
+	$self->on( json => sub
+				{
+					my ($self, $slot) = @_;
+##-->					my $slot = {title=>$title, dayOfWeek=>$dayOfWeek, time=>$time, numberNeeded=>$numberNeeded};
+
+					saveSlot( $slot);
+
+					##
+					##  Send back info
+					##
+					$self->send( { json=> {	status => "Saved"
+										  }
+								 }
+								);
+				}
+			 );
+	
+};
+
+#------------------------------------------------------------------------------
+#  websocket '/replacePosition'
+#  		This call replaces the provided entry to the position table
+#------------------------------------------------------------------------------
+websocket '/replacePosition' => sub
+{
+	my $self = shift;
+
+	##
+	##  See if we received a message
+	##
+	$self->on( json => sub
+				{
+					my ($self, $json) = @_;
+					my $replaceTitle = $json->{replace};
+					my $slot = $json->{with};
+
+					print "Replacing: $replaceTitle  with:\n";
+					foreach (keys(%$slot))
+					{
+						print "\t$_: $slot->{$_}\n";
+					}
+
+					##
+					##  Note that we delete the old and insert to allow
+					##  for changing the title
+					##
+					removeSlot( $replaceTitle);
+					saveSlot( $slot);
+
+					##
+					##  Send back info
+					##
+					$self->send( { json=> {	status => "Saved"
+										  }
+								 }
+								);
+				}
+			 );
+	
+};
+@Slots = readSlots();
+
+app->start;
