@@ -441,7 +441,7 @@ sub scheduleSomeone( $$@)
 		##
 		##  Mark the person as unavailable for this date (to prevent schduling two separate tasks on the same date)
 		##
-		$names[0]->{daysUnavailable} .= " $date";
+		$names[0]->{daysUnavailable} .= ",$date";
 	}
 	
 	return @slotSchedule;
