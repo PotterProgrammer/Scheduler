@@ -5,7 +5,7 @@ package SaveRestore;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( readVolunteers readSlots readSchedule removeSlot saveVolunteer saveSlot saveSchedule);
+@EXPORT = qw( readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule);
 
 use warnings;
 use strict;
@@ -61,8 +61,7 @@ BEGIN
 	##
 	$dbh->do( 'create table if not exists dates_unavailable
 		           ( name text,
-				     date text,
-					 primary key( "name")
+				     date text
 				   )');
 
 	##
@@ -70,8 +69,7 @@ BEGIN
 	##
 	$dbh->do( "create table if not exists dates_desired
 		           ( name text,
-				     date text,
-					 primary key( 'name')
+				     date text
 				   )");
 
 	##
@@ -149,7 +147,7 @@ sub readVolunteers()
 		my $dates = $unavailable->fetchall_arrayref( {});
 		if ( defined( $dates) && @$dates)
 		{
-			my $dateList = join( " ",( map { $_->{date} } @$dates) );
+			my $dateList = join( ",",( map { $_->{date} } @$dates) );
 			$volunteer->{daysUnavailable} = $dateList;
 			if ( $verbose)
 			{
@@ -165,8 +163,8 @@ sub readVolunteers()
 		$dates = $desired->fetchall_arrayref( {});
 		if ( defined( $dates) && @$dates)
 		{
-			my $dateList = join( " ",( map { $_->{date} } @$dates) );
-			$volunteer->{daysDesured} = $dateList;
+			my $dateList = join( ",",( map { $_->{date} } @$dates) );
+			$volunteer->{daysDesired} = $dateList;
 			if ( $verbose)
 			{
 				print "$dates->[0]->{name} wants to volunteer on: $dateList\n";
@@ -181,10 +179,9 @@ sub readVolunteers()
 	return( @$volunteers);
 }
 
-
 #------------------------------------------------------------------------------
 #  sub removeSlot( $positionTitle)
-#		This routine saves the information with the provided title from
+#		This routine removess the information with the provided title from
 #		the "position" table.
 #------------------------------------------------------------------------------
 sub removeSlot($)
@@ -199,6 +196,31 @@ sub removeSlot($)
 	$sth->bind_param( 1, $title);
 	$sth->execute();
 }
+
+#------------------------------------------------------------------------------
+#  sub removeVolunteer( $name)
+#		This routine removes the named individual's entry from the volunteer,
+#		the "position" table.
+#------------------------------------------------------------------------------
+sub removeVolunteer($)
+{
+	my $name = $_[0];
+
+	if ( $verbose)
+	{
+		print "*** Deleting volunteer: $name\n";
+	}
+	my $sth = $dbh->prepare( "delete from volunteer where name = ?");
+	$sth->bind_param( 1, $name);
+	$sth->execute();
+	$sth = $dbh->prepare( "delete from dates_unavailable where name=?");
+	$sth->bind_param( 1, $name);
+	$sth->execute();
+	$sth = $dbh->prepare( "delete from dates_desired where name=?");
+	$sth->bind_param( 1, $name);
+	$sth->execute();
+}
+
 #------------------------------------------------------------------------------
 #  sub saveSlot( $slot)
 #		This routine saves the information in the provided "slot" hashref to

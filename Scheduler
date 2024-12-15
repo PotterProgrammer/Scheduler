@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-package Bob;
 
 
 use warnings;
@@ -13,6 +12,7 @@ use SaveRestore;
 
 
 my @Slots;
+my @Volunteers;
 
 #------------------------------------------------------------------------------
 #  get '/slots'
@@ -29,8 +29,25 @@ get '/slots' => sub
 
 };
 
+
 #------------------------------------------------------------------------------
-#  post '/removePosition
+#  get '/volunteers'
+#------------------------------------------------------------------------------
+get '/volunteers' => sub
+{
+	my $self = shift;
+
+	@Slots = readSlots();
+	@Volunteers = readVolunteers();
+
+	$self->stash( slots=>\@Slots, volunteers=>\@Volunteers);
+
+	$self->render( "volunteers");
+
+};
+
+#------------------------------------------------------------------------------
+#  post '/removePosition'
 #  		This call deletes the provided title entry from the positions table
 #------------------------------------------------------------------------------
 post '/removePosition' => sub
@@ -46,6 +63,27 @@ post '/removePosition' => sub
 	$self->stash( slots=>\@Slots);
 
 	$self->render( 'slots');
+};
+
+
+#------------------------------------------------------------------------------
+#  post '/removeVolunteer'
+#  		This call deletes the provided title entry from the volunteers table
+#------------------------------------------------------------------------------
+post '/removeVolunteer' => sub
+{
+	my $self = shift;
+
+	my $json = $self->req->json();
+	my $name = $json->{name};
+	
+	print "\n\n********* REMOVING $name  ********\n\n";
+	removeVolunteer( $name);
+
+	@Volunteers = readVolunteers();
+	$self->stash( volunteers=>\@Volunteers);
+
+	$self->render( 'volunteers');
 };
 
 
@@ -151,6 +189,74 @@ websocket '/replacePosition' => sub
 			 );
 	
 };
+
+#------------------------------------------------------------------------------
+#  websocket '/getVolunteerInfo'
+#  		This call gets the information about the position at the specified
+#  		index in the list.
+#------------------------------------------------------------------------------
+websocket '/getVolunteerInfo' => sub
+{
+	my $self = shift;
+
+
+	##
+	##  See if we received a message
+	##
+	$self->on( json => sub
+				{
+					my ($self, $json) = @_;
+					my $found = 1;
+
+					my $index = $json->{index};
+
+					if ( $Volunteers[$index]->{name} ne $json->{name})
+					{
+						$found = 0;
+						while( my ($i, $volunteer) = each( @Volunteers))
+						{
+							if ( $volunteer->{name} eq $json->{name})
+							{
+								$index = $i;
+								$found = 1;
+								last;
+							}
+						}
+					}
+
+					
+					##
+					##  Send back info
+					##
+					if ( $found)
+					{
+						$self->send( { json=> {	name => $Volunteers[$index]->{name},
+												email =>$Volunteers[$index]->{email},
+												phone => $Volunteers[$index]->{phone}, 
+												daysDesired => $Volunteers[$index]->{daysDesired},
+												desiredRoles => $Volunteers[$index]->{desiredRoles},
+												daysUnavailable => $Volunteers[$index]->{daysUnavailable}
+											  }
+									  }
+									);
+					}
+					else
+					{
+						$self->send( { json=> {	name => "n/a",
+												email => "n/a",
+												phone => "n/a", 
+												daysDesired => "n/a",
+												desiredRoles => "n/a",
+												daysUnavailable => "n/a"
+											  }
+									  }
+									);
+					}
+				}
+			 );
+	
+};
+
 @Slots = readSlots();
 
 app->start;
