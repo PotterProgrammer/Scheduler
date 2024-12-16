@@ -2,3 +2,4 @@ RCS/
 templates/*.html
 *.txt
 *.db
+*.swp
