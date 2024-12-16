@@ -2,10 +2,10 @@
 
 <html>
 <head>
-	<link rel="stylesheet" href="site.css">
+	<link rel="stylesheet" href="/site.css">
 </head>
 
-<script src="scheduler.js"> </script>
+<script src="/scheduler.js"> </script>
 
 <script>
 
@@ -63,37 +63,100 @@
 	</div>
 </div>
 
-<h1>Volunteers</h1>
+<h1><%= $title %></h1>
 
-<select name="volunteers" class="nameList" id="itemList" size="10" onChange="showVolunteerInfo()" autofocus>
-   % my $first = 1;
-   %foreach my $volunteer (@{$volunteers})
-   %{
-   <option value="<%= $volunteer->{name} %>" <%= ($first)? 'selected' : '' %>><%= $volunteer->{name} %></option>
-   % $first = 0;
-   %}
-</select>
+<div id="holder">
+	<div id="userInfo">
+		<form>
+		<label for="name">Name:</label>
+		<input type="text" id="name" name="name" value="<%= (defined($volunteer))? $volunteer->{name} : "" %>"></input>
+		<br>
+		<label for="email">Email address:</label>
+		<input type="email" id="email" name="email" value="<%= (defined($volunteer))? $volunteer->{email} : "" %>"></input>
+		<br>
+		<label for="phone">Phone number:</label>
+		<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<%= (defined($volunteer))? $volunteer->{phone} : "" %>"></input>
+		<br>
+		<label for="positions">Positions:</label>
 
-<div id="description">
+		% my @roles;
+		% if ( defined( $volunteer))
+		% {
+		%    @roles = split(",", $volunteer->{desiredRoles});
+		% }
+		% else
+		% {
+		%    foreach ( @$slots)
+		%	 {
+		%		push( @roles, $_->{title});
+		%    }
+		% }
+		% my $roleCount = int( @roles);
+		<select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>">
+		% if ( @roles)
+		% {
+		%  foreach my $role (@roles)
+		%    {
+			<option value="<%= $role %>"><%= $role %></option>
+		%    }
+		% }
+		% else
+		% {
+			<option value="-none-"></option>
+		% }
+		</select>
+		<br>
+		<label for="daysUnavailable">Days unavailable:</label>
 
-	<form>
-	<label for="name">Name:</label>
-	<input type="text" id="name" name="name" disabled></input>
-	<br>
-	<label for="email">Email address:</label>
-	<input type="email" id="email" name="email" disabled></input>
-	<br>
-	<label for="phone">Phone number:</label>
-	<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" disabled></input>
-	<br>
-	<label for="positions">Positions:</label>
-	<select name="positions" id="positions" multiple size="1">
-	</select>
-	<br>
-	<button type="button" onclick="showConfirmSave()">Add</button>
-	<button type="button" onclick="showConfirmSave()">Edit</button>
-	<button type="button" onclick="showConfirmDelete()">Delete</button>
-	</form>
+		% my @daysUnavailable;
+		% if ( defined( $volunteer) && defined( $volunteer->{daysUnavailable}))
+		% {
+		%    @daysUnavailable = split(",", $volunteer->{daysUnavailable});
+		% }
+		% my $count = int( @daysUnavailable);
+		<select name="daysUnavailable" id="daysUnavailable" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		% if ( @daysUnavailable)
+		% {
+		%  foreach my $day (@daysUnavailable)
+		%    {
+			<option value="<%= $day %>"><%= $day %></option>
+		%    }
+		% }
+		% else
+		% {
+			<option value="-none-">-none-</option>
+		% }
+		</select>
+		</select>
+		<button type="button">Edit</button>
+		<br>
+		<label for="daysDesired">Days desired:</label>
+		% my @daysDesired;
+		% if ( defined( $volunteer) && defined( $volunteer->{daysDesired}))
+		% {
+		%    @daysDesired = split(",", $volunteer->{daysDesired});
+		% }
+		% $count = int( @daysDesired);
+		<select name="daysDesired" id="daysDesired" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		% if ( @daysDesired)
+		% {
+		%  foreach my $day (@daysDesired)
+		%    {
+			<option value="<%= $day %>"><%= $day %></option>
+		%    }
+		% }
+		% else
+		% {
+			<option value="-none-">-none-</option>
+		% }
+		</select>
+		<button type="button">Edit</button>
+
+		<br>
+		<button type="button" onclick="showConfirmSave()">Save</button>
+		<button type="button" onclick="showConfirmDelete()">Cancel</button>
+		</form>
+	</div>
 </div>
 </body>
 
