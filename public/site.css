@@ -4,6 +4,7 @@ body
 	color: white;
 	font-family: Hevetica, Arial, sans-serif;
 	font-size: 14pt;
+	margin-left: 0;
 }
 
 h1
@@ -29,8 +30,14 @@ input:disabled
 select
 {
 	font-size: 14pt;
+	vertical-align: middle;
+	margin-bottom: .5em;
 }
 
+#positions
+{
+	width: 8.5em;
+}
 
 button
 {
@@ -44,7 +51,6 @@ button
 label
 {
 	cursor: default;
-	vertical-align: top;
 }
 
 .nameList, #itemList
@@ -66,6 +72,16 @@ label
 	height: 80%;
 }
 
+#userInfo
+{
+	position: absolute;
+	margin-top: 5vh;
+	min-width: 40%;
+	margin-left: auto;
+	margin-right: auto;
+	line-height: 2.5;
+}
+
 #dayNeeded
 {
 	font-size:12pt;
@@ -73,6 +89,13 @@ label
 #count
 {
 	width: 3em;
+}
+
+#holder
+{
+	width:99vw;
+	display: flex;
+	justify-content: center;
 }
 
 #overlay
@@ -102,10 +125,13 @@ label
 
 #navbar
 {
+	width: 100vw;
     background-color: lightgray;
     color: white;
-    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 	height: 1.2em;
 	margin-bottom: 2em;
+	margin-top: 1px;
 }
 

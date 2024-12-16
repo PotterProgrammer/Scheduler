@@ -35,6 +35,26 @@
 				});
 	}
 
+	//==============================================================================
+	//	function addVolunteer()
+	//==============================================================================
+	function addVolunteer()
+	{
+		window.location.href = 'addVolunteer';
+	}
+	
+	//==============================================================================
+	//	function editVolunteer()
+	//==============================================================================
+	function editVolunteer()
+	{
+		var volunteerList = document.getElementById( "itemList");
+		var selectedItemNumber = volunteerList.selectedIndex;
+		var itemName = volunteerList.options[selectedItemNumber].value;
+		window.location.href = 'editVolunteer/' + itemName;
+	}
+	
+
 	window.addEventListener( "pageshow", showVolunteerInfo);
 
 </script>
@@ -98,8 +118,8 @@
 	<select name="daysDesired" id="daysDesired" multiple size="1">
 	</select>
 	<br>
-	<button type="button" onclick="showConfirmSave()">Add</button>
-	<button type="button" onclick="showConfirmSave()">Edit</button>
+	<button type="button" onclick="addVolunteer()">Add</button>
+	<button type="button" onclick="editVolunteer()">Edit</button>
 	<button type="button" onclick="showConfirmDelete()">Delete</button>
 	</form>
 </div>
