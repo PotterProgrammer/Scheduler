@@ -14,249 +14,315 @@ use SaveRestore;
 my @Slots;
 my @Volunteers;
 
-#------------------------------------------------------------------------------
-#  get '/slots'
-#------------------------------------------------------------------------------
-get '/slots' => sub
+sub findVolunteer($$);
+
+#main:
 {
-	my $self = shift;
+	#------------------------------------------------------------------------------
+	#  get '/slots'
+	#------------------------------------------------------------------------------
+	get '/slots' => sub
+	{
+		my $self = shift;
 
-	@Slots = readSlots();
+		@Slots = readSlots();
 
-	$self->stash( slots=>\@Slots);
+		$self->stash( slots=>\@Slots);
 
-	$self->render( "slots");
+		$self->render( "slots");
 
-};
-
-
-#------------------------------------------------------------------------------
-#  get '/volunteers'
-#------------------------------------------------------------------------------
-get '/volunteers' => sub
-{
-	my $self = shift;
-
-	@Slots = readSlots();
-	@Volunteers = readVolunteers();
-
-	$self->stash( slots=>\@Slots, volunteers=>\@Volunteers);
-
-	$self->render( "volunteers");
-
-};
-
-#------------------------------------------------------------------------------
-#  post '/removePosition'
-#  		This call deletes the provided title entry from the positions table
-#------------------------------------------------------------------------------
-post '/removePosition' => sub
-{
-	my $self = shift;
-
-	my $json = $self->req->json();
-	my $title = $json->{title};
-	
-	removeSlot( $title);
-
-	@Slots = readSlots();
-	$self->stash( slots=>\@Slots);
-
-	$self->render( 'slots');
-};
+	};
 
 
-#------------------------------------------------------------------------------
-#  post '/removeVolunteer'
-#  		This call deletes the provided title entry from the volunteers table
-#------------------------------------------------------------------------------
-post '/removeVolunteer' => sub
-{
-	my $self = shift;
+	#------------------------------------------------------------------------------
+	#  get '/volunteers'
+	#------------------------------------------------------------------------------
+	get '/volunteers' => sub
+	{
+		my $self = shift;
 
-	my $json = $self->req->json();
-	my $name = $json->{name};
-	
-	print "\n\n********* REMOVING $name  ********\n\n";
-	removeVolunteer( $name);
+		@Slots = readSlots();
+		@Volunteers = readVolunteers();
 
-	@Volunteers = readVolunteers();
-	$self->stash( volunteers=>\@Volunteers);
+		$self->stash( slots=>\@Slots, volunteers=>\@Volunteers);
 
-	$self->render( 'volunteers');
-};
+		$self->render( "volunteers");
+
+	};
+
+	#------------------------------------------------------------------------------
+	#  get '/addVolunteer' => sub
+	#  		This call provides a screen for adding entries for volunteers.
+	#------------------------------------------------------------------------------
+	get '/addVolunteer' => sub
+	{
+		my $self = shift;
+
+		@Slots = readSlots();
+
+		$self->stash( slots=>\@Slots, volunteer=>undef, title=>"Add Volunteers");
+
+		$self->render( "addEditVolunteers");
+
+	};
 
 
-#------------------------------------------------------------------------------
-#  websocket '/getPositionInfo'
-#  		This call gets the information about the position at the specified
-#  		index in the list.
-#------------------------------------------------------------------------------
-websocket '/getPositionInfo' => sub
-{
-	my $self = shift;
+	#------------------------------------------------------------------------------
+	#  get '/editVolunteer/<:name>' => sub
+	#  		This call provides a screen for editing the settings of the named
+	#  		volunteer
+	#------------------------------------------------------------------------------
+	get '/editVolunteer/<:name>' => sub
+	{
+		my $self = shift;
 
-	##
-	##  See if we received a message
-	##:w
-	$self->on( message => sub
-				{
-					my ($self, $posIndex) = @_;
+		print "In editVolunteer.  Name=" . $self->param("name") . "\n";
+		@Volunteers = readVolunteers();
 
-					##
-					##  Send back info
-					##
-					$self->send( { json=> {	title => $Slots[$posIndex]->{title},
-											dayOfWeek =>$Slots[$posIndex]->{dayOfWeek},
-											time => $Slots[$posIndex]->{time}, 
-											numberNeeded => $Slots[$posIndex]->{numberNeeded}
-										  }
-								  }
-								);
-				}
-			 );
-	
-};
+		my ($index, $volunteer) = findVolunteer( 0, $self->param("name"));
 
-#------------------------------------------------------------------------------
-#  websocket '/addPosition'
-#  		This call adds the provided entry to the position table
-#------------------------------------------------------------------------------
-websocket '/addPosition' => sub
-{
-	my $self = shift;
+		$self->stash( slots=> undef, volunteer=>$volunteer, title=>"Edit Information for " . $self->param("name"));
 
-	##
-	##  See if we received a message
-	##
-	$self->on( json => sub
-				{
-					my ($self, $slot) = @_;
-##-->					my $slot = {title=>$title, dayOfWeek=>$dayOfWeek, time=>$time, numberNeeded=>$numberNeeded};
+		$self->render( "addEditVolunteers");
 
-					saveSlot( $slot);
+	};
 
-					##
-					##  Send back info
-					##
-					$self->send( { json=> {	status => "Saved"
-										  }
-								 }
-								);
-				}
-			 );
-	
-};
 
-#------------------------------------------------------------------------------
-#  websocket '/replacePosition'
-#  		This call replaces the provided entry to the position table
-#------------------------------------------------------------------------------
-websocket '/replacePosition' => sub
-{
-	my $self = shift;
+	#------------------------------------------------------------------------------
+	#  post '/removePosition'
+	#  		This call deletes the provided title entry from the positions table
+	#------------------------------------------------------------------------------
+	post '/removePosition' => sub
+	{
+		my $self = shift;
 
-	##
-	##  See if we received a message
-	##
-	$self->on( json => sub
-				{
-					my ($self, $json) = @_;
-					my $replaceTitle = $json->{replace};
-					my $slot = $json->{with};
+		my $json = $self->req->json();
+		my $title = $json->{title};
+		
+		removeSlot( $title);
 
-					print "Replacing: $replaceTitle  with:\n";
-					foreach (keys(%$slot))
+		@Slots = readSlots();
+		$self->stash( slots=>\@Slots);
+
+		$self->render( 'slots');
+	};
+
+
+	#------------------------------------------------------------------------------
+	#  post '/removeVolunteer'
+	#  		This call deletes the provided title entry from the volunteers table
+	#------------------------------------------------------------------------------
+	post '/removeVolunteer' => sub
+	{
+		my $self = shift;
+
+		my $json = $self->req->json();
+		my $name = $json->{name};
+		
+		print "\n\n********* REMOVING $name  ********\n\n";
+		removeVolunteer( $name);
+
+		@Volunteers = readVolunteers();
+		$self->stash( volunteers=>\@Volunteers);
+
+		$self->render( 'volunteers');
+	};
+
+
+	#------------------------------------------------------------------------------
+	#  websocket '/getPositionInfo'
+	#  		This call gets the information about the position at the specified
+	#  		index in the list.
+	#------------------------------------------------------------------------------
+	websocket '/getPositionInfo' => sub
+	{
+		my $self = shift;
+
+		##
+		##  See if we received a message
+		##:w
+		$self->on( message => sub
 					{
-						print "\t$_: $slot->{$_}\n";
+						my ($self, $posIndex) = @_;
+
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	title => $Slots[$posIndex]->{title},
+												dayOfWeek =>$Slots[$posIndex]->{dayOfWeek},
+												time => $Slots[$posIndex]->{time}, 
+												numberNeeded => $Slots[$posIndex]->{numberNeeded}
+											  }
+									  }
+									);
 					}
+				 );
+		
+	};
 
-					##
-					##  Note that we delete the old and insert to allow
-					##  for changing the title
-					##
-					removeSlot( $replaceTitle);
-					saveSlot( $slot);
+	#------------------------------------------------------------------------------
+	#  websocket '/addPosition'
+	#  		This call adds the provided entry to the position table
+	#------------------------------------------------------------------------------
+	websocket '/addPosition' => sub
+	{
+		my $self = shift;
 
-					##
-					##  Send back info
-					##
-					$self->send( { json=> {	status => "Saved"
-										  }
-								 }
-								);
-				}
-			 );
-	
-};
-
-#------------------------------------------------------------------------------
-#  websocket '/getVolunteerInfo'
-#  		This call gets the information about the position at the specified
-#  		index in the list.
-#------------------------------------------------------------------------------
-websocket '/getVolunteerInfo' => sub
-{
-	my $self = shift;
-
-
-	##
-	##  See if we received a message
-	##
-	$self->on( json => sub
-				{
-					my ($self, $json) = @_;
-					my $found = 1;
-
-					my $index = $json->{index};
-
-					if ( $Volunteers[$index]->{name} ne $json->{name})
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
 					{
-						$found = 0;
-						while( my ($i, $volunteer) = each( @Volunteers))
+						my ($self, $slot) = @_;
+	##-->					my $slot = {title=>$title, dayOfWeek=>$dayOfWeek, time=>$time, numberNeeded=>$numberNeeded};
+
+						saveSlot( $slot);
+
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	status => "Saved"
+											  }
+									 }
+									);
+					}
+				 );
+		
+	};
+
+	#------------------------------------------------------------------------------
+	#  websocket '/replacePosition'
+	#  		This call replaces the provided entry to the position table
+	#------------------------------------------------------------------------------
+	websocket '/replacePosition' => sub
+	{
+		my $self = shift;
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+						my $replaceTitle = $json->{replace};
+						my $slot = $json->{with};
+
+						print "Replacing: $replaceTitle  with:\n";
+						foreach (keys(%$slot))
 						{
-							if ( $volunteer->{name} eq $json->{name})
-							{
-								$index = $i;
-								$found = 1;
-								last;
-							}
+							print "\t$_: $slot->{$_}\n";
+						}
+
+						##
+						##  Note that we delete the old and insert to allow
+						##  for changing the title
+						##
+						removeSlot( $replaceTitle);
+						saveSlot( $slot);
+
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	status => "Saved"
+											  }
+									 }
+									);
+					}
+				 );
+		
+	};
+
+	#------------------------------------------------------------------------------
+	#  websocket '/getVolunteerInfo'
+	#  		This call gets the information about the position at the specified
+	#  		index in the list.
+	#------------------------------------------------------------------------------
+	websocket '/getVolunteerInfo' => sub
+	{
+		my $self = shift;
+
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+						my $found = 1;
+
+						##
+						##  Make sure we have the right index for the name provided
+						##
+						my ($index, $name) = findVolunteer( $json->{index}, $json->{name});
+						
+						##
+						##  Send back info
+						##
+						if ( $found)
+						{
+							$self->send( { json=> {	name => $Volunteers[$index]->{name},
+													email =>$Volunteers[$index]->{email},
+													phone => $Volunteers[$index]->{phone}, 
+													daysDesired => $Volunteers[$index]->{daysDesired},
+													desiredRoles => $Volunteers[$index]->{desiredRoles},
+													daysUnavailable => $Volunteers[$index]->{daysUnavailable}
+												  }
+										  }
+										);
+						}
+						else
+						{
+							$self->send( { json=> {	name => "n/a",
+													email => "n/a",
+													phone => "n/a", 
+													daysDesired => "n/a",
+													desiredRoles => "n/a",
+													daysUnavailable => "n/a"
+												  }
+										  }
+										);
 						}
 					}
+				 );
+		
+	};
 
-					
-					##
-					##  Send back info
-					##
-					if ( $found)
-					{
-						$self->send( { json=> {	name => $Volunteers[$index]->{name},
-												email =>$Volunteers[$index]->{email},
-												phone => $Volunteers[$index]->{phone}, 
-												daysDesired => $Volunteers[$index]->{daysDesired},
-												desiredRoles => $Volunteers[$index]->{desiredRoles},
-												daysUnavailable => $Volunteers[$index]->{daysUnavailable}
-											  }
-									  }
-									);
-					}
-					else
-					{
-						$self->send( { json=> {	name => "n/a",
-												email => "n/a",
-												phone => "n/a", 
-												daysDesired => "n/a",
-												desiredRoles => "n/a",
-												daysUnavailable => "n/a"
-											  }
-									  }
-									);
-					}
-				}
-			 );
-	
-};
+	@Slots = readSlots();
 
-@Slots = readSlots();
+	app->start;
+}
 
-app->start;
+
+#------------------------------------------------------------------------------
+#  sub findVolunteer( $index, $name)
+#  		This subroutine looks through the @Volunteers list (beginning with the
+#  		provided index) to find an entry for the provided name.  If one is
+#  		found, the routine returns the index of the entry and the entry.  If it
+#  		is not found it returns (undef, undef).
+#------------------------------------------------------------------------------
+sub findVolunteer($$)
+{
+	my ($startAt, $name) = @_;
+	my $slot;
+	my $index;
+
+	if ( $Volunteers[$startAt]->{name} ne $name)
+	{
+		while( my ($i, $volunteer) = each( @Volunteers))
+		{
+			if ( $volunteer->{name} eq $name)
+			{
+				$index = $i;
+				$slot = $volunteer;
+				last;
+			}
+		}
+	}
+	else
+	{
+		$index = $startAt;
+		$slot = $Volunteers[$index];
+	}
+
+	return( $index, $slot);
+}
