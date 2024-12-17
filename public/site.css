@@ -48,6 +48,12 @@ button
 	margin-bottom: 4vh;
 }
 
+.editButton
+{
+	width:4em;
+	margin-left: .2em;
+}
+
 label
 {
 	cursor: default;

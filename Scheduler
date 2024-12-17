@@ -60,7 +60,7 @@ sub findVolunteer($$);
 
 		@Slots = readSlots();
 
-		$self->stash( slots=>\@Slots, volunteer=>undef, title=>"Add Volunteers");
+		$self->stash( slots=>\@Slots, type=>"add", volunteer=>undef, title=>"Add Volunteers");
 
 		$self->render( "addEditVolunteers");
 
@@ -81,7 +81,7 @@ sub findVolunteer($$);
 
 		my ($index, $volunteer) = findVolunteer( 0, $self->param("name"));
 
-		$self->stash( slots=> undef, volunteer=>$volunteer, title=>"Edit Information for " . $self->param("name"));
+		$self->stash( slots=> undef, volunteer=>$volunteer, type=>"edit", title=>"Edit Information for " . $self->param("name"));
 
 		$self->render( "addEditVolunteers");
 
