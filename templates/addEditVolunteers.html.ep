@@ -10,35 +10,33 @@
 <script>
 
 	//==============================================================================
-	//	function removeEntry()
-	//		This function removes the selected entry in the volunteer list from the
+	//	function saveNewVolunteer()
+	//		This function adds the information added for the volunteer to the
 	//		"positions" table.
 	//==============================================================================
-	function removeEntry()
+	function saveNewVolunteer()
 	{
-		var itemList = document.getElementById( "itemList");
-		var selectedItem = itemList.value;
-		var message = JSON.stringify( { 'name': selectedItem});
-		
-		hideConfirmDelete();
+		alert( "Put a 'Save the volunteer' chunk of code here.");
+	}
 
-		fetch( '<%= url_for( 'removeVolunteer')->to_abs %>' ,
-				{
-					method: "POST",
-					body: JSON.stringify( { 'name': selectedItem}),
-					headers: { "Content-type": "application/json"}
-				}
-			  )
-		.then( response => 
-				{
-					window.location.reload();
-				});
+	//==============================================================================
+	//	function modifyVolunteer()
+	//		This function modifies the information added for the volunteer in the
+	//		"positions" table.
+	//==============================================================================
+	function modifyVolunteer()
+	{
+		alert( "Put the mod code here, dude!");
+	}
+
+	function returnToVolunteers()
+	{
+			window.location.href = '/volunteers';
 	}
 
 	window.addEventListener( "pageshow", showVolunteerInfo);
 
 </script>
-
 
 <!--=================================-->
 <!--| HTML for the page starts here |-->
@@ -50,16 +48,9 @@
 <div id="overlay" hidden >
 	<div class="popup" id="confirmSave" hidden>
 		<h2>Save Entry</h2>
-		<p>Do you wish to save this as a new position or modify the selected position?</p>
-		<button onclick="addEntry()">New Position</button>
-		<button onclick="modifyEntry()">Modify Position</button>
-		<button onclick="hideConfirmSave();showPosition()">Cancel</button>
-	</div>
-	<div class="popup" id="confirmDelete" hidden>
-		<h2>Delete Entry</h2>
-		<p>Are you sure that you wish to delete the entry for "<span id="itemToDelete"></span>"?</p>
-		<button onclick="removeEntry()">Yes</button>
-		<button onclick="hideConfirmDelete()">No</button>
+		<p>Do you wish to save this update for <%= $volunteer->{name} %>?</p>
+		<button onclick="modifyVolunteer()">Ok</button>
+		<button onclick="hideConfirmSave();">Cancel</button>
 	</div>
 </div>
 
@@ -69,18 +60,18 @@
 	<div id="userInfo">
 		<form>
 		<label for="name">Name:</label>
-		<input type="text" id="name" name="name" value="<%= (defined($volunteer))? $volunteer->{name} : "" %>"></input>
+		<input type="text" id="name" name="name" value="<%= ( $type eq 'edit') ? $volunteer->{name} : "" %>"></input>
 		<br>
 		<label for="email">Email address:</label>
-		<input type="email" id="email" name="email" value="<%= (defined($volunteer))? $volunteer->{email} : "" %>"></input>
+		<input type="email" id="email" name="email" value="<%= ($type eq 'edit')? $volunteer->{email} : "" %>"></input>
 		<br>
 		<label for="phone">Phone number:</label>
-		<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<%= (defined($volunteer))? $volunteer->{phone} : "" %>"></input>
+		<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<%= ($type eq 'edit')? $volunteer->{phone} : "" %>"></input>
 		<br>
 		<label for="positions">Positions:</label>
 
 		% my @roles;
-		% if ( defined( $volunteer))
+		% if ( $type eq 'edit')
 		% {
 		%    @roles = split(",", $volunteer->{desiredRoles});
 		% }
@@ -92,7 +83,13 @@
 		%    }
 		% }
 		% my $roleCount = int( @roles);
-		<select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>">
+		% my $showScroll = "";
+		% if ( $roleCount > 1)
+		% {
+		%   $showScroll = 'style="overflow-y:scroll"';
+		% }
+		<!--select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>" <%= $showScroll %> -->
+		<select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>" <%= $showScroll %> >
 		% if ( @roles)
 		% {
 		%  foreach my $role (@roles)
@@ -109,7 +106,7 @@
 		<label for="daysUnavailable">Days unavailable:</label>
 
 		% my @daysUnavailable;
-		% if ( defined( $volunteer) && defined( $volunteer->{daysUnavailable}))
+		% if (( $type eq 'edit') && defined( $volunteer->{daysUnavailable}))
 		% {
 		%    @daysUnavailable = split(",", $volunteer->{daysUnavailable});
 		% }
@@ -128,11 +125,11 @@
 		% }
 		</select>
 		</select>
-		<button type="button">Edit</button>
+		<button type="button" class="editButton" >Edit</button>
 		<br>
 		<label for="daysDesired">Days desired:</label>
 		% my @daysDesired;
-		% if ( defined( $volunteer) && defined( $volunteer->{daysDesired}))
+		% if (( $type eq 'edit') && defined( $volunteer->{daysDesired}))
 		% {
 		%    @daysDesired = split(",", $volunteer->{daysDesired});
 		% }
@@ -150,11 +147,18 @@
 			<option value="-none-">-none-</option>
 		% }
 		</select>
-		<button type="button">Edit</button>
+		<button type="button" class="editButton">Edit</button>
 
 		<br>
+		% if ( $type eq "edit")
+		% {
 		<button type="button" onclick="showConfirmSave()">Save</button>
-		<button type="button" onclick="showConfirmDelete()">Cancel</button>
+		% }
+		%else
+		% {
+		<button type="button" onclick="saveNewVolunteer()">Save</button>
+		% }
+		<button type="button" onclick="returnToVolunteers()">Cancel</button>
 		</form>
 	</div>
 </div>
