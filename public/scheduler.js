@@ -157,16 +157,60 @@ function showVolunteerInfo()
 	}
 }
 
+//==============================================================================
+//  function saveVolunteerInfo( volunteer)
+//		This function saves information about the provided volunteer to the
+//		database.
+//==============================================================================
+function saveVolunteerInfo( volunteer)
+{
+	//
+	//  Call server to get info for the current position
+	//
+	var ws;
+	url = 'saveVolunteerInfo';
+	ws = new WebSocket( url);
+	var msg = JSON.stringify( volunteer);
 
-	//==============================================================================
-	//	function hideConfirmSave()
-	//		This method hides the overlay panel
-	//==============================================================================
-	function hideConfirmSave()
+	ws.onopen = (event) => 
 	{
-		document.getElementById('overlay').hidden = true;
-		document.getElementById('confirmSave').hidden = true;
-	}
+		ws.send( msg);
+	};
+
+	ws.onerror = (event) =>
+	{
+		ws.close();
+		ws = new WebSocket( url);
+		ws.onopen = (event) => 
+		{
+			ws.send( msg);
+		};
+	};
+
+	ws.onmessage = (msg) =>
+	{
+		var reply = JSON.parse( msg.data);
+		if ( reply.status == "OK")
+		{
+			alert( volunteer.name + " was added to the list of volunteers");
+		}
+		else
+		{
+			alert( "A problem arose trying to add " + volunteer.name + " to the list!!");
+		}
+		ws.close();
+	};
+}
+
+//==============================================================================
+//	function hideConfirmSave()
+//		This method hides the overlay panel
+//==============================================================================
+function hideConfirmSave()
+{
+	document.getElementById('overlay').hidden = true;
+	document.getElementById('confirmSave').hidden = true;
+}
 
 //==============================================================================
 //	function showConfirmSave()
