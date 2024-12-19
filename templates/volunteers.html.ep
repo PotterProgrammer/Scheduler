@@ -55,7 +55,7 @@
 	}
 	
 
-	window.addEventListener( "pageshow", showVolunteerInfo);
+	window.addEventListener( "pageshow", function (){alert( "In pageShow!");document.getElementById( "itemList").selectedIndex = 0; showVolunteerInfo();});
 
 </script>
 

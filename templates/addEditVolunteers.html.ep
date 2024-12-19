@@ -8,6 +8,7 @@
 <script src="/scheduler.js"> </script>
 
 <script>
+	var originalName = '';
 
 	//==============================================================================
 	//	function saveNewVolunteer()
@@ -16,7 +17,8 @@
 	//==============================================================================
 	function saveNewVolunteer()
 	{
-		alert( "Put a 'Save the volunteer' chunk of code here.");
+		var volunteer = getVolunteerInfo();
+		saveVolunteerInfo( volunteer);
 	}
 
 	//==============================================================================
@@ -26,15 +28,74 @@
 	//==============================================================================
 	function modifyVolunteer()
 	{
-		alert( "Put the mod code here, dude!");
+		var volunteer = getVolunteerInfo();
+		hideConfirmSave();
+
+		fetch( '/modifyVolunteer' ,
+				{
+					method: "POST",
+					body: JSON.stringify( { 'originalName': originalName, 'info': volunteer}),
+					headers: { "Content-type": "application/json"}
+				}
+			  )
+		.then( response => 
+				{
+					history.back();
+				});
 	}
+
+	//==============================================================================
+	//	function getVolunteerInfo()
+	//		This function retrieves all of the pertinent volunteer info and
+	//		returns it as a JSON volunteer object.
+	//==============================================================================
+	function getVolunteerInfo()
+	{
+		var name = document.getElementById( 'name').value;
+		var email = document.getElementById( 'email').value;
+		var phone = document.getElementById( 'phone').value;
+		var positions = '';
+		var position = document.getElementById( 'positions');
+		for( var i=0; i < position.options.length; i++)
+		{
+			if ( position.options[i].selected)
+			{
+				positions +=  position.options[i].value + ",";
+			}
+		}
+
+		var unavailableDays = '';
+		var daysUnavailable = document.getElementById( 'daysUnavailable');
+		for ( let i=0; i < daysUnavailable.options.length; i++)
+		{
+			if ( daysUnavailable.options[i].selected)
+			{
+				unavailableDays +=  daysUnavailable.options[i].value + ",";
+			}
+		}
+
+		var desiredDays = '';
+		var daysDesired = document.getElementById( 'daysDesired');
+		for( let i=0; i < daysDesired.options.length; i++)
+		{
+			if ( daysDesired.options[i].selected)
+			{
+				desiredDays +=  daysDesired.options[i].value + ",";
+			}
+		}
+
+			alert( "Setting desiredRoles to " + positions);
+		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays};
+		return volunteer;
+	}
+	
 
 	function returnToVolunteers()
 	{
 			window.location.href = '/volunteers';
 	}
 
-	window.addEventListener( "pageshow", showVolunteerInfo);
+	window.addEventListener( "pageshow", function () {originalName='<%= ($type eq "edit")? $volunteer->{name} : "" %>'; showVolunteerInfo();} );
 
 </script>
 
@@ -86,10 +147,9 @@
 		% my $showScroll = "";
 		% if ( $roleCount > 1)
 		% {
-		%   $showScroll = 'style="overflow-y:scroll"';
+		%   $showScroll = 'overflow-y: scroll';
 		% }
-		<!--select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>" <%= $showScroll %> -->
-		<select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>" <%= $showScroll %> >
+		<select name="positions" id="positions" multiple size="<%= ($roleCount)? (($roleCount > 3) ? 3: $roleCount) : 1 %>" style="<%= $showScroll %>">
 		% if ( @roles)
 		% {
 		%  foreach my $role (@roles)
