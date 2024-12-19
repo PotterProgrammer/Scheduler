@@ -21,6 +21,7 @@ sub readSlots();
 sub readVolunteers();
 sub removeSlot($);
 sub saveSlot($);
+sub saveVolunteer($);
 
 #------------------------------------------------------------------------------
 #  BEGIN
@@ -248,7 +249,7 @@ sub saveVolunteer($)
 	##
 	##  First, update the volunteer table
 	##
-	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles) values ?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles) values (?,?,?,?)");
 	$sth->bind_param( 1, $volunteer->{name});
 	$sth->bind_param( 2, $volunteer->{email});
 	$sth->bind_param( 3, $volunteer->{phone});
@@ -260,8 +261,8 @@ sub saveVolunteer($)
 	##
 	if ( defined( $volunteer->{daysDesired}))
 	{
-		my $desired = $dbh->prepare( "insert or replace into dates_desired (name, date) values ?,?)");
-		my @dates = split( /\s+/, $volunteer->{daysDesired});
+		my $desired = $dbh->prepare( "insert or replace into dates_desired (name, date) values (?,?)");
+		my @dates = split( /,/, $volunteer->{daysDesired});
 		foreach my $date (@dates)
 		{
 			$desired->bind_param( 1, $volunteer->{name});
@@ -275,8 +276,8 @@ sub saveVolunteer($)
 	##
 	if ( defined( $volunteer->{daysUnavailable}))
 	{
-		my $unavailable = $dbh->prepare( "insert or replace into dates_unavailable (name, date) values ?,?)");
-		my @dates = split( /\s+/, $volunteer->{daysDesired});
+		my $unavailable = $dbh->prepare( "insert or replace into dates_unavailable (name, date) values (?,?)");
+		my @dates = split( /,/, $volunteer->{daysDesired});
 		foreach my $date (@dates)
 		{
 			$unavailable->bind_param( 1, $volunteer->{name});
@@ -295,7 +296,7 @@ sub saveVolunteer($)
 sub saveSchedule(@)
 {
 	my @schedules = @_;
-	my $sth = $dbh->prepare( "insert or replace into schedule (date. time, title, name) values ?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into schedule (date. time, title, name) values (?,?,?,?)");
 
 	foreach my $slot (@schedules)
 	{

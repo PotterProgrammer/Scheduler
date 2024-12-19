@@ -89,6 +89,35 @@ sub findVolunteer($$);
 
 
 	#------------------------------------------------------------------------------
+	#  post '/modifyVolunteer'
+	#  		This call modifies information for the provided name in the
+	#  		volunteers table.
+	#------------------------------------------------------------------------------
+	post '/modifyVolunteer' => sub
+	{
+		my $self = shift;
+
+		my $json = $self->req->json();
+		my $name = $json->{originalName};
+		print "MODFIY got: { " . join( ',', map { "\"$_\" : \"$json->{$_}\""} keys( %{$json})) . "}\n";
+		
+		print "\n\n********* REMOVING $name  ********\n\n";
+		removeVolunteer( $name);
+
+		##
+		##  Write the volunteer info to the database
+		##
+		print "******** Saving " . join( ',', map { ", $_: $json->info->{$_}\n"} keys( %{$json->{info}})) . " *****\n\n";
+		saveVolunteer( $json->{info});
+						
+
+		@Volunteers = readVolunteers();
+		$self->stash( volunteers=>\@Volunteers);
+
+		$self->render( 'volunteers');
+	};
+
+	#------------------------------------------------------------------------------
 	#  post '/removePosition'
 	#  		This call deletes the provided title entry from the positions table
 	#------------------------------------------------------------------------------
@@ -234,7 +263,7 @@ sub findVolunteer($$);
 
 	#------------------------------------------------------------------------------
 	#  websocket '/getVolunteerInfo'
-	#  		This call gets the information about the position at the specified
+	#  		This call gets the information about the volunteer at the specified
 	#  		index in the list.
 	#------------------------------------------------------------------------------
 	websocket '/getVolunteerInfo' => sub
@@ -285,6 +314,36 @@ sub findVolunteer($$);
 					}
 				 );
 		
+	};
+
+	#------------------------------------------------------------------------------
+	#  websocket '/saveVolunteerInfo'
+	#  		This call adds the information about the position at the specified
+	#  		index in the list.
+	#------------------------------------------------------------------------------
+	websocket '/saveVolunteerInfo' => sub
+	{
+		my $self = shift;
+
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+
+						##
+						##  Write the volunteer info to the database
+						##
+						saveVolunteer( $json);
+						
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	status => "OK" }});
+					}
+				 );
 	};
 
 	@Slots = readSlots();
