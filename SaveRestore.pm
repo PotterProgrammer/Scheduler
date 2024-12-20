@@ -116,7 +116,7 @@ END
 #------------------------------------------------------------------------------
 sub readSlots()
 {
-	my $positions = $dbh->selectall_arrayref( "select * from position", {Slice=>{}});
+	my $positions = $dbh->selectall_arrayref( "select * from position order by title ASC", {Slice=>{}});
 	return( @$positions);
 }
 
@@ -125,7 +125,7 @@ sub readSlots()
 #------------------------------------------------------------------------------
 sub readVolunteers()
 {
-	my $volunteers = $dbh->selectall_arrayref( "select * from volunteer", {Slice=>{}});
+	my $volunteers = $dbh->selectall_arrayref( "select * from volunteer order by name ASC", {Slice=>{}});
 
 	my $unavailable = $dbh->prepare( "select * from dates_unavailable where name=?");
 	my $desired = $dbh->prepare( "select * from dates_desired where name=?");
