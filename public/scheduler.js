@@ -202,9 +202,30 @@ function saveVolunteerInfo( volunteer)
 	};
 }
 
+
+//==============================================================================
+//	function hideEditDates()
+//		This method hides the overlay panel and the save d
+//==============================================================================
+function hideEditDates()
+{
+	document.getElementById('overlay').hidden = true;
+	document.getElementById('dateEdit').hidden = true;
+}
+
+//==============================================================================
+//	function showConfirmSave()
+//		This method shows the overlay panel
+//==============================================================================
+function showEditDates()
+{
+	document.getElementById('overlay').hidden = false;
+	document.getElementById('dateEdit').hidden = false;
+}
+
 //==============================================================================
 //	function hideConfirmSave()
-//		This method hides the overlay panel
+//		This method hides the overlay panel and the save dialog
 //==============================================================================
 function hideConfirmSave()
 {
@@ -214,7 +235,7 @@ function hideConfirmSave()
 
 //==============================================================================
 //	function showConfirmSave()
-//		This method shows the overlay panel
+//		This method shows the overlay panel and the save dialog
 //==============================================================================
 function showConfirmSave()
 {
@@ -224,7 +245,7 @@ function showConfirmSave()
 
 //==============================================================================
 //	function hideConfirmDelete()
-//		This method hides the overlay panel
+//		This method hides the overlay panel and the delete dialog
 //==============================================================================
 function hideConfirmDelete()
 {
@@ -234,7 +255,7 @@ function hideConfirmDelete()
 
 //==============================================================================
 //	function showConfirmDelete()
-//		This method shows the overlay panel
+//		This method shows the overlay panel and the delete dialog
 //==============================================================================
 function showConfirmDelete()
 {
