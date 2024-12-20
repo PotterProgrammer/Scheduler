@@ -45,9 +45,20 @@
 	}
 
 	//==============================================================================
+	//	function editDaysUnvailable()
+	//		This function redirects to a screen where the user can edit the list of
+	//		days when the volunteer is unavailable to work.
+	//==============================================================================
+	function editDaysUnavailable()
+	{
+		var name = document.getElementById( 'name').value;
+		showEditDates();
+	}
+
+	//==============================================================================
 	//	function getVolunteerInfo()
-	//		This function retrieves all of the pertinent volunteer info and
-	//		returns it as a JSON volunteer object.
+	//		This function retrieves all of the pertinent volunteer info entered
+	//		on the screen and returns it as a JSON volunteer object.
 	//==============================================================================
 	function getVolunteerInfo()
 	{
@@ -113,6 +124,23 @@
 		<button onclick="modifyVolunteer()">Ok</button>
 		<button onclick="hideConfirmSave();">Cancel</button>
 	</div>
+	<div id="dateEdit" hidden>
+		<h2>Here are the current dates</h2>
+		<select class="dateList" id="dateList" multiple size="3">
+		</select>
+		<div class="editPanel">
+			<label for="dateToAdd">Add date: </label>
+			<input type="date" id="dateToAdd" name="dateToAdd"></input>
+			<button type="button" style="width:4em;font-size:90%;">Add</button>
+			<br>
+			<button type="button" style="width:20em;font-size:90%";>Delete selected dates</button>
+		</div>
+		<br>
+		<div class="dialogButtons">
+			<button type="button" >Ok</button>
+			<button type="button" >Cancel</button>
+		</div>
+	</div>
 </div>
 
 <h1><%= $title %></h1>
@@ -132,16 +160,14 @@
 		<label for="positions">Positions:</label>
 
 		% my @roles;
+		% my $desiredRoles = '';
 		% if ( $type eq 'edit')
 		% {
-		%    @roles = split(",", $volunteer->{desiredRoles});
+		%    $desiredRoles = $volunteer->{desiredRoles};
 		% }
-		% else
+		% foreach ( @$slots)
 		% {
-		%    foreach ( @$slots)
-		%	 {
-		%		push( @roles, $_->{title});
-		%    }
+		%	push( @roles, $_->{title});
 		% }
 		% my $roleCount = int( @roles);
 		% my $showScroll = "";
@@ -154,7 +180,8 @@
 		% {
 		%  foreach my $role (@roles)
 		%    {
-			<option value="<%= $role %>"><%= $role %></option>
+		%		my $selected = ( $desiredRoles =~ m/$role/i) ? 'selected="selected"' : "";
+			<option value="<%= $role %>" <%== $selected %> ><%= $role %></option>
 		%    }
 		% }
 		% else
@@ -185,7 +212,7 @@
 		% }
 		</select>
 		</select>
-		<button type="button" class="editButton" >Edit</button>
+		<button type="button" class="editButton" onClick="editDaysUnavailable()" >Edit</button>
 		<br>
 		<label for="daysDesired">Days desired:</label>
 		% my @daysDesired;
