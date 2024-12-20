@@ -129,6 +129,47 @@ label
 	z-index: 2;
 }
 
+#dateEdit
+{
+	position: absolute;
+	top: 10vh;
+	width: 75%;
+	left: 12.5%;
+	right:12.5%;
+	text-align: center;
+	color: white;
+	background: blue;
+	border: solid 2px white;
+	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
+	z-index: 2;
+}
+
+.editPanel
+{
+	right;	position: relative;
+	float: right;
+	min-width: 40%;
+	margin-right: 5vw;
+	line-height: .75;
+}
+
+.editPanel button
+{
+	margin-top: 0;
+}
+
+.dialogButtons
+{
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.dateList
+{
+	width: 10em;
+}
+
 #navbar
 {
 	width: 100vw;

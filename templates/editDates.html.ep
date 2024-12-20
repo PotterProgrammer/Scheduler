@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+
+<script>
+<script>
+
+
+<body>
+
+
+	<select id='dateList'>
+	% my @dates = sort {$a cmp $b} split( ',', $volunteer->{daysUnavailable});
+	% foreach my $date (@dates)
+	% {
+		<option value="<%== $date %>"><%== $date %></option>
+	% }
+	</select>
+
+</body>
+
+</html>
