@@ -9,6 +9,7 @@ use lib "./";
 use Mojolicious::Lite;
 
 use SaveRestore;
+use BuildSchedule;
 
 
 my @Slots;
@@ -90,6 +91,35 @@ sub findVolunteer($$);
 
 
 	#------------------------------------------------------------------------------
+	#	get '/buildSchedule' => sub
+	#		This call provides a link to build a schedule.  When invoked
+	#		without the parameters "startDate" and "endDate", it redirects to a
+	#		page where those values may be supplied.  When the start and end
+	#		dates are provided it generates the schedule and redirects to the
+	#		schedule viewing page.
+	#------------------------------------------------------------------------------
+	get '/buildSchedule' => sub
+	{
+		my $self = shift;
+
+		my $startDate = $self->param('startDate');
+		my $endDate = $self->param( 'endDate');
+
+		if ( !defined( $startDate) || !defined( $endDate))
+		{
+			$self->stash( startDate=>$startDate, endDate=>$endDate);
+			$self->render( "buildNewSchedule");
+		}
+		else
+		{
+			my $incomplete = buildScheduleForDates( $startDate, $endDate);
+			$self->stash( incomplete=>$incomplete, startDate=>$startDate, endDate=>$endDate);
+			$self->render( "showSchedule");
+		}
+	};
+
+
+	#------------------------------------------------------------------------------
 	#  post '/modifyVolunteer'
 	#  		This call modifies information for the provided name in the
 	#  		volunteers table.
@@ -109,6 +139,8 @@ sub findVolunteer($$);
 		##  Write the volunteer info to the database
 		##
 		print "******** Saving " . join( ',', map { ", $_: $json->info->{$_}\n"} keys( %{$json->{info}})) . " *****\n\n";
+		my $days = $json->{info}->{daysUnavailable};
+		print "I see: " . join( ',', $days);
 		saveVolunteer( $json->{info});
 						
 

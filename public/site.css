@@ -133,9 +133,9 @@ label
 {
 	position: absolute;
 	top: 10vh;
-	width: 75%;
-	left: 12.5%;
-	right:12.5%;
+	width: 50%;
+	left: 25%;
+	right:25%;
 	text-align: center;
 	color: white;
 	background: blue;
@@ -144,9 +144,24 @@ label
 	z-index: 2;
 }
 
+#added
+{
+	position: absolute;
+	top: 25vh;
+	width: 20vw;
+	left: 40vw;
+	right: 40vw;
+	text-align: center;
+	color: #00ff00;
+	background: blue;
+	border: solid 2px white;
+	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
+	z-index: 4;
+}
+
 .editPanel
 {
-	right;	position: relative;
+	position: relative;
 	float: right;
 	min-width: 40%;
 	margin-right: 5vw;
@@ -167,7 +182,7 @@ label
 
 .dateList
 {
-	width: 10em;
+	width: 7em;
 }
 
 #navbar
@@ -182,3 +197,15 @@ label
 	margin-top: 1px;
 }
 
+#genSchedule
+{
+	width: 60%;
+	margin-left: 20%;
+	margin-right: 20%;
+	text-align: left;
+}
+
+#genSchedule br
+{
+	margin-top: .5em;
+}

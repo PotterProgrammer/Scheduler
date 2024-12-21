@@ -202,10 +202,19 @@ function saveVolunteerInfo( volunteer)
 	};
 }
 
+//==============================================================================
+//  function showAddedAlert()
+//		This function shows the "Added" message on the screen for 1 second
+//==============================================================================
+function showAddedAlert()
+{
+	document.getElementById('added').hidden = false;
+	setTimeout( function(){document.getElementById('added').hidden = true;}, 1000);
+}
 
 //==============================================================================
 //	function hideEditDates()
-//		This method hides the overlay panel and the save d
+//		This method hides the overlay panel and the save dates
 //==============================================================================
 function hideEditDates()
 {
@@ -214,7 +223,7 @@ function hideEditDates()
 }
 
 //==============================================================================
-//	function showConfirmSave()
+//	function showEditDates()
 //		This method shows the overlay panel
 //==============================================================================
 function showEditDates()
