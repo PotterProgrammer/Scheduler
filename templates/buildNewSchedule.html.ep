@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+
+<script>
+
+</script>
+
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<h1>Generate a Schedule</h1>
+
+	<div id="genSchedule">
+		<p>This will generate a schedule for the dates listed below, using the list of positions to fill and volunteers which you have previously entered.</p>
+		<p>If you have not already entered the positions to be filled and the available volunteers, please do so before pressing the "Build Schedule" button.</p>
+
+		<label for="startDate">Start Date of Schedule:</label>
+		<input type="date" id="startDate" value="startDate" name="startDate"></input>
+		<br>
+		<label for="endDate">End Date of Schedule:</label>
+		<input type="date" id="endDate" value="endDate" name="endDate"></input>
+		<br>
+		<button type="button" onClick="makeSchedule()">Build Schedule</button>
+	</div>
+
+
+</body>
+
+</html>
