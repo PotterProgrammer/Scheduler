@@ -240,12 +240,13 @@ sub saveSlot($)
 
 #------------------------------------------------------------------------------
 #  sub saveVolunteer( $volunteer)
-#		This routine saves the information in the provide "volunteer" hashref to the "position" table.
+#		This routine saves the information in the provide "volunteer" hashref to the "volunteer" table.
 #------------------------------------------------------------------------------
 sub saveVolunteer($)
 {
 	my $volunteer = $_[0];
 
+	print "Issuing the first insert.\n";
 	##
 	##  First, update the volunteer table
 	##
@@ -254,37 +255,67 @@ sub saveVolunteer($)
 	$sth->bind_param( 2, $volunteer->{email});
 	$sth->bind_param( 3, $volunteer->{phone});
 	$sth->bind_param( 4, $volunteer->{desiredRoles});
+ print "Storing the volunteer values $volunteer->{name}, $volunteer->{email}, $volunteer->{phone}, $volunteer->{desiredRoles}\n";
 	$sth->execute();
 
+	#------------------------------------------------------------------------------
+	#	Update entries in the dates_desired table
+	#------------------------------------------------------------------------------
 	##
-	##  Store desired dates, if any
+	##  First delete any existing entries in the table for this person
+	##
+	print "Issuing delete against any old desired dates for $volunteer->{name}\n";
+	$dbh->do( "delete from dates_desired where name = ?", undef, $volunteer->{name});
+	
+	##
+	##  Store updated desired dates, if any
 	##
 	if ( defined( $volunteer->{daysDesired}))
 	{
-		my $desired = $dbh->prepare( "insert or replace into dates_desired (name, date) values (?,?)");
+		print "Issuing inserts into dates_desired\n";
+		my $desired = $dbh->prepare( "insert into dates_desired (name, date) values (?,?)");
 		my @dates = split( /,/, $volunteer->{daysDesired});
 		foreach my $date (@dates)
 		{
-			$desired->bind_param( 1, $volunteer->{name});
-			$desired->bind_param( 2, $date);
-			$desired->execute();
+			if ( $date ne "-none-")
+			{
+				print "Inserting $date\n";
+				$desired->bind_param( 1, $volunteer->{name});
+				$desired->bind_param( 2, $date);
+				$desired->execute();
+			}
 		}
 	}
 
+	#------------------------------------------------------------------------------
+	#	Update entries in the dates_unavailable table
+	#------------------------------------------------------------------------------
+	##
+	##  First delete any existing entries in the table for this person
+	##
+	print "Issuing delete against any old unavailable dates for $volunteer->{name}\n";
+	$dbh->do( "delete from dates_unavailable where name = ?", undef, $volunteer->{name});
+	
 	##
 	##  Store unavailable dates, if any
 	##
 	if ( defined( $volunteer->{daysUnavailable}))
 	{
-		my $unavailable = $dbh->prepare( "insert or replace into dates_unavailable (name, date) values (?,?)");
-		my @dates = split( /,/, $volunteer->{daysDesired});
+		print "Inserting dates into dates_unavailable\n";
+		my $unavailable = $dbh->prepare( "insert into dates_unavailable (name, date) values (?,?)");
+		my @dates = split( /,/, $volunteer->{daysUnavailable});
 		foreach my $date (@dates)
 		{
-			$unavailable->bind_param( 1, $volunteer->{name});
-			$unavailable->bind_param( 2, $date);
-			$unavailable->execute();
+			if ( $date ne "-none-")
+			{
+				print "Inserting $date\n";
+				$unavailable->bind_param( 1, $volunteer->{name});
+				$unavailable->bind_param( 2, $date);
+				$unavailable->execute();
+			}
 		}
 	}
+	print "$volunteer->{name} added...\n";
 	
 }
 

@@ -11,6 +11,12 @@ nav a
 	text-decoration: none;
 	margin-left:2em;
 	color: black;
+	float: left;
+}
+
+nav a:hover
+{
+	text-decoration:underline;
 }
 
 nav ul {
@@ -25,17 +31,70 @@ nav ul li {
 }
 
 nav ul li a {
-    color: #fff;
+    color: black;
     text-decoration: none;
 }
 
 nav ul li a:hover {
     text-decoration: underline;
 }
+
+.submenu
+{
+	float: left;
+	overflow: hidden;
+	background-color: lightgray;
+}
+
+.submenu .submenuButton
+{
+	border: none;
+	outline: none;
+	color: black;
+	background-color: lightgray;
+	font-family: inherit;
+	margin: 0;
+}
+
+
+.submenuContent
+{
+	display: none;
+	position: absolute;
+	background-color: lightgray;
+	z-index: 1;
+	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
+	border-top: solid 1px #a0a0a0;
+	border-left: solid 1px gray;
+	border-right: solid 1px gray;
+}
+
+.submenu:hover .submenuContent
+{
+	display: block;
+}
+
+.submenuContent  a 
+{
+	width: 100%;
+	white-space:nowrap;
+	margin-left: 1em;
+	margin-right: 1em;
+	margin-bottom: .25em;
+}
+
 </style>
 
 <nav id="mainMenu">
 	<a href="/slots">Positions</a>
 	<a href="/volunteers">Volunteers</a>
+	<div class="submenu">
+		<button class="submenuButton">Schedule⏷</button>
+		<div class="submenuContent" >
+			<a href="/buildSchedule">Generate Schedule</a><br>
+			<a>View Schedule</a><br>
+			<a>Edit Schedule</a><br>
+		</div>
+	</div>
 	<a href="/help.html">Help</a>
 </nav>

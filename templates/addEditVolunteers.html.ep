@@ -9,6 +9,7 @@
 
 <script>
 	var originalName = '';
+	var dateType = '';
 
 	//==============================================================================
 	//	function saveNewVolunteer()
@@ -18,6 +19,18 @@
 	function saveNewVolunteer()
 	{
 		var volunteer = getVolunteerInfo();
+
+		if ( volunteer.name.length == 0)
+		{
+			alert( "Please enter the name of the volunteer.");
+			return;
+		}
+
+		if ( volunteer.desiredRoles.length == 0)
+		{
+			alert( "Please select at least one position that " + voluntter.name + " would like to volunteer for.");
+			return;
+		}
 		saveVolunteerInfo( volunteer);
 	}
 
@@ -29,6 +42,7 @@
 	function modifyVolunteer()
 	{
 		var volunteer = getVolunteerInfo();
+		alert( "Sending back: " + JSON.stringify( volunteer));
 		hideConfirmSave();
 
 		fetch( '/modifyVolunteer' ,
@@ -49,10 +63,234 @@
 	//		This function redirects to a screen where the user can edit the list of
 	//		days when the volunteer is unavailable to work.
 	//==============================================================================
+	function editDaysDesired()
+	{
+		var name = document.getElementById( 'name').value;
+		var editBoxTitle = document.getElementById( 'dateEditTitle');
+		editBoxTitle.innerText = 'Dates When ' + name + ' desires to volunteer:';
+		dateType = 'daysDesired'
+		getDatesToEdit();
+	
+		showEditDates();
+	}
+
+	//==============================================================================
+	//	function editDaysUnvailable()
+	//		This function redirects to a screen where the user can edit the list of
+	//		days when the volunteer is unavailable to work.
+	//==============================================================================
 	function editDaysUnavailable()
 	{
 		var name = document.getElementById( 'name').value;
+		var editBoxTitle = document.getElementById( 'dateEditTitle');
+		editBoxTitle.innerText = 'Dates When ' + name + ' is Unavailable:';
+		dateType = 'daysUnavailable'
+		getDatesToEdit();
+	
 		showEditDates();
+	}
+
+	//==============================================================================
+	//	function addDate()
+	//		This function adds the date entered into the "dateToAdd" field to the
+	//		dateList in the dateEdit dialog
+	//==============================================================================
+	function addDate()
+	{
+		var dateInput = document.getElementById( 'dateToAdd')
+		var newDate = dateInput.value;
+		var dateList = document.getElementById( 'dateList');
+		let invalidDate = false;
+
+		if ( newDate.length < 10)
+		{
+			alert( "That is not a valid date.");
+			return;
+		}
+		
+		//
+		//  Store the old dates in an array
+		//
+		var dateValues = Array.from( dateList.options, (x) => {return x.value});
+
+		//
+		//  Check for duplicates
+		//
+		dateValues.forEach( (date) =>
+			{
+				if ( date == newDate)
+				{
+					alert( "The date " + newDate + " is already in the list.");
+					invalidDate = true;
+				}
+			});
+
+		if ( invalidDate)
+		{
+			return;
+		}
+		//
+		//  Delete the old elements from the list
+		//
+		while( dateList.options.length > 0)
+		{
+			dateList.remove( 0);
+		}
+
+		//
+		//  Add the new date to the array and sort it
+		//
+		dateValues.push( newDate);
+		dateValues.sort();
+
+		//
+		//  Put the sorted dates back into the list
+		//
+		dateValues.forEach( (date) => 
+			{
+				var newDate = document.createElement('option');
+				var newDateText = document.createTextNode( date);
+				newDate.appendChild( newDateText);
+				newDate.setAttribute( "value", date);
+				dateList.appendChild( newDate);
+			});
+
+		showAddedAlert();
+		dateInput.value = '';
+	}
+
+	//==============================================================================
+	//	function getDatesToEdit()
+	//		This function pulls the date from the edit volunteer dialog and copies
+	//		them to the dateEdit dialog.
+	//==============================================================================
+	function getDatesToEdit()
+	{
+		var	datesToEdit = document.getElementById('dateList');
+		var previousDatesProvided;
+		if ( dateType == 'daysUnavailable')
+		{
+			previousDatesProvided = document.getElementById( 'daysUnavailable');
+		}
+		else
+		{
+			previousDatesProvided = document.getElementById( 'daysDesired');
+		}
+
+		//
+		//  Delete any previously entered dates
+		//
+		while( datesToEdit.options.length > 0)
+		{
+			datesToEdit.remove(0);
+		}
+
+
+		//
+		//  Copy over the original dates
+		//
+		let counter = 0;
+		while( counter < previousDatesProvided.options.length)
+		{
+			var date = previousDatesProvided.options[counter].value;
+			if ( date != '-none-')
+			{
+				var newDate = document.createElement('option');
+				var newDateText = document.createTextNode( date);
+				newDate.appendChild( newDateText);
+				newDate.setAttribute( "value", date);
+				datesToEdit.appendChild( newDate);
+			}
+			counter++;
+		}
+	}
+
+	//==============================================================================
+	//	function updateEditedDates()
+	//		This function updates the contents of the selected dates with the newly
+	//		provided dates.
+	//==============================================================================
+	function updateEditedDates()
+	{
+		var	editedDates = document.getElementById('dateList');
+		var datesBeingReplaced;
+		if ( dateType == 'daysUnavailable')
+		{
+			datesBeingReplaced = document.getElementById( 'daysUnavailable');
+		}
+		else
+		{
+			datesBeingReplaced = document.getElementById( 'daysDesired');
+		}
+
+		//
+		//  Delete the previously entered dates
+		//
+		while( datesBeingReplaced.options.length > 0)
+		{
+			datesBeingReplaced.remove(0);
+		}
+
+		//
+		//  Are we sending any dates back?
+		//
+		if ( editedDates.options.length > 0)
+		{
+			//
+			//  Then add the newly entered dates
+			//
+			while( editedDates.options.length > 0)
+			{
+				var date = editedDates.options[0].value;
+				var newDate = document.createElement('option');
+				var newDateText = document.createTextNode( date);
+				newDate.appendChild( newDateText);
+				newDate.setAttribute( "value", date);
+				datesBeingReplaced.appendChild( newDate);
+				editedDates.remove( 0);
+			}
+		}
+		else
+		{
+			var none = '-none-';
+			var newDate = document.createElement('option');
+			var newDateText = document.createTextNode( none);
+			newDate.appendChild( newDateText);
+			newDate.setAttribute( "value", none);
+			datesBeingReplaced.appendChild( newDate);
+		}
+
+		datesBeingReplaced.size = ( datesBeingReplaced.options.length > 3) ? 3 : datesBeingReplaced.length;
+	}
+
+	//==============================================================================
+	//	function saveEditedDates()
+	//		This function stores the edited dates in the appropriate date list and
+	//		closes the date edit dialog.
+	//==============================================================================
+	function saveEditedDates()
+	{
+		updateEditedDates();
+		hideEditDates();
+	}
+
+	//==============================================================================
+	//	function deleteSelectedDates()
+	//		This function removes all selected dates from the edit dates dialog.
+	//==============================================================================
+	function deleteSelectedDates()
+	{
+		var	dateList = document.getElementById('dateList');
+
+		var counter = dateList.options.length - 1;
+		while( counter >= 0)
+		{
+			if ( dateList.options[counter].selected)
+			{
+				dateList.remove( counter);
+			}
+			counter--;
+		}
 	}
 
 	//==============================================================================
@@ -79,7 +317,7 @@
 		var daysUnavailable = document.getElementById( 'daysUnavailable');
 		for ( let i=0; i < daysUnavailable.options.length; i++)
 		{
-			if ( daysUnavailable.options[i].selected)
+			if ( daysUnavailable.options[i].value != '-none-')
 			{
 				unavailableDays +=  daysUnavailable.options[i].value + ",";
 			}
@@ -89,13 +327,12 @@
 		var daysDesired = document.getElementById( 'daysDesired');
 		for( let i=0; i < daysDesired.options.length; i++)
 		{
-			if ( daysDesired.options[i].selected)
+			if ( daysDesired.options[i].value != '-none-')
 			{
 				desiredDays +=  daysDesired.options[i].value + ",";
 			}
 		}
 
-			alert( "Setting desiredRoles to " + positions);
 		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays};
 		return volunteer;
 	}
@@ -125,21 +362,24 @@
 		<button onclick="hideConfirmSave();">Cancel</button>
 	</div>
 	<div id="dateEdit" hidden>
-		<h2>Here are the current dates</h2>
+		<h2 id='dateEditTitle'>Here are the current dates</h2>
 		<select class="dateList" id="dateList" multiple size="3">
 		</select>
 		<div class="editPanel">
 			<label for="dateToAdd">Add date: </label>
 			<input type="date" id="dateToAdd" name="dateToAdd"></input>
-			<button type="button" style="width:4em;font-size:90%;">Add</button>
+			<button type="button" style="width:4em;font-size:90%;" onClick="addDate()">Add</button>
 			<br>
-			<button type="button" style="width:20em;font-size:90%";>Delete selected dates</button>
+			<button type="button" style="width:20em;font-size:90%"; onClick="deleteSelectedDates()">Delete selected dates</button>
 		</div>
 		<br>
 		<div class="dialogButtons">
-			<button type="button" >Ok</button>
-			<button type="button" >Cancel</button>
+			<button type="button" onClick="saveEditedDates()" >Ok</button>
+			<button type="button" onClick="hideEditDates()">Cancel</button>
 		</div>
+	</div>
+	<div id="added" hidden>
+		<h2>Added</h2>
 	</div>
 </div>
 
@@ -198,7 +438,7 @@
 		%    @daysUnavailable = split(",", $volunteer->{daysUnavailable});
 		% }
 		% my $count = int( @daysUnavailable);
-		<select name="daysUnavailable" id="daysUnavailable" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<select name="daysUnavailable" class="dateList" id="daysUnavailable" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysUnavailable)
 		% {
 		%  foreach my $day (@daysUnavailable)
@@ -221,7 +461,7 @@
 		%    @daysDesired = split(",", $volunteer->{daysDesired});
 		% }
 		% $count = int( @daysDesired);
-		<select name="daysDesired" id="daysDesired" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<select name="daysDesired" class="dateList" id="daysDesired" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysDesired)
 		% {
 		%  foreach my $day (@daysDesired)
@@ -234,7 +474,7 @@
 			<option value="-none-">-none-</option>
 		% }
 		</select>
-		<button type="button" class="editButton">Edit</button>
+		<button type="button" class="editButton" onClick="editDaysDesired()">Edit</button>
 
 		<br>
 		% if ( $type eq "edit")
