@@ -30,7 +30,7 @@ function showVolunteerInfo()
 		var itemName = volunteerList.options[selectedItemNumber].value;
 		
 		var ws;
-		url = 'getVolunteerInfo';
+		url = 'ws://' + window.location.host + '/getVolunteerInfo';
 		ws = new WebSocket( url);
 		var msg = JSON.stringify( { "index" :selectedItemNumber, "name": itemName});
 
@@ -52,6 +52,7 @@ function showVolunteerInfo()
 		ws.onmessage = (msg) =>
 		{
 			var reply = JSON.parse( msg.data);
+			alert( "Got volunteer info: " + msg.data);
 			document.getElementById('name').value = reply.name;
 			document.getElementById('email').value = reply.email;
 			document.getElementById('phone').value = reply.phone;
@@ -168,7 +169,7 @@ function saveVolunteerInfo( volunteer)
 	//  Call server to get info for the current position
 	//
 	var ws;
-	url = 'saveVolunteerInfo';
+	url = 'ws://' + window.location.host + '/saveVolunteerInfo';
 	ws = new WebSocket( url);
 	var msg = JSON.stringify( volunteer);
 
@@ -231,6 +232,27 @@ function showEditDates()
 	document.getElementById('overlay').hidden = false;
 	document.getElementById('dateEdit').hidden = false;
 }
+
+//==============================================================================
+//	function hideEditSchedule()
+//		This method hides the overlay panel and the edit schedule dialog.
+//==============================================================================
+function hideEditSchedule()
+{
+	document.getElementById('overlay').hidden = true;
+	document.getElementById('editSchedule').hidden = true;
+}
+
+//==============================================================================
+//	function showEditSchedule()
+//		This method shows the overlay panel and the edit scheudle dialog
+//==============================================================================
+function showEditSchedule()
+{
+	document.getElementById('overlay').hidden = false;
+	document.getElementById('editSchedule').hidden = false;
+}
+
 
 //==============================================================================
 //	function hideConfirmSave()
