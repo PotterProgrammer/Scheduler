@@ -1,11 +1,11 @@
 ##
 ##  Module to save/restore scheduling information
 ##
-package SaveRestore;
+package BuildSchedule;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( build);
+@EXPORT = qw( buildScheduleForDates );
 
 use warnings;
 use strict;
@@ -14,6 +14,9 @@ use lib "./";
 use Date::Calc	qw( :all);
 use DBI;
 use SaveRestore;
+use open qw(:std :utf8);
+use utf8;
+use utf8::all;
 
 my @Slots;
 my @Schedule;
@@ -83,6 +86,7 @@ sub buildScheduleForDates($$)
 	my ( $startDate, $endDate) = @_;
 
 	$scheduleIncomplete = 0;
+	@Schedule = ();
 
 	##
 	##  Read a list of the slots to be filled
@@ -114,6 +118,7 @@ sub buildScheduleForDates($$)
 		print "\n\n*** NOT ALL SLOTS WERE FILLED!!! ***\n\n"
 	}
 	
+	clearSavedSchedule( $startDate, $endDate);
 	saveSchedule( @Schedule);
 	
 	return( $scheduleIncomplete);
@@ -157,7 +162,10 @@ sub scheduleSlots($$)
 		##
 		##  Store results in final schedule
 		##
-		push( @Schedule, @scheduled);
+		if ( @scheduled)
+		{
+			push( @Schedule, @scheduled);
+		}
 	}
 }
 
@@ -350,7 +358,7 @@ sub scheduleSomeone( $$@)
 		$schedule{date} = $date;
 		$schedule{time} = $slot->{time};
 		$schedule{title} = $slot->{title};
-		$schedule{name} = "n/a";
+		$schedule{name} = "—unfilled—";
 		push( @slotSchedule, \%schedule);
 
 		$scheduleIncomplete = 1;

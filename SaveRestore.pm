@@ -3,25 +3,32 @@
 ##
 package SaveRestore;
 
-require Exporter;
-@ISA = qw( Exporter);
-@EXPORT = qw( readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule);
-
 use warnings;
 use strict;
+
+require Exporter;
+@ISA = qw( Exporter);
+@EXPORT = qw( clearSavedSchedule getRoleVolunteerList readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule);
+
 use DBI;
+use open qw(:std :utf8);
+use utf8;
+use utf8::all;
 
 
 my $dbh;
 my $verbose = 1;
 
 
-sub saveSchedule(@);
+sub getRoleVolunteerList($);
+sub readSchedule($$);
 sub readSlots();
 sub readVolunteers();
 sub removeSlot($);
+sub saveSchedule(@);
 sub saveSlot($);
 sub saveVolunteer($);
+sub updateSchedule($);
 
 #------------------------------------------------------------------------------
 #  BEGIN
@@ -319,6 +326,45 @@ sub saveVolunteer($)
 	
 }
 
+#------------------------------------------------------------------------------
+#  sub getRoleVolunteerList( $title)
+#  		This routine reads the names of volunteers for the given role  and
+#  		returns it as an array.
+#------------------------------------------------------------------------------
+sub getRoleVolunteerList($)
+{
+	my ($title) = @_;
+	$title = '%'. $title . '%';
+	my @names = $dbh->selectall_array( "select name from volunteer where desiredRoles like ? order by name ASC", undef, $title);
+	@names = map { $_->[0]} @names;
+
+	print "I found the names: " . join( ', ', @names) . " for $title\n";
+	return( @names);
+}
+
+
+
+#------------------------------------------------------------------------------
+#  sub clearSavedSchedule($startDate, $endDate)
+#  		This routine clears the saved schedule for the range of dates provided.
+#------------------------------------------------------------------------------
+sub clearSavedSchedule($$)
+{
+	my ($startDate, $endDate) = @_;
+	print "Removing schedule entries for dates between $startDate and $endDate\n";
+	$dbh->do( "delete from schedule where date >= ? and date <= ?", undef, $startDate, $endDate);
+}
+#------------------------------------------------------------------------------
+#  sub readSchedule($startDate, $endDate)
+#  		This routine reads the schedule for the range of dates provided and
+#  		returns it as an array of references to schedule entries.
+#------------------------------------------------------------------------------
+sub readSchedule($$)
+{
+	my ($startDate, $endDate) = @_;
+	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= ? and date <= ? order by date ASC, title ASC", {Slice=>{}}, $startDate, $endDate);
+	return( @$schedule);
+}
 
 #------------------------------------------------------------------------------
 #  sub saveSchedule( @Schedule)
@@ -327,18 +373,41 @@ sub saveVolunteer($)
 sub saveSchedule(@)
 {
 	my @schedules = @_;
-	my $sth = $dbh->prepare( "insert or replace into schedule (date. time, title, name) values (?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into schedule (date, time, title, name) values (?,?,?,?)");
 
 	foreach my $slot (@schedules)
 	{
 		$sth->bind_param( 1, $slot->{date});
 		$sth->bind_param( 2, $slot->{time});
 		$sth->bind_param( 3, $slot->{title});
-		$sth->bind_param( 4, $slot->{name});
+		if ( defined( $slot->{name}) && (length( $slot->{name}) > 0))
+		{
+			$sth->bind_param( 4, $slot->{name});
+		}
+		else
+		{
+			$sth->bind_param( 4, "—unfilled—");
+		}
 		$sth->execute();
 	}
 }
 	
+#------------------------------------------------------------------------------
+#  sub updateSchedule( $shedule)
+#		This routine saves the information in the provided "schedule" hashref to
+#		the "schedule" table.
+#------------------------------------------------------------------------------
+sub updateSchedule($)
+{
+	my $schedule = $_[0];
+	my $sth = $dbh->prepare( "update schedule set name=? where date=? and title=? and name=?");
+	$sth->bind_param( 1, $schedule->{name});
+	$sth->bind_param( 2, $schedule->{date});
+	$sth->bind_param( 3, $schedule->{title});
+	$sth->bind_param( 4, $schedule->{oldName});
+	$sth->execute();
+}
+
 
 
 1;
