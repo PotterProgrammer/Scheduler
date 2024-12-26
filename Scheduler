@@ -9,11 +9,16 @@ use lib "./";
 use Mojolicious::Lite;
 
 use SaveRestore;
-use BuildSchedule;
+use BuildSchedule qw( buildScheduleForDates);
+
+use open qw(:std :utf8);
+use utf8;
+use utf8::all;
 
 
 my @Slots;
 my @Volunteers;
+my @Schedule;
 
 sub findVolunteer($$);
 
@@ -113,11 +118,36 @@ sub findVolunteer($$);
 		else
 		{
 			my $incomplete = buildScheduleForDates( $startDate, $endDate);
-			$self->stash( incomplete=>$incomplete, startDate=>$startDate, endDate=>$endDate);
-			$self->render( "showSchedule");
+			@Schedule = readSchedule( $startDate, $endDate);
+			$self->stash( incomplete=>$incomplete, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
+			$self->render( "viewSchedule");
 		}
 	};
 
+	#------------------------------------------------------------------------------
+	#	get '/showSchedule'
+	#		This call redirects to a page that prompts for the schedule date range.
+	#------------------------------------------------------------------------------
+	get '/showSchedule' => sub
+	{
+		my $self = shift;
+		$self->render( "showSchedule");
+	};
+
+	#------------------------------------------------------------------------------
+	#	get '/viewTheSchedule'
+	#		This call redirects to a page that prompts for the schedule date range.
+	#------------------------------------------------------------------------------
+	get '/viewTheSchedule' => sub
+	{
+		my $self = shift;
+		my $start = $self->param( "start");
+		my $end = $self->param( "end");
+
+		@Schedule = readSchedule( $start, $end);
+		$self->stash( incomplete=>0, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
+		$self->render( "viewSchedule");
+	};
 
 	#------------------------------------------------------------------------------
 	#  post '/modifyVolunteer'
@@ -289,6 +319,69 @@ sub findVolunteer($$);
 											  }
 									 }
 									);
+					}
+				 );
+		
+	};
+
+	#------------------------------------------------------------------------------
+	#  websocket '/updateSchedule'
+	#  		This call modifes information in the schedule, as provided by the caller.
+	#------------------------------------------------------------------------------
+	websocket '/updateSchedule' => sub
+	{
+		my $self = shift;
+
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+
+						##
+						##  Write the volunteer info to the database
+						##
+						updateSchedule( $json);
+						
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	status => "Saved" }});
+					}
+				 );
+	};
+
+	#------------------------------------------------------------------------------
+	#  websocket '/getRoleVolunteers'
+	#  		This call gets the names of volunteers who signed up for the named
+	#  		role.
+	#------------------------------------------------------------------------------
+	websocket '/getRoleVolunteers' => sub
+	{
+		my $self = shift;
+
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+
+						##
+						##  Get the list of volunteers for the role
+						##
+						my @roleVolunteers = getRoleVolunteerList( $json->{title});
+						
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	nameList => \@roleVolunteers
+											  }
+									  }
+								   );
 					}
 				 );
 		
