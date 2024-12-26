@@ -9,6 +9,26 @@
 
 <script>
 
+	//==============================================================================
+	//	function makeSchedule()
+	//		This function calls back to the server to make the schedule for the
+	//		specified dates.  If a previous schedule existed for the specified
+	//		dates, it will be overwriten.
+	//==============================================================================
+	function makeSchedule()
+	{
+		let startDate = document.getElementById( "startDate").value;
+		let endDate = document.getElementById( "endDate").value;
+
+		if (( startDate.length < 10) || ( endDate.length < 10))
+		{
+			alert( 'Please enter both a start date and an end date for the schedule');
+			return;
+		}
+
+		let url = 'buildSchedule?startDate=' + startDate + '&endDate=' + endDate;
+		window.location.replace( url);
+	}
 </script>
 
 
@@ -22,13 +42,15 @@
 		<p>This will generate a schedule for the dates listed below, using the list of positions to fill and volunteers which you have previously entered.</p>
 		<p>If you have not already entered the positions to be filled and the available volunteers, please do so before pressing the "Build Schedule" button.</p>
 
-		<label for="startDate">Start Date of Schedule:</label>
-		<input type="date" id="startDate" value="startDate" name="startDate"></input>
-		<br>
-		<label for="endDate">End Date of Schedule:</label>
-		<input type="date" id="endDate" value="endDate" name="endDate"></input>
-		<br>
-		<button type="button" onClick="makeSchedule()">Build Schedule</button>
+		<div id="dateEntry">
+			<label for="startDate">Start Date of Schedule:</label>
+			<input type="date" id="startDate" value="startDate" name="startDate"></input>
+			<br>
+			<label for="endDate">End Date of Schedule: </label>
+			<input type="date" id="endDate" value="endDate" name="endDate" ></input>
+			<br>
+			<button type="button" onClick="makeSchedule()">Build Schedule</button>
+		</div>
 	</div>
 
 

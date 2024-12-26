@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+
+<script>
+
+	var currentSlot;
+	var oldName = '';
+	var oldDate = '';
+	var oldTitle = '';
+
+	//==============================================================================
+	//  function editSchedule( slot)
+	//		This function displays the editSchedule dialog for the name in the
+	//		provided slot.
+	//==============================================================================
+	function editSchedule( slot)
+	{
+		var date = slot.getAttribute( "data-Day");
+		var title = slot.getAttribute( "data-Title");
+		var name = slot.getAttribute( "data-Name");
+		var editInfo = document.getElementById( "editInfo");
+		editInfo.innerText = "Choose someone for the position " + title + " on " + date + ":";
+		let volunteerList = document.getElementById( 'slotVolunteer');
+		
+		//
+		//  Remember who was originally set for this slot
+		//
+		currentSlot = slot;
+		oldName = name;
+		oldTitle = title;
+		oldDate = date;
+
+		//
+		//  Call server to get volunteers for the given position title
+		//
+		var ws;
+		var url = '<%= url_for('getRoleVolunteers')->to_abs %>';
+		alert( "Getting a websocket");
+		ws = new WebSocket( url);
+
+		ws.onopen = (event) => 
+		{
+			ws.send( '{"title" : "' + title + '"}');
+			alert( "Sent: " + title);
+		};
+
+		ws.onerror = (event) =>
+		{
+			ws.close();
+			ws = new WebSocket( url);
+			ws.onopen = (event) => 
+			{
+				ws.send( title);
+			};
+		};
+
+		ws.onmessage = (msg) =>
+		{
+			var reply = JSON.parse( msg.data);
+
+			let names = reply.nameList;
+
+			alert( "Got back :" + msg.data);
+			ws.close();
+
+			while( volunteerList.options.length > 0)
+			{
+				volunteerList.remove( 0);
+			}
+
+			names.forEach( (name) => 
+				{
+					var newName = document.createElement('option');
+					var newNameText = document.createTextNode( name);
+					newName.appendChild( newNameText);
+					newName.setAttribute( "value", name);
+					volunteerList.appendChild( newName);
+				});
+
+			showEditSchedule();
+		};
+	}
+
+	//==============================================================================
+	//	function saveEdit()
+	//		This function sends the edited data to the server to update the
+	//		database, updates the entry on the display, and hides the dialog.
+	//==============================================================================
+	function saveEdit()
+	{
+		//
+		//  Get the new name for the slot
+		//
+		let volunteerList = document.getElementById( 'slotVolunteer');
+		var newName = volunteerList.value;
+
+		var ws;
+		var url = '<%= url_for('updateSchedule')->to_abs %>';
+		ws = new WebSocket( url);
+
+		ws.onopen = (event) => 
+		{
+			ws.send( JSON.stringify( {"title" : oldTitle, "date": oldDate, "oldName": oldName, "name": newName}));
+		};
+
+		ws.onerror = (event) =>
+		{
+			ws.close();
+			ws = new WebSocket( url);
+			ws.onopen = (event) => 
+			{
+				ws.send( JSON.stringify( {"title" : oldTitle, "date": oldDate, "oldName": oldName, "name": newName}));
+			};
+		};
+
+		ws.onmessage = (msg) =>
+		{
+			var reply = JSON.parse( msg.data);
+
+			if ( reply.status == "Saved")
+			{
+				let element = currentSlot;
+				element.setAttribute( "data-Name", newName);
+				element.value = newName;
+				element.innerText = newName;
+				hideEditSchedule();
+			}
+			else
+			{
+				alert( "The change was not saved");
+			}
+
+			ws.close();
+
+		};
+	}
+
+	//==============================================================================
+	//	function cancelEdit()
+	//==============================================================================
+	function cancelEdit()
+	{
+		oldName = '';
+		oldDate = '';
+		oldTitle = '';
+		hideEditSchedule();
+	}
+</script>
+
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<div id="overlay" hidden >
+		<div id="editSchedule" hidden>
+			<div class="editPanel">
+				<h3>Edit Volunteer Slot</h3>
+				<div id="editInfo"></div>
+				<label for="slotVolunteer">Volunteer: </label>
+				<select id="slotVolunteer">
+					<option value="—unfilled—" name="—unfilled—">—unfilled—</option>
+				</select>
+				<br>
+				<div class="dialogButtons">
+					<button type="button" style="width:4em;font-size:90%;" onClick="saveEdit()">Save</button>
+					<br>
+					<button type="button" style="width:5em;font-size:90%"; onClick="cancelEdit()">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<h1>View Schedule</h1>
+
+	<div id="viewSchedule">
+		<p>Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b>
+		% if ( $incomplete)
+		% {
+			<p style="background-color:white;color:red">Please note that not all positions may have been filled.</p>
+		% }
+		<br>
+
+		<div id="schedule">
+		% my $lastDay = '';
+		% my $lastPosition = '';
+		% foreach my $scheduledSlot (@{$schedule})
+		% {
+		%   if ( $scheduledSlot->{date} ne $lastDay)
+		%	{
+		%	   $lastDay = $scheduledSlot->{date};
+		%      $lastPosition = '';
+			   <h2 id="scheduledDate"> <%== $lastDay %> </h2>
+		%   }
+		%   if ( $scheduledSlot->{title} ne $lastPosition)
+		%   {
+		%      $lastPosition = $scheduledSlot->{title};
+		       <h3 id="scheduledPosition"> <%== $lastPosition %> </h3>
+	    %   }
+			<div class="scheduledVolunteer" data-Day="<%== $lastDay %>" data-Title="<%== $lastPosition %>" data-Name="<%== $scheduledSlot->{name} %>" onClick="editSchedule(this)" ontouchstart="editSchedule(this)" > <%== $scheduledSlot->{name} %> </div>
+		%}
+		</div>
+	</div>
+
+
+</body>
+
+</html>
