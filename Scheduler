@@ -8,6 +8,7 @@ use lib "./";
 
 use Mojolicious::Lite;
 
+use Messaging;
 use SaveRestore;
 use BuildSchedule qw( buildScheduleForDates);
 
@@ -148,6 +149,34 @@ sub findVolunteer($$);
 		$self->stash( incomplete=>0, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
 		$self->render( "viewSchedule");
 	};
+
+	#------------------------------------------------------------------------------
+	#	get '/sendReminders' 
+	#		This call sends reminders to any volunteers that are scheduled to
+	#		serve in the next 3 days.
+	#------------------------------------------------------------------------------
+	get '/sendReminders' => sub
+	{
+		my $self = shift;
+		sendReminders( 3);
+
+		$self->render( text=>'Reminders sent');
+	};
+
+	#------------------------------------------------------------------------------
+	#	get '/requestUpdates'
+	#		This call sends a request to all of the volunteers to update their
+	#		available dates and personal info.
+	#------------------------------------------------------------------------------
+	get '/requestUpdates' => sub
+	{
+		my $self = shift;
+		my $base_url = $self->url_for( '/editVolunteer')->to_abs;
+
+		sendUpdateRequest( $base_url);
+		$self->render( text=>'Request sent');
+	};
+
 
 	#------------------------------------------------------------------------------
 	#  post '/modifyVolunteer'

@@ -59,6 +59,12 @@ label
 	cursor: default;
 }
 
+option:checked {
+  background-color: #00a800;
+  color: white;
+  font-weight: 450;
+}
+
 .nameList, #itemList
 {
 	margin-left: 5vw;
