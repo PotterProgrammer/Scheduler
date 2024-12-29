@@ -3,3 +3,4 @@ templates/*.html
 *.txt
 *.db
 *.swp
+*.xcf
