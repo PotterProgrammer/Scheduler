@@ -397,7 +397,7 @@
 		<label for="phone">Phone number:</label>
 		<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<%= ($type eq 'edit')? $volunteer->{phone} : "" %>"></input>
 		<br>
-		<label for="positions">Positions:</label>
+		<label for="positions" title="Select the positions you wish to volunteer for.">Positions:</label>
 
 		% my @roles;
 		% my $desiredRoles = '';
@@ -421,7 +421,7 @@
 		%  foreach my $role (@roles)
 		%    {
 		%		my $selected = ( $desiredRoles =~ m/$role/i) ? 'selected="selected"' : "";
-			<option value="<%= $role %>" <%== $selected %> ><%= $role %></option>
+			<option value="<%= $role %>" <%== $selected %> title="Select the positions you wish to volunteer for."><%= $role %></option>
 		%    }
 		% }
 		% else

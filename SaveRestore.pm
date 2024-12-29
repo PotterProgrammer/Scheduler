@@ -2,13 +2,13 @@
 ##  Module to save/restore scheduling information
 ##
 package SaveRestore;
+require Exporter;
+@ISA = qw( Exporter);
+@EXPORT = qw( clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
 
 use warnings;
 use strict;
 
-require Exporter;
-@ISA = qw( Exporter);
-@EXPORT = qw( clearSavedSchedule getRoleVolunteerList readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule);
 
 use DBI;
 use open qw(:std :utf8);
@@ -21,14 +21,16 @@ my $verbose = 1;
 
 
 sub getRoleVolunteerList($);
+sub readReminderList($);
 sub readSchedule($$);
 sub readSlots();
-sub readVolunteers();
+sub readVolunteers(@);
 sub removeSlot($);
 sub saveSchedule(@);
 sub saveSlot($);
 sub saveVolunteer($);
 sub updateSchedule($);
+sub updateScheduleReminded($);
 
 #------------------------------------------------------------------------------
 #  BEGIN
@@ -49,7 +51,10 @@ BEGIN
 		           ( date text,
 				     time text,
 					 title text,
-					 name text)");
+					 name text,
+					 notified integer default 0,
+					 reminded integer default 0
+				   )");
 
 	$dbh->do( "create index if not exists schedule_index on schedule ( date, name)");
 
@@ -127,12 +132,28 @@ sub readSlots()
 	return( @$positions);
 }
 
+
 #------------------------------------------------------------------------------
-#  sub readVolunteers()
+#  sub readVolunteers( [$name])
+#  		This routine reads the requested row from the volunteer
+#  		table and returns an array of references to the volunteer records.  If
+#  		no name is provided, all volunteers are included in the list
 #------------------------------------------------------------------------------
-sub readVolunteers()
+sub readVolunteers(@)
 {
-	my $volunteers = $dbh->selectall_arrayref( "select * from volunteer order by name ASC", {Slice=>{}});
+	my ($name) = @_;
+	my $query;
+
+	if ( defined( $name))
+	{
+		$query = "select * from volunteer where name like '$name'";
+	}
+	else
+	{
+		$query = "select * from volunteer order by name ASC";
+	}
+
+	my $volunteers = $dbh->selectall_arrayref( $query, {Slice=>{}});
 
 	my $unavailable = $dbh->prepare( "select * from dates_unavailable where name=?");
 	my $desired = $dbh->prepare( "select * from dates_desired where name=?");
@@ -354,6 +375,7 @@ sub clearSavedSchedule($$)
 	print "Removing schedule entries for dates between $startDate and $endDate\n";
 	$dbh->do( "delete from schedule where date >= ? and date <= ?", undef, $startDate, $endDate);
 }
+
 #------------------------------------------------------------------------------
 #  sub readSchedule($startDate, $endDate)
 #  		This routine reads the schedule for the range of dates provided and
@@ -365,6 +387,21 @@ sub readSchedule($$)
 	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= ? and date <= ? order by date ASC, title ASC", {Slice=>{}}, $startDate, $endDate);
 	return( @$schedule);
 }
+
+#------------------------------------------------------------------------------
+#  sub readReminderList( $nextNDays)
+#  		This routine reads the schedule for a list of all people who need to be
+#  		reminded that they are volunteering in the next "N" days and returns it
+#  		as an array of references to schedule entries.
+#------------------------------------------------------------------------------
+sub readReminderList($)
+{
+	my ($nDays) = @_;
+	my $endDate = "$nDays days";
+	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= date('now') and date <= date( 'now', ?) and reminded=false order by date ASC, title ASC", {Slice=>{}}, $endDate);
+	return( @$schedule);
+}
+
 
 #------------------------------------------------------------------------------
 #  sub saveSchedule( @Schedule)
@@ -405,6 +442,22 @@ sub updateSchedule($)
 	$sth->bind_param( 2, $schedule->{date});
 	$sth->bind_param( 3, $schedule->{title});
 	$sth->bind_param( 4, $schedule->{oldName});
+	$sth->execute();
+}
+
+#------------------------------------------------------------------------------
+#  sub updateScheduleReminded( $scheduledPosition)
+#  		This function updates the schedule to note that the given person for
+#  		the given position has been reminded.
+#------------------------------------------------------------------------------
+sub updateScheduleReminded($)
+{
+	my ( $scheduledPosition) = @_;
+
+	my $sth = $dbh->prepare( "update schedule set reminded=true where date=? and title=? and name=?");
+	$sth->bind_param( 1, $scheduledPosition->{date});
+	$sth->bind_param( 2, $scheduledPosition->{title});
+	$sth->bind_param( 3, $scheduledPosition->{name});
 	$sth->execute();
 }
 
