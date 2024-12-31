@@ -175,8 +175,8 @@ set errorformat=%f(%l)\ :\ error\ C%n:\ %m,Error\ %f\ %l:\ %m
 set fileencodings=ucs-bom,utf-8,default,latin1
 set formatoptions=coql
 set guifont=DejaVu\ Sans\ Mono\ 10
-set guioptions=agmrLTi
-set guitablabel=%f
+set guioptions=agmrLTie
+set guitablabel=%M%-0.20f
 set helplang=en
 set isfname=@,48-57,/,.,-,_,+,,,#,$,%,~,=,:
 set nojoinspaces

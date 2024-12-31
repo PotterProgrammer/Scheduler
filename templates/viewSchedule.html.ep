@@ -41,13 +41,11 @@
 		//
 		var ws;
 		var url = '<%= url_for('getRoleVolunteers')->to_abs %>';
-		alert( "Getting a websocket");
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 
 		{
 			ws.send( '{"title" : "' + title + '"}');
-			alert( "Sent: " + title);
 		};
 
 		ws.onerror = (event) =>
@@ -66,7 +64,6 @@
 
 			let names = reply.nameList;
 
-			alert( "Got back :" + msg.data);
 			ws.close();
 
 			while( volunteerList.options.length > 0)
@@ -181,10 +178,18 @@
 
 	<div id="viewSchedule">
 		<p>Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b>
-		% if ( $incomplete)
-		% {
+		% if ( defined( $incomplete))
+	    % {
+		% 	if ( $incomplete)
+		% 	{		
 			<p style="background-color:white;color:red">Please note that not all positions may have been filled.</p>
+		% 	}
+		%	else
+		%	{
+			<p style="background-color:white;color:red">Scheduling complete, volunteers are being notified.</p>
+		% 	}
 		% }
+		% 
 		<br>
 
 		<div id="schedule">

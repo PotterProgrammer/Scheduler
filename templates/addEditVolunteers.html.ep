@@ -42,7 +42,6 @@
 	function modifyVolunteer()
 	{
 		var volunteer = getVolunteerInfo();
-		alert( "Sending back: " + JSON.stringify( volunteer));
 		hideConfirmSave();
 
 		fetch( '/modifyVolunteer' ,
@@ -340,10 +339,21 @@
 
 	function returnToVolunteers()
 	{
-			window.location.href = '/volunteers';
+		% if ( $userMode)
+		% {
+		window.location.href = 'https://www.stjamesbg.org/';
+		% }
+		% else
+		% {
+		window.location.href = '/volunteers';
+		% }
 	}
 
 	window.addEventListener( "pageshow", function () {originalName='<%= ($type eq "edit")? $volunteer->{name} : "" %>'; showVolunteerInfo();} );
+	% if ( $userMode)
+	% {
+	window.addEventListener( "pageshow", hideNavbar);
+	% }
 
 </script>
 
@@ -430,7 +440,7 @@
 		% }
 		</select>
 		<br>
-		<label for="daysUnavailable">Days unavailable:</label>
+		<label for="daysUnavailable" title="Days you are not available to volunteer">Days unavailable:</label>
 
 		% my @daysUnavailable;
 		% if (( $type eq 'edit') && defined( $volunteer->{daysUnavailable}))
@@ -438,12 +448,12 @@
 		%    @daysUnavailable = split(",", $volunteer->{daysUnavailable});
 		% }
 		% my $count = int( @daysUnavailable);
-		<select name="daysUnavailable" class="dateList" id="daysUnavailable" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<select name="daysUnavailable" class="dateList" id="daysUnavailable" title="Days you are not available to volunteer" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysUnavailable)
 		% {
 		%  foreach my $day (@daysUnavailable)
 		%    {
-			<option value="<%= $day %>"><%= $day %></option>
+			<option value="<%= $day %>" title="Days you are not available to volunteer"><%= $day %></option>
 		%    }
 		% }
 		% else
@@ -454,19 +464,19 @@
 		</select>
 		<button type="button" class="editButton" onClick="editDaysUnavailable()" >Edit</button>
 		<br>
-		<label for="daysDesired">Days desired:</label>
+		<label for="daysDesired" title="A special day when you would prefer to work">Days desired:</label>
 		% my @daysDesired;
 		% if (( $type eq 'edit') && defined( $volunteer->{daysDesired}))
 		% {
 		%    @daysDesired = split(",", $volunteer->{daysDesired});
 		% }
 		% $count = int( @daysDesired);
-		<select name="daysDesired" class="dateList" id="daysDesired" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<select name="daysDesired" class="dateList" id="daysDesired" title="A special day when you would prefer to work" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysDesired)
 		% {
 		%  foreach my $day (@daysDesired)
 		%    {
-			<option value="<%= $day %>"><%= $day %></option>
+			<option value="<%= $day %>" title="A special day when you would prefer to work"><%= $day %></option>
 		%    }
 		% }
 		% else
