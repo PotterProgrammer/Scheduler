@@ -7,6 +7,7 @@ use strict;
 use lib "./";
 
 use Mojolicious::Lite;
+##-->plugin 'Subprocess';
 
 use Messaging;
 use SaveRestore;
@@ -25,6 +26,13 @@ sub findVolunteer($$);
 
 #main:
 {
+	get '/' => sub
+	{
+		my ($self) = @_;
+
+		$self->render( 'index');
+	};
+
 	#------------------------------------------------------------------------------
 	#  get '/slots'
 	#------------------------------------------------------------------------------
@@ -82,14 +90,23 @@ sub findVolunteer($$);
 	get '/editVolunteer/<:name>' => sub
 	{
 		my $self = shift;
+		my $userMode = 0;
+		my $name = $self->param("name");
+		print "name = $name\n";
+		if ( $name =~ s/^user-//)
+		{
+			$userMode = 1;
+		}
 
-		print "In editVolunteer.  Name=" . $self->param("name") . "\n";
+		print "In editVolunteer.  Name=" . $name . "\n";
+		print "User mode = $userMode\n";
+
 		@Slots = readSlots();
 		@Volunteers = readVolunteers();
 
-		my ($index, $volunteer) = findVolunteer( 0, $self->param("name"));
+		my ($index, $volunteer) = findVolunteer( 0, $name);
 
-		$self->stash( slots=> \@Slots, volunteer=>$volunteer, type=>"edit", title=>"Edit Information for " . $self->param("name"));
+		$self->stash( slots=> \@Slots, volunteer=>$volunteer, type=>"edit", title=>"Edit Information for " . $name, userMode=>$userMode);
 
 		$self->render( "addEditVolunteers");
 
@@ -119,12 +136,64 @@ sub findVolunteer($$);
 		else
 		{
 			my $incomplete = buildScheduleForDates( $startDate, $endDate);
+			my $rendered = 0;
+
+			$incomplete = 0;
+
+			##
+			##  Was a complete schedule built?
+			##
+			if ( !$incomplete)
+			{
+##-->				##
+##-->				##  If so, send out notifications automatically
+##-->				##
+##-->				$self->subprocess( sub
+##-->					{
+##-->						print "Sending new schedules...\n";
+##-->						sendSchedules( $startDate, $endDate);
+##-->						print "Schedules sent...\n";
+##-->					},sub { my ($self, @results) = @_; print "Done"});
+##-->				print " *** HERE ***\n";
+				
+				my $cmd =  "curl '" . $self->url_for( "/sendSchedule")->to_abs . "?start=${startDate}&end=${endDate}' &";
+				print "running $cmd\n";
+				system( $cmd);
+				print "Sending...\n";
+			}
+
+			print " **** THERE ****\n";
 			@Schedule = readSchedule( $startDate, $endDate);
 			$self->stash( incomplete=>$incomplete, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
+			print "Viewing schedule...\n";
 			$self->render( "viewSchedule");
 		}
 	};
 
+
+	#------------------------------------------------------------------------------
+	#	get '/sendSchedule
+	#		This call sends personalized schedules to all who are volunteering
+	#		on dates from the start date through the end date.
+	#------------------------------------------------------------------------------
+	get '/sendSchedule' => sub
+	{
+		my $self = shift;
+		my $start = $self->param( "start");
+		my $end = $self->param( "end");
+
+		if ( !defined( $start) || !defined( $end))
+		{
+			$self->stash( url => $self->url_for('/sendSchedule')->to_abs);
+			$self->render( "sendVolunteerSchedules");
+		}
+		else
+		{
+			sendSchedules( $start, $end);
+
+			$self->render( "index");
+		}
+	};
 	#------------------------------------------------------------------------------
 	#	get '/showSchedule'
 	#		This call redirects to a page that prompts for the schedule date range.
@@ -146,7 +215,7 @@ sub findVolunteer($$);
 		my $end = $self->param( "end");
 
 		@Schedule = readSchedule( $start, $end);
-		$self->stash( incomplete=>0, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
+		$self->stash( incomplete=>undef, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
 		$self->render( "viewSchedule");
 	};
 

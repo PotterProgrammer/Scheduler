@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<h1>Send Schedule to Volunteers</h1>
+
+	<div id="genSchedule">
+		<p>This will send copies of the schedule for the dates that you enter below to the appropriate volunteers.</p>
+
+		<div id="dateEntry">
+			<form action="<%== $url =%>" method="GET">
+			<label for="startDate">Start Date of Schedule:</label>
+			<input type="date" id="startDate" value="startDate" name="start"></input>
+			<br>
+			<label for="endDate">End Date of Schedule: </label>
+			<input type="date" id="endDate" value="endDate" name="end" ></input>
+			<br>
+			<input type="submit" value="Send Schedule"</input>
+		</div>
+	</div>
+
+
+</body>
+
+</html>
+

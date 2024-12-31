@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
+@EXPORT = qw( clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
 
 use warnings;
 use strict;
@@ -23,6 +23,7 @@ my $verbose = 1;
 sub getRoleVolunteerList($);
 sub readReminderList($);
 sub readSchedule($$);
+sub readScheduleFor($$$);
 sub readSlots();
 sub readVolunteers(@);
 sub removeSlot($);
@@ -374,6 +375,19 @@ sub clearSavedSchedule($$)
 	my ($startDate, $endDate) = @_;
 	print "Removing schedule entries for dates between $startDate and $endDate\n";
 	$dbh->do( "delete from schedule where date >= ? and date <= ?", undef, $startDate, $endDate);
+}
+
+#------------------------------------------------------------------------------
+#  sub readScheduleFor( $name, $startDate, $endDate)
+#  		This routine reads the schedule for the given name across the range of
+#  		dates provided and returns it as an array of references to schedule
+#  		entries.
+#------------------------------------------------------------------------------
+sub readScheduleFor($$$)
+{
+	my ( $name, $startDate, $endDate) = @_;
+	my $schedule = $dbh->selectall_arrayref( "select * from schedule where name=? and date >= ? and date <= ? order by date ASC, title ASC", {Slice=>{}}, $name, $startDate, $endDate);
+	return( @$schedule);
 }
 
 #------------------------------------------------------------------------------
