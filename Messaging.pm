@@ -5,7 +5,7 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( sendEmail sendReminders sendUpdateRequest);
+@EXPORT = qw( sendEmail sendReminders sendSchedules sendUpdateRequest);
 
 use warnings;
 use strict;
@@ -30,6 +30,7 @@ use utf8;
 use utf8::all;
 
 sub sendReminders($);
+sub sendSchedules($$);
 
 my $HOME = $ENV{'HOME'};
 my $emailSender;
@@ -224,66 +225,6 @@ sub sendEmail(@)
 
 
 #------------------------------------------------------------------------------
-#  sub sendUpdateRequest( $baseURL)
-#  		This function sends a request to all volunteers to update their
-#  		information before the next scheduling.
-#------------------------------------------------------------------------------
-sub sendUpdateRequest($)
-{
-	my ($baseURL) = @_;
-	my $template;
-
-	##
-	##  Get a list of people volunteering on the given date
-	##
-	my @volunteers = readVolunteers();
-
-	##
-	##  Read in the template
-	##
-	open( my $TEMPLATE, '<', "email/prescheduling.htm") || die "Couldn't read email template!\n";
-	read( $TEMPLATE, $template, 999999);
-	close $TEMPLATE;
-
-	##
-	##  Loop through the list, sending a request to update information
-	##
-	foreach  my $volunteer ( @volunteers)
-	{
-		##
-		##  Get the info for this slot
-		##
-		my $name = $volunteer->{name};
-		my $firstName = ($name =~ m/^([^\s]*)/) ? $1 : $name;
-		my $positions = $volunteer->{desiredRoles};
-		my $volunteerEmail = $volunteer->{email};
-
-		print "Volunteer email = $volunteerEmail\n";
-		$positions =~ s/([^,]+),?/<li>$1<\/li>\n/g;
-
-
-		my $email  = $template;
-
-		$email =~ s/__FIRST_NAME__/$firstName/smg;
-		$email =~ s/__POSITIONS__/$positions/smg;
-		$email =~ s/__UPDATE_URL__/$baseURL\/$name/smg;
-
-		##
-		##  Send the reminder email
-		##
-		if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
-		{
-			sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Service reminder', $email, 'email/scheduling.png');
-			print "Sent\n";
-		}
-		else
-		{
-			print STDERR "No email address for $name!\n";
-		}
-	}
-}
-
-#------------------------------------------------------------------------------
 #  sub sendReminders( $numberOfDays)
 #  		This function sends reminders to everyone who is scheduled to volunteer
 #  		in the next number of days
@@ -359,7 +300,7 @@ sub sendReminders($)
 		##
 		if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
 		{
-			sendEmail( $volunteerEmail, 'Scheduling Assistant @ St. James', 'Service reminder', $email, 'email/reminder.png');
+			sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Service reminder', $email, 'email/reminder.png');
 			print "Sent\n";
 		}
 		else
@@ -371,6 +312,174 @@ sub sendReminders($)
 		##  Note that this person was notified
 		##
 		updateScheduleReminded( $scheduledVolunteer);
+	}
+}
+
+#------------------------------------------------------------------------------
+#  sub sendSchedules( $firstDate, $lastDate)
+#  		This function sends out email copies of the personal volunteer schedule
+#  		to each person who is scheduled to serve sometime from the first date
+#  		through the last date.
+#------------------------------------------------------------------------------
+sub sendSchedules($$)
+{
+	my ( $firstDate, $lastDate) = @_;
+	my $template;
+	my $dash = "\x{2014}";
+	my $enDash = "\x{2013}";
+
+	my $admin = 'Pastor Bobby';
+	my $adminEmail = 'pastor@stjamesbg.org';
+	my $adminPhone = '270-842-4949';
+##-->	my $adminTextNumber = '859-420-4784';
+	my $adminTextNumber = '270-777-6029';
+
+
+	my $dialableAdminPhone = $adminPhone;
+	my $textableAdminNumber = $adminTextNumber;
+	$dialableAdminPhone =~ s/[^0-9]//g;
+	$textableAdminNumber =~ s/[^0-9]//g;
+
+
+	my $printableStart = $firstDate;
+	my $printableEnd = $lastDate;
+	$printableStart =~ s/(\d\d\d\d)-(.*)/$2-$1/;
+	$printableEnd =~ s/(\d\d\d\d)-(.*)/$2-$1/;
+
+	##
+	##  First, get a list of people volunteering
+	##
+	my @volunteers = readVolunteers();
+
+	##
+	##  Read in the scheduler template
+	##
+	open( my $TEMPLATE, '<', "email/personalSchedule.htm") || die "Couldn't read email template!\n";
+	read( $TEMPLATE, $template, 999999);
+	close $TEMPLATE;
+
+	##
+	##  Loop through the list to find schedules (if any) for the given dates
+	##
+	foreach my $volunteer (@volunteers)
+	{
+		my $name = $volunteer->{name};
+		my $firstName = ( $name=~/(\S+)/) ? $1 : $name;
+		my $volunteerEmail = $volunteer->{email};
+		my $volunteerPhone = $volunteer->{phone};
+
+		##
+		##  See if this person is scheduled for the dates given
+		##
+		my @schedules = readScheduleFor( $name, $firstDate, $lastDate);
+
+		##
+		##	Was the person scheduled?
+		##
+		if ( @schedules)
+		{
+			my $scheduledDates = '';
+
+			##
+			##  Build the schedule list
+			##
+			foreach my $schedule ( @schedules)
+			{
+				my $printableDate = $schedule->{date};
+				$printableDate =~ s/(\d+)-(.*)/$2-$1/;
+				$scheduledDates .= '<li><span class="scheduledDate">' . $printableDate . '</span>';
+				$scheduledDates .= '<span class="scheduledSeparator">' . $dash . '</span>';
+				$scheduledDates .= '<span class="scheduledRole">' . $schedule->{title}. '</span>';
+				$scheduledDates .= 'at <span class="scheduledTime">' . $schedule->{time}. '</span>';
+				$scheduledDates .= '</li>';
+			}
+
+			my $email  = $template;
+
+			$email =~ s/__FIRST_NAME__/$firstName/smg;
+			$email =~ s/__NAME__/$firstName/smg;
+			$email =~ s/__SCHEDULE__/$scheduledDates/smg;
+			$email =~ s/__SCHEDULE_ADMIN__/$admin/smg;
+			$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+			$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+					
+			##
+			##  Send the reminder email
+			##
+			if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+			{
+				sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', "New Schedule for $printableStart $enDash $printableEnd", $email, 'email/scheduling.png');
+				print "Sent\n";
+			}
+			else
+			{
+				print STDERR "No email address for $name!\n";
+			}
+		}
+	}
+
+}
+
+#------------------------------------------------------------------------------
+#  sub sendUpdateRequest( $baseURL)
+#  		This function sends a request to all volunteers to update their
+#  		information before the next scheduling.
+#------------------------------------------------------------------------------
+sub sendUpdateRequest($)
+{
+	my ($baseURL) = @_;
+	my $template;
+
+	##
+	##  Get a list of people volunteering on the given date
+	##
+	my @volunteers = readVolunteers();
+
+	##
+	##  Read in the template
+	##
+	open( my $TEMPLATE, '<', "email/prescheduling.htm") || die "Couldn't read email template!\n";
+	read( $TEMPLATE, $template, 999999);
+	close $TEMPLATE;
+
+	##
+	##  Loop through the list, sending a request to update information
+	##
+	foreach  my $volunteer ( @volunteers)
+	{
+		##
+		##  Get the info for this slot
+		##
+		my $name = $volunteer->{name};
+		my $firstName = ($name =~ m/^([^\s]*)/) ? $1 : $name;
+		my $positions = $volunteer->{desiredRoles};
+		my $volunteerEmail = $volunteer->{email};
+
+		print "Volunteer email = $volunteerEmail\n";
+		$positions =~ s/([^,]+),?/<li>$1<\/li>\n/g;
+
+
+		my $email  = $template;
+
+		$email =~ s/__FIRST_NAME__/$firstName/smg;
+		$email =~ s/__POSITIONS__/$positions/smg;
+		$email =~ s/__UPDATE_URL__/$baseURL\/$name?user/smg;
+
+		##
+		##  Send the reminder email
+		##
+		if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+		{
+			sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Any Information updates for volunteering?', $email, 'email/scheduling.png');
+			print "Sent\n";
+		}
+		else
+		{
+			print STDERR "No email address for $name!\n";
+		}
 	}
 }
 1;

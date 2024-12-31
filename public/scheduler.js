@@ -52,7 +52,6 @@ function showVolunteerInfo()
 		ws.onmessage = (msg) =>
 		{
 			var reply = JSON.parse( msg.data);
-			alert( "Got volunteer info: " + msg.data);
 			document.getElementById('name').value = reply.name;
 			document.getElementById('email').value = reply.email;
 			document.getElementById('phone').value = reply.phone;
@@ -193,7 +192,7 @@ function saveVolunteerInfo( volunteer)
 		var reply = JSON.parse( msg.data);
 		if ( reply.status == "OK")
 		{
-			alert( volunteer.name + " was added to the list of volunteers");
+//-->			alert( volunteer.name + " was added to the list of volunteers");
 		}
 		else
 		{
@@ -299,6 +298,9 @@ function showConfirmDelete()
 }
 
 
-
+function hideNavbar()
+{
+	document.getElementById('navbar').hidden = true;
+}
 
 window.addEventListener( "pageshow", loadNavbar);
