@@ -466,7 +466,7 @@ sub sendUpdateRequest($)
 
 		$email =~ s/__FIRST_NAME__/$firstName/smg;
 		$email =~ s/__POSITIONS__/$positions/smg;
-		$email =~ s/__UPDATE_URL__/$baseURL\/$name?user/smg;
+		$email =~ s/__UPDATE_URL__/$baseURL\/?user=$name/smg;
 
 		##
 		##  Send the reminder email

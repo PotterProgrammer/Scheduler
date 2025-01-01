@@ -83,19 +83,26 @@ sub findVolunteer($$);
 
 
 	#------------------------------------------------------------------------------
-	#  get '/editVolunteer/<:name>' => sub
+	#  get '/editVolunteer?edit=<name>' => sub
 	#  		This call provides a screen for editing the settings of the named
 	#  		volunteer
 	#------------------------------------------------------------------------------
-	get '/editVolunteer/<:name>' => sub
+	get '/editVolunteer' => sub
 	{
 		my $self = shift;
 		my $userMode = 0;
-		my $name = $self->param("name");
-		print "name = $name\n";
-		if ( $name =~ s/^user-//)
+		my $name = $self->param("edit");
+		if ( defined( $name))
 		{
-			$userMode = 1;
+			print "Editing user $name\n";
+		}
+		else
+		{
+			if ( defined( $name = $self->param( "user")))
+			{
+				print "Editing info for user $name\n";
+				$userMode = 1;
+			}
 		}
 
 		print "In editVolunteer.  Name=" . $name . "\n";
