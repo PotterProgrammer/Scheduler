@@ -51,7 +51,7 @@
 		var volunteerList = document.getElementById( "itemList");
 		var selectedItemNumber = volunteerList.selectedIndex;
 		var itemName = volunteerList.options[selectedItemNumber].value;
-		window.location.href = 'editVolunteer/' + itemName;
+		window.location.href = 'editVolunteer?edit=' + itemName;
 	}
 	
 
