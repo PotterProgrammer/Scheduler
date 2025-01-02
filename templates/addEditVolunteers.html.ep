@@ -28,7 +28,7 @@
 
 		if ( volunteer.desiredRoles.length == 0)
 		{
-			alert( "Please select at least one position that " + voluntter.name + " would like to volunteer for.");
+			alert( "Please select at least one position that " + volunteer.name + " would like to volunteer for.");
 			return;
 		}
 		saveVolunteerInfo( volunteer);
