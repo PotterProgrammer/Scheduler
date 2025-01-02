@@ -13,6 +13,7 @@ use strict;
 use lib "./";
 use Date::Calc	qw( :all);
 use DBI;
+use List::Util qw( shuffle);
 use SaveRestore;
 use open qw(:std :utf8);
 use utf8;
@@ -135,6 +136,14 @@ sub scheduleSlots($$)
 	my ($startDate, $endDate) = @_;
 
 	##
+	##  Sort the slots based on the number of volunteers.  (Slots with fewer
+	##	volunteers get filled first to make sure those volunteers aren't chosen
+	##	elsewhere first.)
+	##
+	@Slots = sort { int( findVolunteersForTask( $a->{title})) <=> int( findVolunteersForTask( $b->{title}))} @Slots;
+	
+
+	##
 	##  Loop through the list of slots to fill
 	##
 	foreach my $slot ( @Slots)
@@ -143,6 +152,12 @@ sub scheduleSlots($$)
 		##  Get a list of people willing to volunteer for this task
 		##
 		my @names = findVolunteersForTask( $slot->{title});
+		print "Slot " . $slot->{title} . " has " . int( @names) . " volunteers\n";
+
+		##
+		##  Shuffle the names so that the same people don't get picked every time
+		##
+		@names = shuffle( @names);
 
 		##
 		##  Generate a list of dates for this task

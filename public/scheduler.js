@@ -192,7 +192,8 @@ function saveVolunteerInfo( volunteer)
 		var reply = JSON.parse( msg.data);
 		if ( reply.status == "OK")
 		{
-//-->			alert( volunteer.name + " was added to the list of volunteers");
+			alert( volunteer.name + " was added to the list of volunteers");
+			showAddedAlert();
 		}
 		else
 		{
