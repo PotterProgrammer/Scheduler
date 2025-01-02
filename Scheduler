@@ -75,7 +75,7 @@ sub findVolunteer($$);
 
 		@Slots = readSlots();
 
-		$self->stash( slots=>\@Slots, type=>"add", volunteer=>undef, title=>"Add Volunteers");
+		$self->stash( slots=>\@Slots, type=>"add", volunteer=>undef, userMode=>0, title=>"Add Volunteers");
 
 		$self->render( "addEditVolunteers");
 
