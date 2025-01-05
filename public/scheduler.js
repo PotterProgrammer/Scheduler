@@ -213,6 +213,7 @@ function showAddedAlert()
 	setTimeout( function(){document.getElementById('added').hidden = true;}, 1000);
 }
 
+
 //==============================================================================
 //	function hideEditDates()
 //		This method hides the overlay panel and the save dates
