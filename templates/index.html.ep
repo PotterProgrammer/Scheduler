@@ -12,20 +12,58 @@
 function resetToIndex()
 {
 	let page = window.location.href + "";
-	let match = page.match( /index|\/$/);
-	if ( match == null)
+	let indexPage = page.match( /index$|\/$/);
+	let parms = window.location.search;
+
+	if (( indexPage == null) || (( parms != null) && (parms.length > 0)))
 	{
 		window.location = "<%= url_for('/')->to_abs %>";
 	}
 }
 
+//==============================================================================
+//  function showSentAlert()
+//		This function shows the "Messages are being sent" message on the screen
+//		for 1 second
+//==============================================================================
+function showSentAlert()
+{
+	document.getElementById('sentMessages').hidden = false;
+	setTimeout( function(){document.getElementById('sentMessages').hidden = true; resetToIndex();}, 2000);
+}
 
-window.addEventListener( "pageshow", resetToIndex);
+
+//==============================================================================
+//  function showAlert()
+//		This function checks to see if the alert message should be displayed,
+//		before refreshing
+//==============================================================================
+function showAlert()
+{
+	let request = window.location.search;
+
+	if ( request != null && request.match( /messageSent/))
+	{
+		showSentAlert();
+	}
+	else
+	{
+		resetToIndex();
+	}
+}
+
+window.addEventListener( "pageshow", showAlert);
 
 </script>
 
 <body>
 	<div id="navbar">
+	</div>
+
+	<div id="xoverlay">
+		<div id="sentMessages" hidden="">
+			<h2>Messages are being sent</h2>
+		</div>
 	</div>
 
 	<h1>Scheduler</h1>
