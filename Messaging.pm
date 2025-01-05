@@ -21,8 +21,8 @@ use SaveRestore;
 ##-->use Email::Simple::Creator;
 ##-->use Email::Sender::Transport::SMTP;
 ##-->use Email::Sender::Transport::SMTP::TLS;
-##-->use WWW::Twilio::API;
-##-->use WWW::Twilio::TwiML;
+use WWW::Twilio::API;
+use WWW::Twilio::TwiML;
 use URI::Escape;
 
 use open qw(:std :utf8);
@@ -33,6 +33,10 @@ sub sendReminders($);
 sub sendSchedules($$);
 
 my $HOME = $ENV{'HOME'};
+my $adminName;
+my $adminEmail;
+my $adminPhone;
+my $adminTextNumber;
 my $emailSender;
 my $email_pwd;
 my $email_uid;
@@ -80,98 +84,118 @@ sub unhidden($)
 #------------------------------------------------------------------------------
 sub loadConfig()
 {
- if ( -e "$HOME/ET2/config.cfg")
+	if ( -e "$HOME/.scheduler.cfg")
 	{
-	 open( CFG, "$HOME/ET2/config.cfg");
-	 while( <CFG>)
+		open( CFG, "$HOME/.scheduler.cfg");
+		while( <CFG>)
 		{
-		 chomp;
-		 if ( m/EmailServer=(.*)/)
+			chomp;
+			if ( m/EmailServer=(.*)/)
 			{
-			 $email_smtp = $1;
-			 next;
+				$email_smtp = $1;
+				next;
 			}
-		 if ( m/EmailPort=(.*)/)
+			if ( m/EmailPort=(.*)/)
 			{
-			 $email_port=int($1);
-			 next;
+				$email_port=int($1);
+				next;
 			}
-		 if ( m/EmailSSL=(.*)/)
+			if ( m/EmailSSL=(.*)/)
 			{
-			 $email_use_ssl= int($1);
-			 next;
+				$email_use_ssl= int($1);
+				next;
 			}
-		 if ( m/EmailTLS=(.*)/)
+			if ( m/EmailTLS=(.*)/)
 			{
-			 $email_use_tls=int($1);
-			 next;
+				$email_use_tls=int($1);
+				next;
 			}
-		 if ( m/EmailUID=(.*)/)
+			if ( m/EmailUID=(.*)/)
 			{
-			 $email_uid=$1;
-			 next;
+				$email_uid=$1;
+				next;
 			}
-		 if ( m/EmailPWD=(.*)/)
+			if ( m/EmailPWD=(.*)/)
 			{
-			 $email_pwd = unhidden($1);
-			 next;
+				$email_pwd = unhidden($1);
+				next;
 			}
-		 if ( m/EmailSender=(.*)/)
+			if ( m/EmailSender=(.*)/)
 			{
-			 $emailSender=$1;
-			 next;
+				$emailSender=$1;
+				next;
 			}
-		 if ( m/TwilioAcct=(.*)/)
-		 	{
-			 $TwilioAccount=$1;
-			 next;
+			if ( m/TwilioAcct=(.*)/)
+			{
+				$TwilioAccount=$1;
+				next;
 			}
-		 if ( m/TwilioAuth=(.*)/)
-		 	{
-			 $TwilioAuth = unhidden($1);
-			 next;
+			if ( m/TwilioAuth=(.*)/)
+			{
+				$TwilioAuth = unhidden($1);
+				next;
 			}
-		 if ( m/TwilioPhone=(.*)/)
-		 	{
-			 $TwilioNumber=$1;
-			 next;
+			if ( m/TwilioPhone=(.*)/)
+			{
+				$TwilioNumber=$1;
+				next;
 			}
-		 if ( m/TwilioGender=(.*)/)
-		 	{
-			 $TwilioGender=$1;
-			 next;
+			if ( m/TwilioGender=(.*)/)
+			{
+				$TwilioGender=$1;
+				next;
 			}
-		 if ( m/TwilioIntro=(.*)/)
-		 	{
-			 $TwilioIntro=$1;
-			 next;
+			if ( m/TwilioIntro=(.*)/)
+			{
+				$TwilioIntro=$1;
+				next;
 			}
-		 if ( m/TwilioAlways=(.*)/)
-		 	{
-			 $AlwaysTwilio=$1;
-			 next;
+			if ( m/TwilioAlways=(.*)/)
+			{
+				$AlwaysTwilio=$1;
+				next;
 			}
-		 if ( m/Logging=(.*)/)
-		 	{
-			 $logging = $1;
-			 next;
+			if ( m/AdminName=(.*)/)
+			{
+				$adminName = $1;
+				next;
 			}
-		 if ( m/MaxRetries=(.*)/)
-		 	{
-			 $max_retries = $1;
-			 next;
+			if ( m/AdminEmail=(.*)/)
+			{
+				$adminEmail = $1;
+				next;
 			}
-		 if ( m/DelayBetweenRetries=(.*)/)
-		 	{
-			 $delayBetweenRetries = $1;
-			 next;
+			if ( m/AdminPhone=(.*)/)
+			{
+				$adminPhone = $1;
+				next;
 			}
-		 if (m/CallerIDNumber=(.*)/i)
-		 	{
-			 $callerIDNumber = $1;
+			if ( m/AdminText=(.*)/)
+			{
+				$adminTextNumber = $1;
+				next;
+			}
+			if ( m/Logging=(.*)/)
+			{
+				$logging = $1;
+				next;
+			}
+			if ( m/MaxRetries=(.*)/)
+			{
+				$max_retries = $1;
+				next;
+			}
+			if ( m/DelayBetweenRetries=(.*)/)
+			{
+				$delayBetweenRetries = $1;
+				next;
+			}
+			if (m/CallerIDNumber=(.*)/i)
+			{
+				$callerIDNumber = $1;
 			}
 		}
-	 close CFG;
+		close CFG;
 	}
 }
 
@@ -223,6 +247,113 @@ sub sendEmail(@)
 	$mailer->bye;
 }
 
+#------------------------------------------------------------------------------
+#  sub sendSMSTwilio($$$)
+#		Send an SMS message using Twilio to transmit. This function returns a
+#		non-zero value on error.
+#------------------------------------------------------------------------------
+sub sendSMSTwilio($$)
+{
+	my ( $to, $message) = @_;
+	my $rc = 0;
+##--> my @pieces = ($message =~ /.{0,125}(?: |$)/mg);
+
+##-->	my @pieces = unpack( "(A125)*", $message);
+	my @pieces;
+
+	while ( $message =~ s/(.{1,125})\s+//sm)
+	{
+		my $nextMessage = $1;
+
+		if ( $nextMessage =~ s/<BREAK>(.*)//sm)
+		{
+			$message = "$1 $message";
+		}
+		push( @pieces, $nextMessage);
+	}
+
+	while ( $message =~ s/<BREAK>(.*)//sm)
+	{
+		push( @pieces, $message);
+		$message = $1;
+	}
+	push( @pieces, $message);
+
+	foreach( @pieces)
+	{
+		print "\nWould send:\n$_\n";
+	}
+	return;
+
+	if ( !defined( $TwilioAccount))
+	{
+		loadConfig();
+	}
+
+	my $twilio = WWW::Twilio::API->new(AccountSid  => $TwilioAccount,
+									AuthToken   => $TwilioAuth,
+									API_VERSION => '2010-04-01' );
+
+
+
+	foreach $message ( @pieces)
+	{
+		print "Message = '$message'\n";
+		chomp $message;
+		
+		##
+		##  Twilio changed the API from SMS/Messages to Messages
+		##
+##-->	 my $response = $twilio->POST(	'SMS/Messages',
+		print "Sending to $to\n";
+		my $response = $twilio->POST(	'Messages',
+									To   => $to,
+									From => $TwilioNumber,
+									Body => $message,
+									);
+
+		my $sid;
+		my $status;
+		if ($response->{content} =~ m/<Sid>([^<]*)<\/Sid>/i)
+		{
+			$sid = $1;
+		}
+		
+		if ( $response->{content} =~ m/.*<Status>(.*?)<\/Status>/i)
+		{
+			$status = $1;
+		}
+		
+		if ( !defined( $status))
+			{
+			logCall( "Unable to send TXT message!", "Twilio said: " . $response->{message} . "\n" . $response->{content} );
+
+			sendEmail( 'webmaster@stjamesbg.org', 'St.James PhoneTree Alert', 'St. James Phone Tree Alert!', "Trying to send a message to $to returned the following error: " .  $response->{content});
+			$rc = 1;
+		}
+		else
+		{
+			print "Status=$status\n";
+			while( $status =~ /queued|sending/)
+			{
+				##
+				##  Twilio changed the API from SMS/Messages to Messages
+				##
+##-->			 $response = $twilio->GET( 'SMS/Messages', Sid=>$sid);
+				$response = $twilio->GET( "Messages/$sid", AccountSid=> $TwilioAccount, Sid=>$sid);
+				$response->{content} =~ m/<Status>(.*?)<\/Status>/i;
+				$status = $1;
+				sleep 1;
+		  	}
+
+			print "Final status=$status\n";
+			$rc |= ( $status =~ m/fail/);
+		}
+	}
+	print "The rc was $rc\n";
+
+	return( $rc);
+}
 
 #------------------------------------------------------------------------------
 #  sub sendReminders( $numberOfDays)
@@ -232,16 +363,17 @@ sub sendEmail(@)
 sub sendReminders($)
 {
 	my ($number) = @_;
-	my $template;
-    my $admin = 'Pastor Bobby';
-	my $adminEmail = 'pastor@stjamesbg.org';
-	my $adminPhone = '270-842-4949';
-##-->	my $adminTextNumber = '859-420-4784';
-	my $adminTextNumber = '270-777-6029';
+	my $emailTemplate;
+	my $textTemplate;
 
+	if ( ! defined( $adminName))
+	{
+		loadConfig();
+	}
 
 	my $dialableAdminPhone = $adminPhone;
 	my $textableAdminNumber = $adminTextNumber;
+
 	$dialableAdminPhone =~ s/[^0-9]//g;
 	$textableAdminNumber =~ s/[^0-9]//g;
 
@@ -251,11 +383,16 @@ sub sendReminders($)
 	my @volunteers = readReminderList( $number);
 
 	##
-	##  Read in the template
+	##  Read in the templates
 	##
 	open( my $TEMPLATE, '<', "email/reminder.htm") || die "Couldn't read email template!\n";
-	read( $TEMPLATE, $template, 999999);
+	read( $TEMPLATE, $emailTemplate, 999999);
 	close $TEMPLATE;
+	
+	open( $TEMPLATE, '<', "sms/reminder.txt") || die "Couldn't read text template!\n";
+	read( $TEMPLATE, $textTemplate, 999999);
+	close $TEMPLATE;
+
 
 	##
 	##  Loop through the list, sending reminders
@@ -280,32 +417,76 @@ sub sendReminders($)
 		my @info = readVolunteers( $name);
 		my $volunteerEmail = $info[0]->{email};
 		my $volunteerPhone = $info[0]->{phone};
+		my $contactMode = $info[0]->{contact};
 
-		my $email  = $template;
-
-		$email =~ s/__FIRST_NAME__/$firstName/smg;
-		$email =~ s/__NAME__/$name/smg;
-		$email =~ s/__DATE__/$date/smg;
-		$email =~ s/__TIME__/$time/smg;
-		$email =~ s/__POSITION__/$position/smg;
-		$email =~ s/__SCHEDULE_ADMIN__/$admin/smg;
-		$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
-		$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
-		$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
-		$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
-		$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+		$volunteerPhone =~ s/[- \(\)]//g;
 
 		##
-		##  Send the reminder email
+		##  Should we email the person?
 		##
-		if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+		if ( $contactMode =~ /email|both/)
 		{
-			sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Service reminder', $email, 'email/reminder.png');
-			print "Sent\n";
+			my $email  = $emailTemplate;
+
+			$email =~ s/__FIRST_NAME__/$firstName/smg;
+			$email =~ s/__NAME__/$name/smg;
+			$email =~ s/__DATE__/$date/smg;
+			$email =~ s/__TIME__/$time/smg;
+			$email =~ s/__POSITION__/$position/smg;
+			$email =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+			$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+			$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+
+			##
+			##  Send the reminder email
+			##
+			if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+			{
+				sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Service reminder', $email, 'email/reminder.png');
+				print "Sent\n";
+			}
+			else
+			{
+				print STDERR "No email address for $name!\n";
+			}
 		}
-		else
+
+		##
+		##  Should we send a text?
+		##
+		if ( $contactMode =~ /text|both/)
 		{
-			print STDERR "No email address for $name!\n";
+			my $text  = $textTemplate;
+
+			$text =~ s/__FIRST_NAME__/$firstName/smg;
+			$text =~ s/__NAME__/$name/smg;
+			$text =~ s/__DATE__/$date/smg;
+			$text =~ s/__TIME__/$time/smg;
+			$text =~ s/__POSITION__/$position/smg;
+			$text =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+			$text =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+			$text =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+			$text =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+			$text =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+			$text =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+
+			##
+			##  Send the reminder text
+			##
+			if ( defined( $volunteerPhone) && $volunteerPhone =~ m/^[0-9-]+$/)
+			{
+				print "Sending a text reminder to $volunteerPhone\n";
+				sendSMSTwilio( $volunteerPhone, $text);
+				print "Sent\n";
+			}
+			else
+			{
+				print STDERR "No phone number for $name!\n";
+			}
+			
 		}
 		
 		##
@@ -325,15 +506,14 @@ sub sendSchedules($$)
 {
 	my ( $firstDate, $lastDate) = @_;
 	my $template;
+	my $textTemplate;
 	my $dash = "\x{2014}";
 	my $enDash = "\x{2013}";
 
-	my $admin = 'Pastor Bobby';
-	my $adminEmail = 'pastor@stjamesbg.org';
-	my $adminPhone = '270-842-4949';
-##-->	my $adminTextNumber = '859-420-4784';
-	my $adminTextNumber = '270-777-6029';
-
+	if ( ! defined( $adminName))
+	{
+		loadConfig();
+	}
 
 	my $dialableAdminPhone = $adminPhone;
 	my $textableAdminNumber = $adminTextNumber;
@@ -358,6 +538,11 @@ sub sendSchedules($$)
 	read( $TEMPLATE, $template, 999999);
 	close $TEMPLATE;
 
+	open( $TEMPLATE, '<', "sms/personalSchedule.txt") || die "Couldn't read text template!\n";
+	read( $TEMPLATE, $textTemplate, 999999);
+	close $TEMPLATE;
+	
+
 	##
 	##  Loop through the list to find schedules (if any) for the given dates
 	##
@@ -367,6 +552,7 @@ sub sendSchedules($$)
 		my $firstName = ( $name=~/(\S+)/) ? $1 : $name;
 		my $volunteerEmail = $volunteer->{email};
 		my $volunteerPhone = $volunteer->{phone};
+		my $contactMode = $volunteer->{contact};
 
 		##
 		##  See if this person is scheduled for the dates given
@@ -378,45 +564,95 @@ sub sendSchedules($$)
 		##
 		if ( @schedules)
 		{
-			my $scheduledDates = '';
-
 			##
-			##  Build the schedule list
+			##  Should we email the person?
 			##
-			foreach my $schedule ( @schedules)
+			if ( $contactMode =~ /email|both/)
 			{
-				my $printableDate = $schedule->{date};
-				$printableDate =~ s/(\d+)-(.*)/$2-$1/;
-				$scheduledDates .= '<li><span class="scheduledDate">' . $printableDate . '</span>';
-				$scheduledDates .= '<span class="scheduledSeparator">' . $dash . '</span>';
-				$scheduledDates .= '<span class="scheduledRole">' . $schedule->{title}. '</span>';
-				$scheduledDates .= 'at <span class="scheduledTime">' . $schedule->{time}. '</span>';
-				$scheduledDates .= '</li>';
+				my $scheduledDates = '';
+
+				##
+				##  Build the schedule list
+				##
+				foreach my $schedule ( @schedules)
+				{
+					my $printableDate = $schedule->{date};
+					$printableDate =~ s/(\d+)-(.*)/$2-$1/;
+					$scheduledDates .= '<li><span class="scheduledDate">' . $printableDate . '</span>';
+					$scheduledDates .= '<span class="scheduledSeparator">' . $dash . '</span>';
+					$scheduledDates .= '<span class="scheduledRole">' . $schedule->{title}. '</span>';
+					$scheduledDates .= 'at <span class="scheduledTime">' . $schedule->{time}. '</span>';
+					$scheduledDates .= '</li>';
+				}
+
+				my $email  = $template;
+
+				$email =~ s/__FIRST_NAME__/$firstName/smg;
+				$email =~ s/__NAME__/$firstName/smg;
+				$email =~ s/__SCHEDULE__/$scheduledDates/smg;
+				$email =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+				$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+				$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+				$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+				$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+				$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+						
+				##
+				##  Send the reminder email
+				##
+				if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+				{
+					sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', "New Schedule for $printableStart $enDash $printableEnd", $email, 'email/scheduling.png');
+					print "Sent\n";
+				}
+				else
+				{
+					print STDERR "No email address for $name!\n";
+				}
 			}
 
-			my $email  = $template;
+			##
+			##  Should we send a text?
+			##
+			if ( $contactMode =~ /text|both/)
+			{
+				my $scheduledDates = '';
 
-			$email =~ s/__FIRST_NAME__/$firstName/smg;
-			$email =~ s/__NAME__/$firstName/smg;
-			$email =~ s/__SCHEDULE__/$scheduledDates/smg;
-			$email =~ s/__SCHEDULE_ADMIN__/$admin/smg;
-			$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
-			$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
-			$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
-			$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
-			$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
-					
-			##
-			##  Send the reminder email
-			##
-			if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
-			{
-				sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', "New Schedule for $printableStart $enDash $printableEnd", $email, 'email/scheduling.png');
-				print "Sent\n";
-			}
-			else
-			{
-				print STDERR "No email address for $name!\n";
+				##
+				##  Build the schedule list
+				##
+				foreach my $schedule ( @schedules)
+				{
+					my $printableDate = $schedule->{date};
+					$printableDate =~ s/(\d+)-(.*)/$2-$1/;
+					$scheduledDates .= " * $printableDate $dash $schedule->{title}  $schedule->{time}\n";
+				}
+
+				my $text  = $textTemplate;
+
+				$text =~ s/__FIRST_NAME__/$firstName/smg;
+				$text =~ s/__NAME__/$firstName/smg;
+				$text =~ s/__SCHEDULE__/$scheduledDates/smg;
+				$text =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+				$text =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+				$text =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+				$text =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+				$text =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+				$text =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+						
+				##
+				##  Send the reminder text
+				##
+				if ( defined( $volunteerPhone) && $volunteerPhone =~ m/^[0-9-]+$/)
+				{
+					print "Sending a text of the schedule to $volunteerPhone\n";
+					sendSMSTwilio( $volunteerPhone, $text);
+					print "Sent\n";
+				}
+				else
+				{
+					print STDERR "No phone number for $name!\n";
+				}
 			}
 		}
 	}
@@ -432,6 +668,17 @@ sub sendUpdateRequest($)
 {
 	my ($baseURL) = @_;
 	my $template;
+	my $textTemplate;
+
+	if ( ! defined( $adminName))
+	{
+		loadConfig();
+	}
+
+	my $dialableAdminPhone = $adminPhone;
+	my $textableAdminNumber = $adminTextNumber;
+	$dialableAdminPhone =~ s/[^0-9]//g;
+	$textableAdminNumber =~ s/[^0-9]//g;
 
 	##
 	##  Get a list of people volunteering on the given date
@@ -439,10 +686,14 @@ sub sendUpdateRequest($)
 	my @volunteers = readVolunteers();
 
 	##
-	##  Read in the template
+	##  Read in the templates
 	##
 	open( my $TEMPLATE, '<', "email/prescheduling.htm") || die "Couldn't read email template!\n";
 	read( $TEMPLATE, $template, 999999);
+	close $TEMPLATE;
+
+	open( $TEMPLATE, '<', "sms/prescheduling.txt") || die "Couldn't read text template!\n";
+	read( $TEMPLATE, $textTemplate, 999999);
 	close $TEMPLATE;
 
 	##
@@ -457,28 +708,77 @@ sub sendUpdateRequest($)
 		my $firstName = ($name =~ m/^([^\s]*)/) ? $1 : $name;
 		my $positions = $volunteer->{desiredRoles};
 		my $volunteerEmail = $volunteer->{email};
+		my $volunteerPhone = $volunteer->{phone};
+		my $contactMode = $volunteer->{contact};
+		my $url = "$baseURL\/?user=$name";
+		$url =~ s/ /%20/g;
 
-		print "Volunteer email = $volunteerEmail\n";
-		$positions =~ s/([^,]+),?/<li>$1<\/li>\n/g;
-
-
-		my $email  = $template;
-
-		$email =~ s/__FIRST_NAME__/$firstName/smg;
-		$email =~ s/__POSITIONS__/$positions/smg;
-		$email =~ s/__UPDATE_URL__/$baseURL\/?user=$name/smg;
 
 		##
-		##  Send the reminder email
+		##  Should we email the person?
 		##
-		if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+		if ( $contactMode =~ /email|both/)
 		{
-			sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Any Information updates for volunteering?', $email, 'email/scheduling.png');
-			print "Sent\n";
+			my $email  = $template;
+
+			my $emailPositions = $positions;
+			$emailPositions =~ s/([^,]+),?/<li>$1<\/li>\n/g;
+
+			$email =~ s/__FIRST_NAME__/$firstName/smg;
+			$email =~ s/__POSITIONS__/$emailPositions/smg;
+			$email =~ s/__UPDATE_URL__/$url/smg;
+			$email =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+			$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+			$email =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+			$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+
+			##
+			##  Send the reminder email
+			##
+			if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
+			{
+				sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Any Information updates for volunteering?', $email, 'email/scheduling.png');
+				print "Sent\n";
+			}
+			else
+			{
+				print STDERR "No email address for $name!\n";
+			}
 		}
-		else
+
+		if ( $contactMode =~ /text|both/)
 		{
-			print STDERR "No email address for $name!\n";
+			my $text  = $textTemplate;
+			
+			my $textPositions = $positions;
+			$textPositions =~ s/([^,]+),?/ *  $1\n/g;
+
+			$text =~ s/__FIRST_NAME__/$firstName/smg;
+			$text =~ s/__POSITIONS__/$textPositions/smg;
+			$text =~ s/__UPDATE_URL__/$url/smg;
+			$text =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
+			$text =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
+			$text =~ s/__SCHEDULE_ADMIN_PHONE__/$adminPhone/smg;
+			$text =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
+			$text =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
+			$text =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+
+			##
+			##  Send the reminder text
+			##
+			if ( defined( $volunteerPhone) && $volunteerPhone =~ m/^[0-9-]+$/)
+			{
+				print "Sending a text reminder to $volunteerPhone\n";
+				sendSMSTwilio( $volunteerPhone, $text);
+				print "Sent\n";
+			}
+			else
+			{
+				print STDERR "No phone number for $name!\n";
+			}
+			
 		}
 	}
 }

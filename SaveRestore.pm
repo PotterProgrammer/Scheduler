@@ -67,6 +67,7 @@ BEGIN
 				     email text,
 					 phone text,
 					 desiredRoles text,
+					 contact text,
 					 primary key( 'name')
 				   )");
 
@@ -279,12 +280,13 @@ sub saveVolunteer($)
 	##
 	##  First, update the volunteer table
 	##
-	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles) values (?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles, contact) values (?,?,?,?,?)");
 	$sth->bind_param( 1, $volunteer->{name});
 	$sth->bind_param( 2, $volunteer->{email});
 	$sth->bind_param( 3, $volunteer->{phone});
 	$sth->bind_param( 4, $volunteer->{desiredRoles});
- print "Storing the volunteer values $volunteer->{name}, $volunteer->{email}, $volunteer->{phone}, $volunteer->{desiredRoles}\n";
+	$sth->bind_param( 5, $volunteer->{contact});
+ print "Storing the volunteer values $volunteer->{name}, $volunteer->{email}, $volunteer->{phone}, $volunteer->{desiredRoles}, $volunteer->{contact}\n";
 	$sth->execute();
 
 	#------------------------------------------------------------------------------
