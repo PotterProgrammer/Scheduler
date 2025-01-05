@@ -7,6 +7,23 @@
 
 <script src="/scheduler.js"> </script>
 
+<script>
+
+function resetToIndex()
+{
+	let page = window.location.href + "";
+	let match = page.match( /index|\/$/);
+	if ( match == null)
+	{
+		window.location = "<%= url_for('/')->to_abs %>";
+	}
+}
+
+
+window.addEventListener( "pageshow", resetToIndex);
+
+</script>
+
 <body>
 	<div id="navbar">
 	</div>

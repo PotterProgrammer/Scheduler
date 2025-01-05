@@ -229,12 +229,12 @@ sub findVolunteer($$);
 	#------------------------------------------------------------------------------
 	#	get '/sendReminders' 
 	#		This call sends reminders to any volunteers that are scheduled to
-	#		serve in the next 3 days.
+	#		serve in the next 6 days.
 	#------------------------------------------------------------------------------
 	get '/sendReminders' => sub
 	{
 		my $self = shift;
-		sendReminders( 3);
+		sendReminders( 6);
 
 		$self->render( text=>'Reminders sent');
 	};

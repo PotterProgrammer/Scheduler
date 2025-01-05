@@ -1,0 +1,9 @@
+Hi __FIRST_NAME__,
+  This is quick update to let you know that a new schedule is going to be set up soon.
+
+You are currently listed as wanting to volunteer for the following positions: 
+__POSITIONS__
+If there are any days that you are unavailable to volunteer for, if you would like to volunteer on a specific date, or if would like to update the list of positions that you are signed up for, you can go to your signup page __UPDATE_URL__ and 
+update the information we have listed for you or notify __SCHEDULE_ADMIN__ of the change.
+
+Thanks for your help and support!
