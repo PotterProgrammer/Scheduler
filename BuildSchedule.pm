@@ -241,22 +241,31 @@ sub getDatesForTask()
 
 	my ($year, $month, $day) = Nth_Weekday_of_Month_Year( $startYear, $startMonth, $DayOfWeek{$dayOfWeek}, 1);
 
+	if ( $verbose)
+	{
+		print "Found $year-$month-$day as the first Sunday of the starting month\n";
+	}
+
+	my $startYMD = ($startYear * 10000) + ($startMonth * 100) + $startDay;
+	my $endYMD = ($endYear * 10000) + ($endMonth * 100) + $endDay;
+
 	##
 	##  Advance until we are at or past the start date
 	##
-	while( ( $year <= $startYear) &&
-		   ( $month <= $startMonth) &&
-		   ( $day <= $startDay))
+	while( (( $year * 10000) + ($month * 100) + $day) < $startYMD)
 	{
 		($year, $month, $day) = Add_Delta_Days( $year, $month, $day, 7);
+	}
+
+	if ( $verbose)
+	{
+		print "Found $year-$month-$day as the first Sunday for the schedule\n";
 	}
 	
 	##
 	##  Generate a list of desired dates
 	##
-	while( ( $year <= $endYear) &&
-		   ( $month <= $endMonth) &&
-		   ( $day <= $endDay))
+	while( (( $year * 10000) + ($month * 100) + $day) <= $endYMD)
 	{
 		push( @dates, sprintf( "%04d-%02d-%02d", $year, $month, $day));
 		($year, $month, $day) = Add_Delta_Days( $year, $month, $day, 7);
