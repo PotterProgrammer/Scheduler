@@ -1,0 +1,10 @@
+Hi __FIRST_NAME__,
+  A new schedule has been made, and you are scheduled to serve on the following dates:<BREAK>
+__SCHEDULE__
+If you are unable to serve on any of these dates, please notify __SCHEDULE_ADMIN__ as soon as possible by one of the following: 
+<BREAK>
+Email: __SCHEDULE_ADMIN_EMAIL__
+Phone: __SCHEDULE_ADMIN_PHONE__
+Text: __SCHEDULE_ADMIN_TEXT_NUMBER__
+
+Thanks for your support!
