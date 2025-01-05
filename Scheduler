@@ -33,6 +33,14 @@ sub findVolunteer($$);
 		$self->render( 'index');
 	};
 
+	get '/index' => sub
+	{
+		print "there...\n";
+		my ($self) = @_;
+
+		$self->render( 'index');
+	};
+
 	#------------------------------------------------------------------------------
 	#  get '/slots'
 	#------------------------------------------------------------------------------
@@ -198,7 +206,7 @@ sub findVolunteer($$);
 		{
 			sendSchedules( $start, $end);
 
-			$self->render( "index");
+			$self->redirect_to( '/index?messageSent=true');
 		}
 	};
 	#------------------------------------------------------------------------------
@@ -236,7 +244,8 @@ sub findVolunteer($$);
 		my $self = shift;
 		sendReminders( 6);
 
-		$self->render( text=>'Reminders sent');
+		$self->stash( sendingMessages => 1);
+		$self->redirect_to( '/index?messageSent=true');
 	};
 
 	#------------------------------------------------------------------------------
@@ -250,7 +259,7 @@ sub findVolunteer($$);
 		my $base_url = $self->url_for( '/editVolunteer')->to_abs;
 
 		sendUpdateRequest( $base_url);
-		$self->render( text=>'Request sent');
+		$self->redirect_to( '/index?messageSent=true');
 	};
 
 
