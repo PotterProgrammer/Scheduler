@@ -176,6 +176,21 @@ option:checked {
 	z-index: 4;
 }
 
+#sentMessages
+{
+	position: absolute;
+	top: 25vh;
+	width: 20vw;
+	left: 40vw;
+	right: 40vw;
+	text-align: center;
+	color: #00ff00;
+	background: blue;
+	border: solid 2px white;
+	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
+	z-index: 4;
+}
+
 .editPanel
 {
 	position: relative;
