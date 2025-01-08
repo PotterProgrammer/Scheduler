@@ -30,7 +30,15 @@ function showVolunteerInfo()
 		var itemName = volunteerList.options[selectedItemNumber].value;
 		
 		var ws;
-		url = 'ws://' + window.location.host + '/getVolunteerInfo';
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/getVolunteerInfo';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/getVolunteerInfo';
+		}
 		ws = new WebSocket( url);
 		var msg = JSON.stringify( { "index" :selectedItemNumber, "name": itemName});
 
@@ -55,6 +63,21 @@ function showVolunteerInfo()
 			document.getElementById('name').value = reply.name;
 			document.getElementById('email').value = reply.email;
 			document.getElementById('phone').value = reply.phone;
+
+			//
+			//  Set the preferred contact
+			//
+			var contactMethod = document.getElementById( 'contactMethod');
+			while( contactMethod.options.length > 0)
+			{
+				contactMethod.remove(0);
+			}
+
+			var contactOption = document.createElement('option');
+			var contactText = document.createTextNode( reply.contact);
+			contactOption.appendChild( contactText);
+			contactOption.setAttribute( "value", reply.contact);
+			contactMethod.appendChild( contactOption);
 
 			//
 			//  Clear current positions listed
@@ -168,7 +191,14 @@ function saveVolunteerInfo( volunteer)
 	//  Call server to get info for the current position
 	//
 	var ws;
-	url = 'ws://' + window.location.host + '/saveVolunteerInfo';
+	if ( window.location.protocol == 'https:')
+	{
+		url = 'wss://' + window.location.host + '/saveVolunteerInfo';
+	}
+	else
+	{
+		url = 'ws://' + window.location.host + '/saveVolunteerInfo';
+	}
 	ws = new WebSocket( url);
 	var msg = JSON.stringify( volunteer);
 
