@@ -1,9 +1,8 @@
 Hi __FIRST_NAME__,
-  This is just a reminder that you are scheduled to serve in the role of
-__POSITION__ on __DATE__ at __TIME__
+  This is just a reminder that you are scheduled to serve in the role of __POSITION__ on __DATE__ at __TIME__
 
 If you are unable to do this, please notify __SCHEDULE_ADMIN__
-as soon as possible by one of the following: 
+as soon as possible by one of the following: <BREAK>
 
 Email: __SCHEDULE_ADMIN_EMAIL__
 Phone: __SCHEDULE_ADMIN_PHONE__

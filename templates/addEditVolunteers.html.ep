@@ -302,6 +302,7 @@
 		var name = document.getElementById( 'name').value;
 		var email = document.getElementById( 'email').value;
 		var phone = document.getElementById( 'phone').value;
+		var contact = document.getElementById( 'contactMethod').value;
 		var positions = '';
 		var position = document.getElementById( 'positions');
 		for( var i=0; i < position.options.length; i++)
@@ -332,7 +333,7 @@
 			}
 		}
 
-		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays};
+		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays, "contact": contact};
 		return volunteer;
 	}
 	
@@ -406,6 +407,23 @@
 		<br>
 		<label for="phone">Phone number:</label>
 		<input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<%= ($type eq 'edit')? $volunteer->{phone} : "" %>"></input>
+		<br>
+		<label for="contactMethod">Contact by: </label>
+		<select id="contactMethod">
+		% for my $contactType ( ('email', 'text', 'both'))
+		% {
+		%   my $selected;
+		%   if ( $type eq 'edit')
+		%	{
+		%		$selected = ($volunteer->{contact} eq $contactType) ? 'selected="selected"' : "";
+		%	}
+		%	else
+		%	{
+		%		$selected = ($contactType eq 'both') ? 'selected="selected"' : "";
+		%   }
+			<option value="<%= $contactType %>" <%== $selected %> title="Select how you would prefer to be contacted."><%= $contactType %></option>
+		% }
+		</select>
 		<br>
 		<label for="positions" title="Select the positions you wish to volunteer for.">Positions:</label>
 

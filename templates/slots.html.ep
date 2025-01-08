@@ -21,7 +21,16 @@
 		var selectedItemNumber = itemList.selectedIndex;
 		
 		var ws;
-		var url = '<%= url_for( 'getPositionInfo')->to_abs %>';
+		var url;
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/getPositionInfo';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/getPositionInfo';
+		}
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 
@@ -66,7 +75,16 @@
 		var numberNeeded = document.getElementById('count').value;
 		
 		var ws;
-		var url = '<%= url_for( 'addPosition')->to_abs %>';
+		var url;
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/addPosition';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/addPosition';
+		}
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 
@@ -109,7 +127,16 @@
 		var numberNeeded = document.getElementById('count').value;
 		
 		var ws;
-		var url = '<%= url_for( 'replacePosition')->to_abs %>';
+		var url;
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/replacePosition';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/replacePosition';
+		}
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 

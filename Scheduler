@@ -527,11 +527,12 @@ sub findVolunteer($$);
 						##
 						##  Send back info
 						##
-						if ( $found)
+						if ( defined( $index))
 						{
 							$self->send( { json=> {	name => $Volunteers[$index]->{name},
 													email =>$Volunteers[$index]->{email},
 													phone => $Volunteers[$index]->{phone}, 
+													contact => $Volunteers[$index]->{contact},
 													daysDesired => $Volunteers[$index]->{daysDesired},
 													desiredRoles => $Volunteers[$index]->{desiredRoles},
 													daysUnavailable => $Volunteers[$index]->{daysUnavailable}
@@ -544,6 +545,7 @@ sub findVolunteer($$);
 							$self->send( { json=> {	name => "n/a",
 													email => "n/a",
 													phone => "n/a", 
+													contact => "n/a", 
 													daysDesired => "n/a",
 													desiredRoles => "n/a",
 													daysUnavailable => "n/a"
@@ -605,7 +607,8 @@ sub findVolunteer($$)
 	my $slot;
 	my $index;
 
-	if ( $Volunteers[$startAt]->{name} ne $name)
+	@Volunteers = readVolunteers();
+	if ( !defined( $startAt) || !defined( $Volunteers[$startAt]) || $Volunteers[$startAt]->{name} ne $name)
 	{
 		while( my ($i, $volunteer) = each( @Volunteers))
 		{
