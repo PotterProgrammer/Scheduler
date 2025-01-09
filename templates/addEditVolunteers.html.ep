@@ -3,7 +3,6 @@
 <html>
 <head>
 	<link rel="stylesheet" href="/site.css">
-</head>
 
 <script src="/scheduler.js"> </script>
 
@@ -31,7 +30,74 @@
 			alert( "Please select at least one position that " + volunteer.name + " would like to volunteer for.");
 			return;
 		}
-		saveVolunteerInfo( volunteer);
+		saveVolunteerInfo( volunteer, clearEntries);
+	}
+
+	//==============================================================================
+	//	function clearEntries()
+	//		This function clears all of the fields after a user has been added.
+	//==============================================================================
+	function clearEntries()
+	{
+		document.getElementById( 'name').value = '';
+		document.getElementById( 'email').value = '';
+		document.getElementById( 'phone').value = '';
+
+		//
+		//  Unselect contact method
+		//
+		var contactMethod = document.getElementById( 'contactMethod');
+		for ( var i=0; i < contactMethod.options.length; i++)
+		{
+			contactMethod.options[i].selected = false;
+		}
+
+		//
+		//  Unselect positions
+		//
+		var positions = document.getElementById( 'positions');
+		for ( var i=0; i < positions.options.length; i++)
+		{
+			positions.options[i].selected = false;
+		}
+
+		//
+		//  Remove days unavailable
+		//
+		var daysUnavailable = document.getElementById( 'daysUnavailable');
+		while( daysUnavailable.options.length > 0)
+		{
+			daysUnavailable.remove(0);
+		}
+
+		//
+		//  Set default to '-none-'
+		//
+		var newDate = document.createElement('option');
+		var newDateText = document.createTextNode( '-none-');
+		newDate.appendChild( newDateText);
+		newDate.setAttribute( "value", '-none-');
+		daysUnavailable.appendChild( newDate);
+		daysUnavailable.size = 1;
+	
+		//
+		//  Remove days desired
+		//
+		var daysDesired = document.getElementById( 'daysDesired');
+		while( daysDesired.options.length > 0)
+		{
+			daysDesired.remove(0);
+		}
+		
+		//
+		//  Set default to '-none-'
+		//
+		newDate = document.createElement('option');
+		newDateText = document.createTextNode( '-none-');
+		newDate.appendChild( newDateText);
+		newDate.setAttribute( "value", '-none-');
+		daysDesired.appendChild( newDate);
+		daysDesired.size = 1;
 	}
 
 	//==============================================================================
@@ -358,6 +424,8 @@
 
 </script>
 
+</head>
+
 <!--=================================-->
 <!--| HTML for the page starts here |-->
 <!--=================================-->
@@ -365,12 +433,13 @@
 <div id="navbar">
 </div>
 
+	
 <div id="overlay" hidden >
 	<div class="popup" id="confirmSave" hidden>
 		<h2>Save Entry</h2>
 		<p>Do you wish to save this update for <%= $volunteer->{name} %>?</p>
 		<button onclick="modifyVolunteer()">Ok</button>
-		<button onclick="hideConfirmSave();">Cancel</button>
+		<button onclick="hideConfirmSave()">Cancel</button>
 	</div>
 	<div id="dateEdit" hidden>
 		<h2 id='dateEditTitle'>Here are the current dates</h2>
@@ -379,9 +448,9 @@
 		<div class="editPanel">
 			<label for="dateToAdd">Add date: </label>
 			<input type="date" id="dateToAdd" name="dateToAdd"></input>
-			<button type="button" style="width:4em;font-size:90%;" onClick="addDate()">Add</button>
+			<button type="button" style="width:4em;font-size:90%" onClick="addDate()">Add</button>
 			<br>
-			<button type="button" style="width:20em;font-size:90%"; onClick="deleteSelectedDates()">Delete selected dates</button>
+			<button type="button" style="width:20em;font-size:90%" onClick="deleteSelectedDates()">Delete selected dates</button>
 		</div>
 		<br>
 		<div class="dialogButtons">
@@ -393,6 +462,7 @@
 		<h2>Added</h2>
 	</div>
 </div>
+	
 
 <h1><%= $title %></h1>
 
