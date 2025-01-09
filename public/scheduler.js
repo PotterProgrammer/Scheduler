@@ -181,11 +181,11 @@ function showVolunteerInfo()
 }
 
 //==============================================================================
-//  function saveVolunteerInfo( volunteer)
+//  function saveVolunteerInfo( volunteer, callback)
 //		This function saves information about the provided volunteer to the
 //		database.
 //==============================================================================
-function saveVolunteerInfo( volunteer)
+function saveVolunteerInfo( volunteer, callback)
 {
 	//
 	//  Call server to get info for the current position
@@ -222,8 +222,9 @@ function saveVolunteerInfo( volunteer)
 		var reply = JSON.parse( msg.data);
 		if ( reply.status == "OK")
 		{
-			alert( volunteer.name + " was added to the list of volunteers");
-			showAddedAlert();
+//-->			alert( volunteer.name + " was added to the list of volunteers");
+			showAddedAlert( true);
+			callback();
 		}
 		else
 		{
@@ -234,13 +235,22 @@ function saveVolunteerInfo( volunteer)
 }
 
 //==============================================================================
-//  function showAddedAlert()
+//  function showAddedAlert( hideBackground)
 //		This function shows the "Added" message on the screen for 1 second
 //==============================================================================
-function showAddedAlert()
+function showAddedAlert( hideBackground)
 {
 	document.getElementById('added').hidden = false;
-	setTimeout( function(){document.getElementById('added').hidden = true;}, 1000);
+
+	if ( hideBackground == true)
+	{
+		document.getElementById('overlay').hidden = false;
+		setTimeout( function(){document.getElementById('overlay').hidden = true;document.getElementById('added').hidden = true;}, 1000);
+	}
+	else
+	{
+		setTimeout( function(){document.getElementById('added').hidden = true;}, 1000);
+	}
 }
 
 
