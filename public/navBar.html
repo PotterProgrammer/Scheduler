@@ -100,7 +100,13 @@ nav ul li a:hover
 <nav id="mainMenu">
 	<a href="/index"><img src="/schedule.png"></a>
 	<a href="/slots">Positions</a>
-	<a href="/volunteers">Volunteers</a>
+	<div class="submenu">
+		<button class="submenuButton">Volunteers⏷</button>
+		<div class="submenuContent" >
+			<a href="/addVolunteer">Add Volunteers</a><br>
+			<a href="/volunteers">Edit Volunteers</a><br>
+		</div>
+	</div>
 	<div class="submenu">
 		<button class="submenuButton">Schedule⏷</button>
 		<div class="submenuContent" >
@@ -116,5 +122,5 @@ nav ul li a:hover
 			<a href="/sendReminders">Send Weekly Reminders</a>
 		</div>
 	</div>
-	<a href="/help.html">Help</a>
+	<a onclick="showHelp()" >Help</a>
 </nav>
