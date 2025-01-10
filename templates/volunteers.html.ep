@@ -19,10 +19,11 @@
 		var itemList = document.getElementById( "itemList");
 		var selectedItem = itemList.value;
 		var message = JSON.stringify( { 'name': selectedItem});
+		var url = window.location.protocol + '//' + window.location.host + '/removeVolunteer';
 		
 		hideConfirmDelete();
 
-		fetch( '<%= url_for( 'removeVolunteer')->to_abs %>' ,
+		fetch( url,
 				{
 					method: "POST",
 					body: JSON.stringify( { 'name': selectedItem}),

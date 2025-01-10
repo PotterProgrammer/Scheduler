@@ -153,23 +153,20 @@ sub findVolunteer($$);
 			my $incomplete = buildScheduleForDates( $startDate, $endDate);
 			my $rendered = 0;
 
-			$incomplete = 0;
-
 			##
 			##  Was a complete schedule built?
 			##
 			if ( !$incomplete)
 			{
-##-->				##
-##-->				##  If so, send out notifications automatically
-##-->				##
-##-->				$self->subprocess( sub
-##-->					{
-##-->						print "Sending new schedules...\n";
-##-->						sendSchedules( $startDate, $endDate);
-##-->						print "Schedules sent...\n";
-##-->					},sub { my ($self, @results) = @_; print "Done"});
-##-->				print " *** HERE ***\n";
+				##
+				##  If so, send out notifications automatically
+				##
+				$self->subprocess( sub
+					{
+						print "Sending new schedules...\n";
+						sendSchedules( $startDate, $endDate);
+						print "Schedules sent...\n";
+					},sub { my ($self, @results) = @_; print "Done"});
 				
 				my $cmd =  "curl '" . $self->url_for( "/sendSchedule")->to_abs . "?start=${startDate}&end=${endDate}' &";
 				print "running $cmd\n";
@@ -261,7 +258,6 @@ sub findVolunteer($$);
 		sendUpdateRequest( $base_url);
 		$self->redirect_to( '/index?messageSent=true');
 	};
-
 
 	#------------------------------------------------------------------------------
 	#  post '/modifyVolunteer'

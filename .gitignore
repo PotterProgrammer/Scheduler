@@ -4,3 +4,5 @@ templates/*.html
 *.db
 *.swp
 *.xcf
+*.db.backup
+*.cfg
