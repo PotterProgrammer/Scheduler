@@ -28,17 +28,14 @@ function showVolunteerInfo()
 	{
 		var selectedItemNumber = volunteerList.selectedIndex;
 		var itemName = volunteerList.options[selectedItemNumber].value;
-		
+		var url = 'ws://' + window.location.host + '/getVolunteerInfo';
 		var ws;
 
 		if ( window.location.protocol == 'https:')
 		{
 			url = 'wss://' + window.location.host + '/getVolunteerInfo';
 		}
-		else
-		{
-			url = 'ws://' + window.location.host + '/getVolunteerInfo';
-		}
+
 		ws = new WebSocket( url);
 		var msg = JSON.stringify( { "index" :selectedItemNumber, "name": itemName});
 
@@ -191,14 +188,12 @@ function saveVolunteerInfo( volunteer, callback)
 	//  Call server to get info for the current position
 	//
 	var ws;
+	var url = 'ws://' + window.location.host + '/saveVolunteerInfo';
 	if ( window.location.protocol == 'https:')
 	{
 		url = 'wss://' + window.location.host + '/saveVolunteerInfo';
 	}
-	else
-	{
-		url = 'ws://' + window.location.host + '/saveVolunteerInfo';
-	}
+
 	ws = new WebSocket( url);
 	var msg = JSON.stringify( volunteer);
 
@@ -251,6 +246,15 @@ function showAddedAlert( hideBackground)
 	{
 		setTimeout( function(){document.getElementById('added').hidden = true;}, 1000);
 	}
+}
+
+//==============================================================================
+//  function showHelp()
+//		This function opens a window with the user's manual
+//==============================================================================
+function showHelp()
+{
+	window.open( "/usermanual.pdf");
 }
 
 
@@ -340,6 +344,10 @@ function showConfirmDelete()
 }
 
 
+//==============================================================================
+//  function hideNavbar()
+//  	This method hides the menu bar 
+//==============================================================================
 function hideNavbar()
 {
 	document.getElementById('navbar').hidden = true;

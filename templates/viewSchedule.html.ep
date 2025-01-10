@@ -40,7 +40,12 @@
 		//  Call server to get volunteers for the given position title
 		//
 		var ws;
-		var url = '<%= url_for('getRoleVolunteers')->to_abs %>';
+		var url = 'ws://' + window.location.host + '/getRoleVolunteers';
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/getRoleVolunteers';
+		}
+
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 
@@ -98,7 +103,12 @@
 		var newName = volunteerList.value;
 
 		var ws;
-		var url = '<%= url_for('updateSchedule')->to_abs %>';
+		var url = 'ws://' + window.location.host + '/updateSchedule';
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/updateSchedule';
+		}
+
 		ws = new WebSocket( url);
 
 		ws.onopen = (event) => 
@@ -208,7 +218,7 @@
 		%      $lastPosition = $scheduledSlot->{title};
 		       <h3 id="scheduledPosition"> <%== $lastPosition %> </h3>
 	    %   }
-			<div class="scheduledVolunteer" data-Day="<%== $lastDay %>" data-Title="<%== $lastPosition %>" data-Name="<%== $scheduledSlot->{name} %>" onClick="editSchedule(this)" ontouchstart="editSchedule(this)" > <%== $scheduledSlot->{name} %> </div>
+			<div class="scheduledVolunteer" data-Day="<%== $lastDay %>" data-Title="<%== $lastPosition %>" data-Name="<%== $scheduledSlot->{name} %>" onclick="editSchedule(this)" ontouchstart="editSchedule(this)" > <%== $scheduledSlot->{name} %> </div>
 		%}
 		</div>
 	</div>
