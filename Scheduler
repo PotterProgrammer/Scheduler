@@ -142,6 +142,7 @@ sub findVolunteer($$);
 
 		my $startDate = $self->param('startDate');
 		my $endDate = $self->param( 'endDate');
+		my $calendarURL = $self->url_for( '/calendarFor')->to_abs;
 
 		if ( !defined( $startDate) || !defined( $endDate))
 		{
@@ -164,7 +165,7 @@ sub findVolunteer($$);
 				$self->subprocess( sub
 					{
 						print "Sending new schedules...\n";
-						sendSchedules( $startDate, $endDate);
+						sendSchedules( $startDate, $endDate, $calendarURL);
 						print "Schedules sent...\n";
 					},sub { my ($self, @results) = @_; print "Done"});
 				
@@ -193,19 +194,44 @@ sub findVolunteer($$);
 		my $self = shift;
 		my $start = $self->param( "start");
 		my $end = $self->param( "end");
+		my $calendarURL = $self->url_for( '/calendarFor')->to_abs;
 
 		if ( !defined( $start) || !defined( $end))
 		{
-			$self->stash( url => $self->url_for('/sendSchedule')->to_abs);
 			$self->render( "sendVolunteerSchedules");
 		}
 		else
 		{
-			sendSchedules( $start, $end);
+			sendSchedules( $start, $end, $calendarURL);
 
 			$self->redirect_to( '/index?messageSent=true');
 		}
 	};
+
+	#------------------------------------------------------------------------------
+	#	get '/calendarFor/:name' => sub
+	#		This call returns a .ics file containing the scheduled dates that
+	#		:name is set to volunteer.  Note that this URL also requires a
+	#		query string containing "start=YYYY-MM-DD" and "end=YYYY-MM-DD"
+	#------------------------------------------------------------------------------
+	get '/calendarFor/:name' => sub
+	{
+		my $self = shift;
+		my $name = $self->param( "name");
+		print "The name is $name\n";
+		my $start = $self->param( "start");
+		my $end = $self->param( "end");
+
+		if ( !defined( $start) || !defined( $end))
+		{
+			$self->render( "not_found");
+		}
+		my $calendar = makeCalendarFor( $name, $start, $end);
+
+		$self->res->headers->content_disposition( "attachment;filename=volunteer.ics");
+		$self->render( text=>$calendar);
+	};
+
 	#------------------------------------------------------------------------------
 	#	get '/showSchedule'
 	#		This call redirects to a page that prompts for the schedule date range.

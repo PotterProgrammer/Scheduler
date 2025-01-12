@@ -90,6 +90,28 @@
 	}
 
 	//==============================================================================
+	//  function printSchedule()
+	// 		This function prints the currently displayed schedule
+	//==============================================================================
+	function printSchedule()
+	{
+		var scheduleDates = document.getElementById( "scheduleDates");
+		var prtContent = document.getElementById( "schedule");
+		var WinPrint = window.open( '', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+		WinPrint.document.write( '<!DOCTYPE html>');
+//-->		WinPrint.document.write( '<link rel="stylesheet" href="/printschedule.css">');
+		WinPrint.document.write( '<link rel="stylesheet" href="/printschedule.css">');
+		WinPrint.document.write( scheduleDates.innerHTML);
+		WinPrint.document.write( '<div class="twocolumn"><br>');
+		WinPrint.document.write( prtContent.innerHTML);
+		WinPrint.document.write( "</div>\n</body>\n</html>");
+		WinPrint.document.close();
+		WinPrint.focus();
+		WinPrint.print();
+		WinPrint.close();
+	}
+
+	//==============================================================================
 	//	function saveEdit()
 	//		This function sends the edited data to the server to update the
 	//		database, updates the entry on the display, and hides the dialog.
@@ -187,7 +209,7 @@
 	<h1>View Schedule</h1>
 
 	<div id="viewSchedule">
-		<p>Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b>
+		<p id="scheduleDates">Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b>
 		% if ( defined( $incomplete))
 	    % {
 		% 	if ( $incomplete)
@@ -205,13 +227,15 @@
 		<div id="schedule">
 		% my $lastDay = '';
 		% my $lastPosition = '';
+        % my $separator = '';
 		% foreach my $scheduledSlot (@{$schedule})
 		% {
 		%   if ( $scheduledSlot->{date} ne $lastDay)
 		%	{
 		%	   $lastDay = $scheduledSlot->{date};
 		%      $lastPosition = '';
-			   <h2 id="scheduledDate"> <%== $lastDay %> </h2>
+			   <%== $separator %><h2 id="scheduledDate"> <%== $lastDay %> </h2>
+		%      $separator = "\n<br>\n";
 		%   }
 		%   if ( $scheduledSlot->{title} ne $lastPosition)
 		%   {
@@ -222,7 +246,9 @@
 		%}
 		</div>
 	</div>
-
+	<div class="centered">
+		<button onclick="printSchedule()">Print Schedule</button>
+	</div>
 
 </body>
 
