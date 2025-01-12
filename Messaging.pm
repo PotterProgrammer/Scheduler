@@ -5,15 +5,20 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( sendEmail sendReminders sendSchedules sendUpdateRequest);
+@EXPORT = qw( makeCalendarFor sendEmail sendReminders sendSchedules sendUpdateRequest);
 
 use warnings;
 use strict;
 
+use Data::ICal;
+use Data::ICal::Entry::Event;
+use DateTime;
+use DateTime::Format::ICal;
 use DBI;
-
 use Email::Send::SMTP::Gmail;
+use POSIX;
 use SaveRestore;
+use Time::HiRes;
 
 
 ##-->use Email::Sender::Simple qw(try_to_sendmail);
@@ -29,8 +34,9 @@ use open qw(:std :utf8);
 use utf8;
 use utf8::all;
 
+sub makeCalendarFor($$$);
 sub sendReminders($);
-sub sendSchedules($$);
+sub sendSchedules($$$);
 
 my $HOME = $ENV{'HOME'};
 my $adminName;
@@ -523,12 +529,12 @@ sub sendReminders($)
 }
 
 #------------------------------------------------------------------------------
-#  sub sendSchedules( $firstDate, $lastDate)
+#  sub sendSchedules( $firstDate, $lastDate, $calendarURL)
 #  		This function sends out email copies of the personal volunteer schedule
 #  		to each person who is scheduled to serve sometime from the first date
 #  		through the last date.
 #------------------------------------------------------------------------------
-sub sendSchedules($$)
+sub sendSchedules($$$)
 {
 	local $SIG{CHLD} = "IGNORE";
 	my $pid = fork();
@@ -537,7 +543,7 @@ sub sendSchedules($$)
 
 	if ( !$pid)
 	{
-		my ( $firstDate, $lastDate) = @_;
+		my ( $firstDate, $lastDate, $calendarURL) = @_;
 		my $template;
 		my $textTemplate;
 		my $dash = "\x{2014}";
@@ -621,7 +627,7 @@ sub sendSchedules($$)
 					my $email  = $template;
 
 					$email =~ s/__FIRST_NAME__/$firstName/smg;
-					$email =~ s/__NAME__/$firstName/smg;
+					$email =~ s/__NAME__/$name/smg;
 					$email =~ s/__SCHEDULE__/$scheduledDates/smg;
 					$email =~ s/__SCHEDULE_ADMIN__/$adminName/smg;
 					$email =~ s/__SCHEDULE_ADMIN_EMAIL__/$adminEmail/smg;
@@ -629,6 +635,7 @@ sub sendSchedules($$)
 					$email =~ s/__SCHEDULE_ADMIN_DIALABLE_PHONE__/$dialableAdminPhone/smg;
 					$email =~ s/__SCHEDULE_ADMIN_TEXT_NUMBER__/$adminTextNumber/smg;
 					$email =~ s/__SCHEDULE_ADMIN_TEXTABLE_NUMBER__/$textableAdminNumber/smg;
+					$email =~ s/__CALENDAR_FILE__/$calendarURL\/$name?start=$firstDate\&end=$lastDate/smg;
 							
 					##
 					##  Send the reminder email
@@ -690,6 +697,67 @@ sub sendSchedules($$)
 			}
 		}
 	}
+}
+
+#------------------------------------------------------------------------------
+#  sub makeCalendarFor( $$$)
+#  		This routine returns a string in .ics format that contains the
+#  		scheduled dates that the named individual is to volunteer between the
+#  		provided start and end dates.
+#------------------------------------------------------------------------------
+sub makeCalendarFor( $$$)
+{
+	my ($name, $firstDate, $lastDate) = @_;
+	my $ics;
+	
+	##
+	##  See if this person is scheduled for the dates given
+	##
+	my @schedules = readScheduleFor( $name, $firstDate, $lastDate);
+
+	##
+	##	Was the person scheduled?
+	##
+	if ( @schedules)
+	{
+		my $timezoneOffset =  strftime( "%z", localtime());
+		my $calendar = Data::ICal->new();
+		my $timeNow = DateTime->now();
+
+		##
+		##  Build a calendar entry for each scheduled date
+		##
+		foreach my $schedule ( @schedules)
+		{
+			my $event = Data::ICal::Entry::Event->new();
+			$schedule->{time} =~ m/(\d+):(\d+)/;
+			my ( $hour, $minute) = ($1, $2);
+			$schedule->{date} =~ m/(\d+)-(\d+)-(\d+)/;
+			my ( $year, $month, $day) = ( $1, $2, $3);
+
+			my $start = DateTime->new( year=>$year, month=>$month, day=>$day, hour=>$hour, minute=>$minute, time_zone=>$timezoneOffset);
+			my $end = DateTime->new( year=>$year, month=>$month, day=>$day, hour=>$hour + 1, minute=>$minute, time_zone=>$timezoneOffset);
+
+			$event->add_properties(
+									summary => 'Volunteering',
+									description => "Serving in the position: $schedule->{title}.",
+									dtstamp => DateTime::Format::ICal->format_datetime( $timeNow),
+									dtstart => DateTime::Format::ICal->format_datetime( $start),
+									dtend => DateTime::Format::ICal->format_datetime( $end),
+									status => 'CONFIRMED',
+									uid => Time::HiRes::time()
+								  );
+
+			$calendar->add_entry( $event);
+		}
+	
+		##
+		##  Generate ICS 
+		##
+		$ics = $calendar->as_string;
+	}
+
+	return $ics;
 }
 
 #------------------------------------------------------------------------------

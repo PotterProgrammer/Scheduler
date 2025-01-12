@@ -212,6 +212,12 @@ option:checked {
 	justify-content: center;
 }
 
+.centered
+{
+	display: flex;
+	justify-content: center;
+}
+
 .dateList
 {
 	width: 7em;
@@ -270,7 +276,7 @@ option:checked {
 	font-weight: bold;
 	text-decoration:underline;
 	margin-left: 1em;
-	margin-top: 2em;
+	margin-top: 1.2em;
 	line-height: 0;
 }
 
