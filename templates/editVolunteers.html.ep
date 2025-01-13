@@ -84,7 +84,7 @@
 	</div>
 </div>
 
-<h1>Volunteers</h1>
+<h1>Edit Volunteers List</h1>
 
 <select name="volunteers" class="nameList" id="itemList" size="10" onChange="showVolunteerInfo()" autofocus>
    % my $first = 1;
