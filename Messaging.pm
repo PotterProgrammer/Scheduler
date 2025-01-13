@@ -262,52 +262,25 @@ sub sendSMSTwilio($$)
 {
 	my ( $to, $message) = @_;
 	my $rc = 0;
-##--> my @pieces = ($message =~ /.{0,125}(?: |$)/mg);
-
-##-->	my @pieces = unpack( "(A125)*", $message);
 	my @pieces;
 
-	while ( $message =~ s/(.{1,125})\s+//sm)
-	{
-		my $nextMessage = $1;
-
-		if ( $nextMessage =~ s/<BREAK>(.*)//sm)
-		{
-			$message = "$1 $message";
-		}
-		push( @pieces, $nextMessage);
-	}
-
-	while ( $message =~ s/<BREAK>(.*)//sm)
-	{
-		push( @pieces, $message);
-		$message = $1;
-	}
-	push( @pieces, $message);
-
-	#
-	##  DDDDD   EEEEEE  BBBBB   U    U   GGGGG     CCCCC  OOOO  DDDDD  EEEEEE  ||
-	##  D    D  E       B    B  U    U  G         C      O    O D    D E       ||
-	##  D    D  EEEEEE  BBBBB   U    U  G  GGGG   C      O    O D    D EEEEE   ||
-	##  D    D  E       B    B  U    U  G    G    C      O    O D    D E       ||
-	##  DDDDD   EEEEEE  BBBBB    UUUU    GGGGG     CCCCC  OOOO  DDDDD  EEEEEE  ||
-	##                                                                         ||
-	##        Code below was modified by GTAYLOR on 05 Jan 2025                \/
-	##vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-##-->	foreach( @pieces)
+##-->	while ( $message =~ s/(.{1,150})\s+//sm)
 ##-->	{
-##-->		print "\nWould send:\n$_\n";
+##-->		my $nextMessage = $1;
+##-->
+##-->		if ( $nextMessage =~ s/<BREAK>(.*)//sm)
+##-->		{
+##-->			$message = "$1 $message";
+##-->		}
+##-->		push( @pieces, $nextMessage);
 ##-->	}
-##-->	return;
-	#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	##        Code above was modified by GTAYLOR on 05 Jan 2025                /\
-	##                                                                         ||
-	##  DDDDD   EEEEEE  BBBBB   U    U   GGGGG     CCCCC  OOOO  DDDDD  EEEEEE  ||
-	##  D    D  E       B    B  U    U  G         C      O    O D    D E       ||
-	##  D    D  EEEEEE  BBBBB   U    U  G  GGGG   C      O    O D    D EEEEE   ||
-	##  D    D  E       B    B  U    U  G    G    C      O    O D    D E       ||
-	##  DDDDD   EEEEEE  BBBBB    UUUU    GGGGG     CCCCC  OOOO  DDDDD  EEEEEE  ||
-	##
+##-->
+##-->	while ( $message =~ s/<BREAK>(.*)//sm)
+##-->	{
+##-->		push( @pieces, $message);
+##-->		$message = $1;
+##-->	}
+	push( @pieces, $message);
 
 	if ( !defined( $TwilioAccount))
 	{

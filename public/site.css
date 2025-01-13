@@ -34,6 +34,17 @@ select
 	margin-bottom: .5em;
 }
 
+select:disabled
+{
+	background-color: white;
+	color: black;
+}
+
+select:disabled,option:checked
+{
+	background-color:white;
+}
+
 #positions
 {
 	width: 8.5em;
@@ -72,6 +83,18 @@ option:checked {
 	font-size: 14pt;
 	width: 15em;
 }
+
+#addUserDescription
+{
+	position: relative;
+	margin-top: -1em;
+	float: right;
+	min-width: 40%;
+	margin-right: 5vw;
+	line-height: 2.5;
+	height: 80%;
+}
+
 
 #description
 {
