@@ -223,6 +223,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit Scheduler
 argglobal
@@ -354,7 +355,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 129 - ((30 * winheight(0) + 21) / 43)
+let s:l = 129 - ((31 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -491,7 +492,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 5 - ((4 * winheight(0) + 21) / 43)
+let s:l = 5 - ((4 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -629,7 +630,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 197 - ((36 * winheight(0) + 21) / 43)
+let s:l = 197 - ((38 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -767,7 +768,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 181 - ((0 * winheight(0) + 21) / 43)
+let s:l = 181 - ((0 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -905,7 +906,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 95 - ((22 * winheight(0) + 21) / 43)
+let s:l = 95 - ((23 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1050,6 +1051,143 @@ normal! zt
 keepjumps 90
 normal! 05|
 tabnext
+edit public/printschedule.css
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal backupcopy=
+setlocal balloonexpr=
+setlocal nobinary
+setlocal nobreakindent
+setlocal breakindentopt=
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),0],:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal cursorlineopt=both
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal noexpandtab
+if &filetype != 'css'
+setlocal filetype=css
+endif
+setlocal fixendofline
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal formatprg=
+setlocal grepprg=
+setlocal iminsert=0
+setlocal imsearch=-1
+setlocal include=^\\s*@import\\s\\+\\%(url(\\)\\=
+setlocal includeexpr=
+setlocal indentexpr=GetCSSIndent()
+setlocal indentkeys=0{,0},!^F,o,O
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255,-
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal lispwords=
+setlocal nolist
+setlocal listchars=
+setlocal makeencoding=
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=bin,octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=csscomplete#CompleteCSS
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal scrolloff=-1
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal showbreak=
+setlocal sidescrolloff=-1
+setlocal signcolumn=auto
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal spelloptions=
+setlocal statusline=
+setlocal suffixesadd=
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'css'
+setlocal syntax=css
+endif
+setlocal tabstop=4
+setlocal tagcase=
+setlocal tagfunc=
+setlocal tags=
+setlocal termwinkey=
+setlocal termwinscroll=10000
+setlocal termwinsize=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal thesaurusfunc=
+setlocal noundofile
+setlocal undolevels=-123456
+setlocal varsofttabstop=
+setlocal vartabstop=
+setlocal virtualedit=
+setlocal wincolor=
+setlocal nowinfixheight
+setlocal nowinfixwidth
+set nowrap
+setlocal nowrap
+setlocal wrapmargin=0
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 1 - ((0 * winheight(0) + 21) / 43)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 1
+normal! 0
+tabnext
 edit templates/slots.html.ep
 argglobal
 balt public/site.css
@@ -1181,7 +1319,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 160 - ((21 * winheight(0) + 21) / 43)
+let s:l = 160 - ((22 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1319,7 +1457,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 88 - ((16 * winheight(0) + 21) / 43)
+let s:l = 88 - ((17 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1344,7 +1482,9 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 8 + 22) / 45)
-exe '2resize ' . ((&lines * 34 + 22) / 45)
+exe 'vert 1resize ' . ((&columns * 100 + 86) / 173)
+exe '2resize ' . ((&lines * 36 + 22) / 45)
+exe 'vert 2resize ' . ((&columns * 100 + 86) / 173)
 argglobal
 balt templates/editVolunteers.html.ep
 setlocal keymap=
@@ -1613,7 +1753,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 42 - ((23 * winheight(0) + 17) / 34)
+let s:l = 42 - ((24 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1621,7 +1761,9 @@ keepjumps 42
 normal! 033|
 wincmd w
 exe '1resize ' . ((&lines * 8 + 22) / 45)
-exe '2resize ' . ((&lines * 34 + 22) / 45)
+exe 'vert 1resize ' . ((&columns * 100 + 86) / 173)
+exe '2resize ' . ((&lines * 36 + 22) / 45)
+exe 'vert 2resize ' . ((&columns * 100 + 86) / 173)
 tabnext
 edit templates/buildNewSchedule.html.ep
 argglobal
@@ -1754,7 +1896,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 45 - ((35 * winheight(0) + 21) / 43)
+let s:l = 45 - ((37 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1916,8 +2058,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 12 + 22) / 45)
-exe '2resize ' . ((&lines * 30 + 22) / 45)
+exe '1resize ' . ((&lines * 13 + 22) / 45)
+exe 'vert 1resize ' . ((&columns * 100 + 86) / 173)
+exe '2resize ' . ((&lines * 31 + 22) / 45)
+exe 'vert 2resize ' . ((&columns * 100 + 86) / 173)
 argglobal
 balt BuildSchedule.pm
 setlocal keymap=
@@ -2048,7 +2192,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 6) / 12)
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -2186,15 +2330,17 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 176 - ((23 * winheight(0) + 15) / 30)
+let s:l = 176 - ((24 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 176
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 12 + 22) / 45)
-exe '2resize ' . ((&lines * 30 + 22) / 45)
+exe '1resize ' . ((&lines * 13 + 22) / 45)
+exe 'vert 1resize ' . ((&columns * 100 + 86) / 173)
+exe '2resize ' . ((&lines * 31 + 22) / 45)
+exe 'vert 2resize ' . ((&columns * 100 + 86) / 173)
 tabnext
 edit templates/showSchedule.html.ep
 argglobal
@@ -2327,7 +2473,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 12 - ((10 * winheight(0) + 21) / 43)
+let s:l = 12 - ((10 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -2465,7 +2611,7 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 26 - ((24 * winheight(0) + 21) / 43)
+let s:l = 26 - ((25 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -2478,7 +2624,7 @@ badd +1 SaveRestore.pm
 badd +1 Messaging.pm
 badd +33 public/scheduler.js
 badd +1 public/navBar.html
-badd +1 public/site.css
+badd +0 public/site.css
 badd +1 templates/slots.html.ep
 badd +1 templates/editVolunteers.html.ep
 badd +1 templates/addVolunteers.html.ep
@@ -2486,9 +2632,10 @@ badd +1 templates/buildNewSchedule.html.ep
 badd +1 BuildSchedule.pm
 badd +1 templates/viewSchedule.html.ep
 badd +1 templates/showSchedule.html.ep
-badd +0 templates/index.html.ep
+badd +1 templates/index.html.ep
 badd +1 session\!
 badd +22 templates/editDates.html.ep
+badd +0 public/printschedule.css
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -2499,6 +2646,7 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
