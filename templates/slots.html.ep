@@ -60,54 +60,54 @@
 	}
 
 
-	//==============================================================================
-	//	function addEntry()
-	//		This function adds the provided values as a new volunteer position
-	//==============================================================================
-	function addEntry()
-	{
-		//
-		//  Call server to get info for the current position
-		//
-		var title = document.getElementById('title').value
-		var dayOfWeek = document.getElementById('dayNeeded').value;
-		var time = document.getElementById('time').value;
-		var numberNeeded = document.getElementById('count').value;
-		
-		var ws;
-		var url;
-
-		if ( window.location.protocol == 'https:')
-		{
-			url = 'wss://' + window.location.host + '/addPosition';
-		}
-		else
-		{
-			url = 'ws://' + window.location.host + '/addPosition';
-		}
-		ws = new WebSocket( url);
-
-		ws.onopen = (event) => 
-		{
-			ws.send( JSON.stringify( {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}));
-		};
-
-		ws.onerror = (event) =>
-		{
-			ws.close();
-			ws = new WebSocket( url);
-			ws.onopen = (event) => 
-			{
-				ws.send( selectedItemNumber);
-			};
-		};
-
-		ws.onmessage = () =>
-		{
-			ws.close();
-			window.location.reload();
-		};
-	}
+//-->	//==============================================================================
+//-->	//	function addEntry()
+//-->	//		This function adds the provided values as a new volunteer position
+//-->	//==============================================================================
+//-->	function addEntry()
+//-->	{
+//-->		//
+//-->		//  Call server to get info for the current position
+//-->		//
+//-->		var title = document.getElementById('title').value
+//-->		var dayOfWeek = document.getElementById('dayNeeded').value;
+//-->		var time = document.getElementById('time').value;
+//-->		var numberNeeded = document.getElementById('count').value;
+//-->		
+//-->		var ws;
+//-->		var url;
+//-->
+//-->		if ( window.location.protocol == 'https:')
+//-->		{
+//-->			url = 'wss://' + window.location.host + '/addPosition';
+//-->		}
+//-->		else
+//-->		{
+//-->			url = 'ws://' + window.location.host + '/addPosition';
+//-->		}
+//-->		ws = new WebSocket( url);
+//-->
+//-->		ws.onopen = (event) => 
+//-->		{
+//-->			ws.send( JSON.stringify( {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}));
+//-->		};
+//-->
+//-->		ws.onerror = (event) =>
+//-->		{
+//-->			ws.close();
+//-->			ws = new WebSocket( url);
+//-->			ws.onopen = (event) => 
+//-->			{
+//-->				ws.send( selectedItemNumber);
+//-->			};
+//-->		};
+//-->
+//-->		ws.onmessage = () =>
+//-->		{
+//-->			ws.close();
+//-->			window.location.reload();
+//-->		};
+//-->	}
 
 
 	//==============================================================================
@@ -212,9 +212,9 @@ window.addEventListener( "pageshow", refreshDisplay);
 <div id="overlay" hidden >
 	<div class="popup" id="confirmSave" hidden>
 		<h2>Save Entry</h2>
-		<p>Do you wish to save this as a new position or modify the selected position?</p>
-		<button onclick="addEntry()">New Position</button>
-		<button onclick="modifyEntry()">Modify Position</button>
+		<p>Do you wish to save these changes to this position?</p>
+		<!-- button onclick="addEntry()">New Position</button -->
+		<button onclick="modifyEntry()">Save Changes</button>
 		<button onclick="hideConfirmSave();showPosition()">Cancel</button>
 	</div>
 	<div class="popup" id="confirmDelete" hidden>
@@ -225,7 +225,7 @@ window.addEventListener( "pageshow", refreshDisplay);
 	</div>
 </div>
 
-<h1>Volunteer Positions</h1>
+<h1>Edit Volunteer Positions</h1>
 
 <select name="slots" id="itemList" size="10" onChange="showPosition()" autofocus>
    %foreach my $slot (@{$slots})
@@ -256,7 +256,7 @@ window.addEventListener( "pageshow", refreshDisplay);
 	<label for="count">Number of volunteers needed:</label>
 	<input type="number" id="count" name="count" min="1" max="20" step="1"></input>
 	<br>
-	<button type="button" onclick="showConfirmSave()">Save Position</button>
+	<button type="button" onclick="showConfirmSave()">Save Changes</button>
 	<button type="button" onclick="showConfirmDelete()">Delete Position</button>
 </div>
 </body>

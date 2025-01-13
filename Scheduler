@@ -42,6 +42,21 @@ sub findVolunteer($$);
 	};
 
 	#------------------------------------------------------------------------------
+	#  get '/addSlots'
+	#------------------------------------------------------------------------------
+	get '/addSlots' => sub
+	{
+		my $self = shift;
+
+		@Slots = readSlots();
+
+		$self->stash( slots=>\@Slots);
+
+		$self->render( "addSlots");
+
+	};
+
+	#------------------------------------------------------------------------------
 	#  get '/slots'
 	#------------------------------------------------------------------------------
 	get '/slots' => sub
@@ -58,9 +73,9 @@ sub findVolunteer($$);
 
 
 	#------------------------------------------------------------------------------
-	#  get '/volunteers'
+	#  get '/editVolunteers'
 	#------------------------------------------------------------------------------
-	get '/volunteers' => sub
+	get '/editVolunteers' => sub
 	{
 		my $self = shift;
 
@@ -69,7 +84,7 @@ sub findVolunteer($$);
 
 		$self->stash( slots=>\@Slots, volunteers=>\@Volunteers);
 
-		$self->render( "volunteers");
+		$self->render( "editVolunteers");
 
 	};
 
@@ -82,10 +97,11 @@ sub findVolunteer($$);
 		my $self = shift;
 
 		@Slots = readSlots();
+		@Volunteers = readVolunteers();
 
-		$self->stash( slots=>\@Slots, type=>"add", volunteer=>undef, userMode=>0, title=>"Add Volunteers");
+		$self->stash( slots=>\@Slots, type=>"add", volunteers=>\@Volunteers, volunteer=>undef, userMode=>0, title=>"Add Volunteers");
 
-		$self->render( "addEditVolunteers");
+		$self->render( "addVolunteers");
 
 	};
 
@@ -121,9 +137,9 @@ sub findVolunteer($$);
 
 		my ($index, $volunteer) = findVolunteer( 0, $name);
 
-		$self->stash( slots=> \@Slots, volunteer=>$volunteer, type=>"edit", title=>"Edit Information for " . $name, userMode=>$userMode);
+		$self->stash( slots=> \@Slots, volunteers=>undef, volunteer=>$volunteer, type=>"edit", title=>"Edit Information for " . $name, userMode=>$userMode);
 
-		$self->render( "addEditVolunteers");
+		$self->render( "addVolunteers");
 
 	};
 

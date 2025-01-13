@@ -39,6 +39,7 @@
 	//==============================================================================
 	function clearEntries()
 	{
+		window.location.reload();
 		document.getElementById( 'name').value = '';
 		document.getElementById( 'email').value = '';
 		document.getElementById( 'phone').value = '';
@@ -412,7 +413,7 @@
 		% }
 		% else
 		% {
-		window.location.href = '/volunteers';
+		window.location.href = '/editVolunteers';
 		% }
 	}
 
@@ -466,7 +467,19 @@
 
 <h1><%= $title %></h1>
 
-<div id="holder">
+%if ( $type eq 'add')
+% {
+<select name="volunteers" class="nameList" id="itemList" size="10" disabled>
+   % my $first = 1;
+   %foreach my $volunteer (@{$volunteers})
+   %{
+   <option value="<%= $volunteer->{name} %>"><%= $volunteer->{name} %></option>
+   % $first = 0;
+   %}
+</select>
+%}
+
+<div id="<%= (!$userMode && $type eq 'add') ? 'addUserDescription' : 'holder' %>">
 	<div id="userInfo">
 		<form>
 		<label for="name">Name:</label>

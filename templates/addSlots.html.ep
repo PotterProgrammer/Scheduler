@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="site.css">
+</head>
+
+<script src="scheduler.js"> </script>
+
+<script>
+
+	//==============================================================================
+	//	function addEntry()
+	//		This function adds the provided values as a new volunteer position
+	//==============================================================================
+	function addEntry()
+	{
+		//
+		//  Call server to get info for the current position
+		//
+		var title = document.getElementById('title').value
+		var dayOfWeek = document.getElementById('dayNeeded').value;
+		var time = document.getElementById('time').value;
+		var numberNeeded = document.getElementById('count').value;
+		
+		var ws;
+		var url;
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/addPosition';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/addPosition';
+		}
+		ws = new WebSocket( url);
+
+		ws.onopen = (event) => 
+		{
+			ws.send( JSON.stringify( {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}));
+		};
+
+		ws.onerror = (event) =>
+		{
+			ws.close();
+			ws = new WebSocket( url);
+			ws.onopen = (event) => 
+			{
+				ws.send( selectedItemNumber);
+			};
+		};
+
+		ws.onmessage = () =>
+		{
+			ws.close();
+			window.location.reload();
+		};
+	}
+
+
+	//==============================================================================
+	//	function modifyEntry()
+	//		This function modifies the provided values as a new volunteer position
+	//==============================================================================
+	function modifyEntry()
+	{
+		//
+		//  Call server to get info for the current position
+		//
+		var itemList = document.getElementById( "itemList");
+		var selectedItem = itemList.value;
+		var title = document.getElementById('title').value
+		var dayOfWeek = document.getElementById('dayNeeded').value;
+		var time = document.getElementById('time').value;
+		var numberNeeded = document.getElementById('count').value;
+		
+		var ws;
+		var url;
+
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/replacePosition';
+		}
+		else
+		{
+			url = 'ws://' + window.location.host + '/replacePosition';
+		}
+		ws = new WebSocket( url);
+
+		ws.onopen = (event) => 
+		{
+			ws.send( JSON.stringify( {'replace': selectedItem, with: {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}}));
+		};
+
+		ws.onerror = (event) =>
+		{
+			ws.close();
+			ws = new WebSocket( url);
+			ws.onopen = (event) => 
+			{
+				ws.send( selectedItemNumber);
+			};
+		};
+
+		ws.onmessage = () =>
+		{
+			ws.close();
+			window.location.reload();
+		};
+	}
+
+
+//==============================================================================
+//  window.onload
+//		When window loads, load navbar, init slot list and show info for first
+//		slot entry.
+//==============================================================================
+function refreshDisplay()
+{
+	document.getElementById('title').value = '';
+	document.getElementById('dayNeeded').value = 'Sunday';
+	document.getElementById('time').value = '10:45';
+	document.getElementById('count').value = '1';
+}
+
+window.addEventListener( "pageshow", refreshDisplay);
+
+
+</script>
+
+
+<body>
+<div id="navbar">
+</div>
+
+<div id="overlay" hidden >
+	<div class="popup" id="confirmSave" hidden>
+		<h2>Save Entry</h2>
+		<p>Do you wish to save this as a new position?</p>
+		<button onclick="addEntry()">Save</button>
+		<button onclick="hideConfirmSave()">Cancel</button>
+	</div>
+</div>
+
+<h1>Add Volunteer Positions</h1>
+
+<select name="slots" id="itemList" size="10" autofocus disabled>
+   %foreach my $slot (@{$slots})
+   %{
+   <option value="<%= $slot->{title} %>"><%= $slot->{title} %></option>
+   %}
+</select>
+
+<div id="description">
+
+	<label for="title">Position:</label>
+	<input type="text" id="title" name="title"></input>
+	<br>
+	<label for="dayNeeded">Day Needed:</label>
+	<select name="dayNeeded" id="dayNeeded">
+		<option value="Sunday">Sunday</option>
+		<option value="Monday">Monday</option>
+		<option value="Tuesday">Tuesday</option>
+		<option value="Wednesday">Wednesday</option>
+		<option value="Thursday">Thursday</option>
+		<option value="Friday">Friday</option>
+		<option value="Saturday">Saturday</option>
+	</select>
+	<br>
+	<label for="time">Time when service needed:</label>
+	<input type="time" id="time" name="time"></input>
+	<br>
+	<label for="count">Number of volunteers needed:</label>
+	<input type="number" id="count" name="count" min="1" max="20" step="1"></input>
+	<br>
+	<button type="button" onclick="showConfirmSave()">Save Position</button>
+</div>
+</body>
+
+</html>
+
+
