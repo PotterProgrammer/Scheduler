@@ -417,7 +417,10 @@
 		% }
 	}
 
+    % if ( $type eq "edit")
+	% {
 	window.addEventListener( "pageshow", function () {originalName='<%= ($type eq "edit")? $volunteer->{name} : "" %>'; showVolunteerInfo();} );
+    % }
 	% if ( $userMode)
 	% {
 	window.addEventListener( "pageshow", hideNavbar);
