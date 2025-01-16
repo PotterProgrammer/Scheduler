@@ -312,6 +312,14 @@ option:checked {
 	margin-bottom: 0;
 }
 
+.labeledCheckbox
+{
+	line-height: 1.6;
+	display: grid;
+	grid-template-columns: auto 2em;
+	gap: 0.5em;
+}
+
 .scheduledVolunteer 
 {
 	font-size: 90%;

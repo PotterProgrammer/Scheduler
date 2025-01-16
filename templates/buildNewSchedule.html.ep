@@ -19,6 +19,7 @@
 	{
 		let startDate = document.getElementById( "startDate").value;
 		let endDate = document.getElementById( "endDate").value;
+		let sendSchedules = document.getElementById( "sendSchedules").checked;
 
 		if (( startDate.length < 10) || ( endDate.length < 10))
 		{
@@ -26,7 +27,7 @@
 			return;
 		}
 
-		let url = 'buildSchedule?startDate=' + startDate + '&endDate=' + endDate;
+		let url = 'buildSchedule?startDate=' + startDate + '&endDate=' + endDate + "&sendSchedules=" + sendSchedules;
 		window.location.replace( url);
 	}
 </script>
@@ -49,6 +50,9 @@
 			<label for="endDate">End Date of Schedule: </label>
 			<input type="date" id="endDate" value="endDate" name="endDate" ></input>
 			<br>
+			<label class="labeledCheckbox" for="sendSchedules">Automatically Send Schedules:
+				<input type="checkbox" id="sendSchedules" name="sendSchedules"></input>
+			</label>
 			<button type="button" onClick="makeSchedule()">Build Schedule</button>
 		</div>
 	</div>

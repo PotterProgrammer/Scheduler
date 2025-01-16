@@ -36,8 +36,12 @@ sub findVolunteer($$);
 	get '/index' => sub
 	{
 		print "there...\n";
-		my ($self) = @_;
 
+		my ($self) = @_;
+warn join ":", @{app->static->paths};
+warn join ":", @{app->static->classes};
+warn join ":", @{app->renderer->paths};
+warn join ":", @{app->renderer->classes};
 		$self->render( 'index');
 	};
 
@@ -158,6 +162,7 @@ sub findVolunteer($$);
 
 		my $startDate = $self->param('startDate');
 		my $endDate = $self->param( 'endDate');
+		my $sendSchedules = $self->param( 'sendSchedules');
 		my $calendarURL = $self->url_for( '/calendarFor')->to_abs;
 
 		if ( !defined( $startDate) || !defined( $endDate))
@@ -175,25 +180,34 @@ sub findVolunteer($$);
 			##
 			if ( !$incomplete)
 			{
+	print "HERE!!\n";
 				##
-				##  If so, send out notifications automatically
+				##  Does the user want notifications to be sent?
 				##
-				$self->subprocess( sub
-					{
-						print "Sending new schedules...\n";
-						sendSchedules( $startDate, $endDate, $calendarURL);
-						print "Schedules sent...\n";
-					},sub { my ($self, @results) = @_; print "Done"});
-				
-				my $cmd =  "curl '" . $self->url_for( "/sendSchedule")->to_abs . "?start=${startDate}&end=${endDate}' &";
-				print "running $cmd\n";
-				system( $cmd);
-				print "Sending...\n";
+				if ( defined( $sendSchedules) && $sendSchedules !~/false/)
+				{
+print "SendSchedules = $sendSchedules\n";
+sleep 5;
+					##
+					##  If so, send out notifications automatically
+					##
+	##-->				$self->subprocess( sub
+	##-->					{
+	##-->						print "Sending new schedules...\n";
+	##-->						sendSchedules( $startDate, $endDate, $calendarURL);
+	##-->						print "Schedules sent...\n";
+	##-->					},sub { my ($self, @results) = @_; print "Done"});
+					
+					my $cmd =  "curl '" . $self->url_for( "/sendSchedule")->to_abs . "?start=${startDate}&end=${endDate}' &";
+					print "running $cmd\n";
+					system( $cmd);
+					print "Sending...\n";
+				}
 			}
 
 			print " **** THERE ****\n";
 			@Schedule = readSchedule( $startDate, $endDate);
-			$self->stash( incomplete=>$incomplete, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
+			$self->stash( incomplete=>$incomplete, sentSchedules=>$sendSchedules, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
 			print "Viewing schedule...\n";
 			$self->render( "viewSchedule");
 		}
