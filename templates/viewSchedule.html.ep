@@ -218,7 +218,14 @@
 		% 	}
 		%	else
 		%	{
+		%      if ( defined( $sentSchedules) && ($sentSchedules =~ /true/))
+		%      {
 			<p style="background-color:white;color:red">Scheduling complete, volunteers are being notified.</p>
+		%      }
+		%      else
+		%      {
+			<p style="background-color:white;color:red">Scheduling complete, volunteers <b>were not</b> notified.</p>
+		%      }
 		% 	}
 		% }
 		% 
