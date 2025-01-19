@@ -283,7 +283,7 @@ sleep 5;
 		my $end = $self->param( "end");
 
 		@Schedule = readSchedule( $start, $end);
-		$self->stash( incomplete=>undef, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
+		$self->stash( incomplete=>undef, sentSchedules=>undef,startDate=>$start, endDate=>$end, schedule=>\@Schedule);
 		$self->render( "viewSchedule");
 	};
 
@@ -642,6 +642,8 @@ sleep 5;
 
 	@Slots = readSlots();
 
+	app->config( hypnotoad=>{listen =>['http://*:3000']});
+	app->secrets( ['Your mileage may vary']);
 	app->start;
 }
 
