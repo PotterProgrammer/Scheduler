@@ -134,14 +134,23 @@ sub buildScheduleForDates($$)
 sub scheduleSlots($$)
 {
 	my ($startDate, $endDate) = @_;
+	my %volunteerCount;
 
 	##
 	##  Sort the slots based on the number of volunteers.  (Slots with fewer
 	##	volunteers get filled first to make sure those volunteers aren't chosen
 	##	elsewhere first.)
 	##
-	@Slots = sort { int( findVolunteersForTask( $a->{title})) <=> int( findVolunteersForTask( $b->{title}))} @Slots;
+	@Slots = sort { ( int( findVolunteersForTask( $a->{title})) - $a->{numberNeeded})  <=> 
+	                ( int( findVolunteersForTask( $b->{title})) - $b->{numberNeeded}) } @Slots;
 	
+	##
+	## 	Reset volunteer counts for this period
+	##
+	foreach my $person ( @Volunteers)
+	{
+		$volunteerCount{ $person->{name}} = 0;
+	}
 
 	##
 	##  Loop through the list of slots to fill
@@ -149,41 +158,224 @@ sub scheduleSlots($$)
 	foreach my $slot ( @Slots)
 	{
 		##
-		##  Get a list of people willing to volunteer for this task
-		##
-		my @names = findVolunteersForTask( $slot->{title});
-		print "Slot " . $slot->{title} . " has " . int( @names) . " volunteers\n";
-
-		##
-		##  Shuffle the names so that the same people don't get picked every time
-		##
-		@names = shuffle( @names);
-
-		##
 		##  Generate a list of dates for this task
 		##
 		my @dates = getDatesForTask( $slot->{dayOfWeek}, $startDate, $endDate);
 
 		##
-		##  Schedule any dates which are unavailable to some volunteers
+		##  Assign volunteers for each date for this slot
 		##
-		my @scheduled = scheduleUnavailables( $slot, \@names, \@dates);
-
-		##
-		##  Schedule remaining dates
-		##
-		push( @scheduled , scheduleAllAvailable( $slot, \@names, \@dates));
-		
-		##
-		##  Store results in final schedule
-		##
-		if ( @scheduled)
+		foreach  my $date ( @dates)
 		{
-			push( @Schedule, @scheduled);
+			if ( $verbose)
+			{
+				print "Scheduling " . $slot->{title} . " for $date\n";
+			}
+
+			##
+			##  Get a list of people willing to volunteer for this task
+			##
+			my @names = findVolunteersForTask( $slot->{title});
+			
+			##
+			##  Shuffle the names so that the same people don't get picked every time
+			##
+			@names = shuffle( @names);
+
+			##
+			##  Remove names which are unavailable on this date
+			##
+			@names = removeUnavailables( $date, @names);
+
+			##
+			##  Sort the remaining names based on how often they've volunteered thus far
+			##
+			@names = orderByCount( \%volunteerCount, @names);
+
+			##
+			##  Did anyone volunteer specifically for this date?
+			##
+			@names = orderBySpecialRequest( $date, @names);
+
+			##
+			##  Schedule volunteers for this slot
+			##
+			my @scheduled = fillSlot( $slot, $date, \%volunteerCount, @names);
+			
+			##
+			##  Store results in final schedule
+			##
+			if ( @scheduled)
+			{
+				push( @Schedule, @scheduled);
+			}
 		}
+		
 	}
 }
 
+
+#------------------------------------------------------------------------------
+#  sub orderByCount( \%volunteerCount, @names)
+#  		This function sorts the list of names placing those who have
+#  		volunteered most at the end of the list and returns the new list.  (The
+#  		original list is untouched.)
+#------------------------------------------------------------------------------
+sub orderByCount($@)
+{
+	my ($volunteerCount, @names) = @_;
+	
+	##
+	##  Sort the names provide based on how often they've been scheduled already
+	##
+	@names = sort { $volunteerCount->{$a->{name}} <=> $volunteerCount->{$b->{name}}} @names;
+
+	return @names;
+}
+
+#------------------------------------------------------------------------------
+#  sub orderBySpecialRequest( $date, @names)
+#  		This function sorts the list of names placing those who have
+#  		requested to serve on this date at the head of the list.  (The
+#  		original list is untouched.)
+#------------------------------------------------------------------------------
+sub orderBySpecialRequest( $@)
+{
+	my ($date, @names) = @_;
+	my @sortedList;
+	
+	##
+	##  Loop through the list of names
+	##
+	foreach my $name (@names)
+	{
+		##
+		##  Did this person ask to work on this date?
+		##
+		if (  defined( $name->{daysDesired}) &&
+			  length( $name->{daysDesired}) && 
+			  $name->{daysDesired} =~ m/$date/ )
+		{
+			##
+			##  If so, put them at the front of the list
+			##
+			unshift( @sortedList, $name);
+	
+print "\n\n ***********  Moving $name->{name} to the front of the list!!\n";
+		}
+		else
+		{
+			##
+			##  If not, add them to the list in the same order
+			##
+			push( @sortedList, $name);
+		}
+	}
+	return @sortedList;
+}
+
+#------------------------------------------------------------------------------
+#  sub removeUnavailables( $date, @names)
+#  		This function looks through the list of names and generates a list of
+#  		all names that are available on the given date.
+#------------------------------------------------------------------------------
+sub removeUnavailables( $@)
+{
+	my ( $date, @names) = @_;
+	my @availables;
+
+	foreach my $name (@names)
+	{
+		##
+		##  Is this person unavailable?
+		##
+		if (  defined( $name->{daysUnavailable}) &&
+			  length( $name->{daysUnavailable}) && 
+			  $name->{daysUnavailable} =~ m/$date/ )
+		{
+			##
+			##  If so, add their name to the "unavailable" list
+			##
+			if ( $verbose)
+			{
+				print "$name->{name} is unavailable on $date\n";
+			}
+		}
+		else
+		{
+			push( @availables, $name);
+		}
+	}
+
+	return @availables;
+}
+
+#------------------------------------------------------------------------------
+#  sub fillSlot( $slot, $date, \%volunteerCount, @names)
+#  		This function attempts to fill all needed openings in this slot using
+#  		the list of names provided.  Volunteers who are scheduled have their
+#  		volunteerCount incremented and have the current date added
+#  		(temporarily) to their "dates unavailable" list to prevent double
+#  		booking.
+#------------------------------------------------------------------------------
+sub fillSlot( $$$@)
+{
+	my ( $slot, $date, $volunteerCount, @names) = @_;
+	my @slotSchedule;
+	
+	##
+	##  Schedule each person needed for this slot
+	##
+	for( my $count = 0; $count < $slot->{numberNeeded}; $count++)
+	{
+		##
+		##  Is anyone available?
+		##
+		if ( @names)
+		{
+			##
+			##  If so, schedule the next person in line
+			##
+			my %schedule;
+			$schedule{date} = $date;
+			$schedule{time} = $slot->{time};
+			$schedule{title} = $slot->{title};
+			$schedule{name} = $names[0]->{name};
+			push( @slotSchedule, \%schedule);
+
+			if ( $verbose)
+			{
+				print "Scheduled $names[0]->{name} for $slot->{title} on $date\n";
+			}
+
+			##
+			##  Make note that this person was scheduled for a task
+			##
+			$volunteerCount->{$names[0]->{name}}++;
+
+			##
+			##  Mark the person as unavailable for this date (to prevent schduling two separate tasks on the same date)
+			##
+			$names[0]->{daysUnavailable} .= ",$date";
+
+			shift( @names);
+		}
+		else
+		{
+			print "\n\n No one available for $slot->{title} on $date!!\n\n\n\a";
+			my %schedule;
+			$schedule{date} = $date;
+			$schedule{time} = $slot->{time};
+			$schedule{title} = $slot->{title};
+			$schedule{name} = "—unfilled—";
+			push( @slotSchedule, \%schedule);
+
+			$scheduleIncomplete = 1;
+		}
+	}
+	
+	return @slotSchedule;
+}
 
 #------------------------------------------------------------------------------
 #  sub findVolunteersForTask( $task)
@@ -200,6 +392,7 @@ sub findVolunteersForTask()
 	{
 		print "Looking for volunteers for the task of $task\n";
 	}
+
 	foreach my $volunteer ( @Volunteers)
 	{
 		if ( defined( $volunteer->{desiredRoles}) && 
