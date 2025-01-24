@@ -111,6 +111,18 @@
 		var volunteer = getVolunteerInfo();
 		hideConfirmSave();
 
+		if ( volunteer.name.length == 0)
+		{
+			alert( "Please enter the name of the volunteer.");
+			return;
+		}
+
+		if ( volunteer.desiredRoles.length == 0)
+		{
+			alert( "Please select at least one position that " + volunteer.name + " would like to volunteer for.");
+			return;
+		}
+
 		fetch( '/modifyVolunteer' ,
 				{
 					method: "POST",
@@ -544,48 +556,50 @@
 		% }
 		</select>
 		<br>
-		<label for="daysUnavailable" title="Days you are not available to volunteer">Days unavailable:</label>
 
 		% my @daysUnavailable;
+        % my $title = ($type eq 'add') ? 'Days when this person is not available to volunteer' : 'Days when ' . $volunteer->{name} . ' is not able to volunteer';
 		% if (( $type eq 'edit') && defined( $volunteer->{daysUnavailable}))
 		% {
 		%    @daysUnavailable = split(",", $volunteer->{daysUnavailable});
 		% }
 		% my $count = int( @daysUnavailable);
-		<select name="daysUnavailable" class="dateList" id="daysUnavailable" title="Days you are not available to volunteer" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<label for="daysUnavailable" id="daysUnavailableLabel" title="<%= $title %>">Days unavailable:</label>
+		<select name="daysUnavailable" class="dateList" id="daysUnavailable" title="<%= $title %>" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysUnavailable)
 		% {
 		%  foreach my $day (@daysUnavailable)
 		%    {
-			<option value="<%= $day %>" title="Days you are not available to volunteer"><%= $day %></option>
+			<option value="<%= $day %>" title="<%= $title %>"><%= $day %></option>
 		%    }
 		% }
 		% else
 		% {
-			<option value="-none-">-none-</option>
+			<option value="-none-" title="<%= $title %>">-none-</option>
 		% }
 		</select>
 		</select>
 		<button type="button" class="editButton" onClick="editDaysUnavailable()" >Edit</button>
 		<br>
-		<label for="daysDesired" title="A special day when you would prefer to work">Days desired:</label>
 		% my @daysDesired;
+		% $title = ($type eq 'add') ? 'Special days when this person specifically wishes to be chosen.' : 'Special days when ' . $volunteer->{name} . ' specifically wishes to be chosen.';
 		% if (( $type eq 'edit') && defined( $volunteer->{daysDesired}))
 		% {
 		%    @daysDesired = split(",", $volunteer->{daysDesired});
 		% }
+		<label for="daysDesired" id="daysDesiredLabel" title="<%= $title %>">Days desired:</label>
 		% $count = int( @daysDesired);
-		<select name="daysDesired" class="dateList" id="daysDesired" title="A special day when you would prefer to work" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
+		<select name="daysDesired" class="dateList" id="daysDesired" title="<%= $title %>" multiple size="<%= ($count)? (($count > 3) ? 3 : $count) : 1 %>">
 		% if ( @daysDesired)
 		% {
 		%  foreach my $day (@daysDesired)
 		%    {
-			<option value="<%= $day %>" title="A special day when you would prefer to work"><%= $day %></option>
+			<option value="<%= $day %>" title="<%= $title %>"><%= $day %></option>
 		%    }
 		% }
 		% else
 		% {
-			<option value="-none-">-none-</option>
+			<option value="-none-" title="<%= $title %>">-none-</option>
 		% }
 		</select>
 		<button type="button" class="editButton" onClick="editDaysDesired()">Edit</button>

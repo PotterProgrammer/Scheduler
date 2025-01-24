@@ -100,7 +100,10 @@ function showVolunteerInfo()
 			//
 			//  Clear current days unavailable listed
 			//
+			var dayListLabel = document.getElementById('daysUnavailableLabel');
+			dayListLabel.title = 'Days that ' + reply.name + ' will be unvailable to serve.';
 			var dayList = document.getElementById('daysUnavailable');
+			dayList.title = 'Days that ' + reply.name + ' will be unavailable to serve.';
 			while( dayList.options.length > 0)
 			{
 				dayList.remove(0);
@@ -138,7 +141,10 @@ function showVolunteerInfo()
 			//
 			//  Clear current days desired listed
 			//
+			dayListLabel = document.getElementById('daysDesiredLabel');
+			dayListLabel.title = 'Days that ' + reply.name + ' specifically asked to be chosen.';
 			dayList = document.getElementById('daysDesired');
+			dayList.title = 'Days that ' + reply.name + ' specifically asked to be chosen.';
 			while( dayList.options.length > 0)
 			{
 				dayList.remove(0);

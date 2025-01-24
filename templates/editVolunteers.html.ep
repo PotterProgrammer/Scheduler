@@ -115,12 +115,12 @@
 	<select name="positions" id="positions" multiple size="1" >
 	</select>
 	<br>
-	<label for="daysUnavailable">Days unavailable:</label>
+	<label for="daysUnavailable" id="daysUnavailableLabel">Days unavailable:</label>
 	<select name="daysUnavailable" id="daysUnavailable" multiple size="1">
 	</select>
 	<br>
-	<label for="daysDesired">Days desired:</label>
-	<select name="daysDesired" id="daysDesired" multiple size="1">
+	<label for="daysDesired" id="daysDesiredLabel" title="A special day when you would prefer to be chosen">Days desired:</label>
+	<select name="daysDesired" id="daysDesired" multiple size="1" title="A special day when you would prefer to be chosen">
 	</select>
 	<br>
 	<!-- button type="button" onclick="addVolunteer()">Add</button -->
