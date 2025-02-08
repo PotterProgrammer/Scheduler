@@ -6,6 +6,7 @@
 </head>
 
 <script src="/scheduler.js"> </script>
+<script src="/Dialog.js"></script>
 
 <script>
 
@@ -159,7 +160,7 @@
 			}
 			else
 			{
-				alert( "The change was not saved");
+				Dialog.Alert( {title: "WARNING!", text: "The change was not saved"});
 			}
 
 			ws.close();

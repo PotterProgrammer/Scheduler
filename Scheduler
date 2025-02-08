@@ -315,6 +315,15 @@ sleep 5;
 		$self->redirect_to( '/index?messageSent=true');
 	};
 
+	get '/config' => sub
+	{
+		my $self = shift;
+		my $base_url = $self->url_for( '/editVolunteer')->to_abs;
+
+		sendUpdateRequest( $base_url);
+		$self->render( 'editConfig');
+	};
+
 	#------------------------------------------------------------------------------
 	#  post '/modifyVolunteer'
 	#  		This call modifies information for the provided name in the
@@ -386,6 +395,37 @@ sleep 5;
 		$self->render( 'volunteers');
 	};
 
+	#------------------------------------------------------------------------------
+	#  websocket '/checkDates'
+	#  		This call checks to see if the provided date range would conflict
+	#  		with the existing schedule.  It returns an array of conflicting dates.
+	#------------------------------------------------------------------------------
+	websocket '/checkDates' => sub
+	{
+		my $self = shift;
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+
+						my @dates = checkScheduledDates( $json->{start}, $json->{end});
+
+						print "I got back: " . join( ", ", @dates) . "\n";
+
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	dates => \@dates
+											  }
+									  }
+									);
+					}
+				 );
+		
+	};
 
 	#------------------------------------------------------------------------------
 	#  websocket '/getPositionInfo'
@@ -398,7 +438,7 @@ sleep 5;
 
 		##
 		##  See if we received a message
-		##:w
+		##
 		$self->on( message => sub
 					{
 						my ($self, $posIndex) = @_;
