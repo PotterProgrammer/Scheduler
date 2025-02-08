@@ -5,7 +5,7 @@
 	<link rel="stylesheet" href="/site.css">
 </head>
 
-<script src="/scheduler.js"> </script>
+<script type="module" src="/scheduler.js"> </script>
 
 <script>
 <script>
