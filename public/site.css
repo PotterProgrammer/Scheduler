@@ -154,6 +154,39 @@ option:checked {
 	right: 0;
 }
 
+#confirmDialog 
+{
+	padding-left: 4em;
+	padding-right: 4em;
+	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
+}
+
+#dialogTitle
+{
+	text-align:center;
+	color:blue;
+}
+#dialogText
+{
+	text-align:center;
+}
+#confirmDialog ul
+{
+	width: 7em;
+	text-align:center;
+	margin-left:auto;
+	margin-right:auto;
+	color: blue;
+	font-weight: bold;
+}
+
+#dialogButtonRow
+{
+	width:100%;
+	margin-left:auto;
+	text-align:center;
+}
+
 .popup
 {
 	position: absolute;

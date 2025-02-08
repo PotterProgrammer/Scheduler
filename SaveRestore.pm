@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
 
 use warnings;
 use strict;
@@ -20,6 +20,7 @@ my $dbh;
 my $verbose = 1;
 
 
+sub checkScheduledDates($$);
 sub getRoleVolunteerList($);
 sub readReminderList($);
 sub readSchedule($$);
@@ -366,6 +367,19 @@ sub getRoleVolunteerList($)
 	return( @names);
 }
 
+#------------------------------------------------------------------------------
+#  sub checkScheduledDates($$)
+#  		This routine looks to see if there are any dates in the existing
+#  		schedule that conflict with the provided date range.  The routine
+#  		returns an array of all dates that overlap.
+#------------------------------------------------------------------------------
+sub checkScheduledDates($$)
+{
+	my ( $startDate, $endDate) = @_;
+	my @dates = $dbh->selectall_array( "Select distinct date from schedule where date >= ? and date <= ? order by date ASC", undef, $startDate, $endDate);
+	@dates = map { $_->[0]} @dates;
+	return @dates;
+}
 
 
 #------------------------------------------------------------------------------
@@ -414,7 +428,7 @@ sub readReminderList($)
 {
 	my ($nDays) = @_;
 	my $endDate = "$nDays days";
-	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= date('now') and date <= date( 'now', ?) and reminded=false order by date ASC, title ASC", {Slice=>{}}, $endDate);
+	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= date('now') and date <= date( 'now', ?) and reminded=0 order by date ASC, title ASC", {Slice=>{}}, $endDate);
 	return( @$schedule);
 }
 
@@ -470,7 +484,7 @@ sub updateScheduleReminded($)
 {
 	my ( $scheduledPosition) = @_;
 
-	my $sth = $dbh->prepare( "update schedule set reminded=true where date=? and title=? and name=?");
+	my $sth = $dbh->prepare( "update schedule set reminded=1 where date=? and title=? and name=?");
 	$sth->bind_param( 1, $scheduledPosition->{date});
 	$sth->bind_param( 2, $scheduledPosition->{title});
 	$sth->bind_param( 3, $scheduledPosition->{name});

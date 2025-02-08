@@ -5,6 +5,7 @@
 	<link rel="stylesheet" href="/site.css">
 
 <script src="/scheduler.js"> </script>
+<script src="/Dialog.js"> </script>
 
 <script>
 	var originalName = '';
@@ -21,13 +22,13 @@
 
 		if ( volunteer.name.length == 0)
 		{
-			alert( "Please enter the name of the volunteer.");
+			Dialog.Alert( {title: "Missing Name", text: "Please enter the name of the volunteer."});
 			return;
 		}
 
 		if ( volunteer.desiredRoles.length == 0)
 		{
-			alert( "Please select at least one position that " + volunteer.name + " would like to volunteer for.");
+			Dialog.Alert( {title: "Missing Position", text: "Please select at least one position that " + volunteer.name + " would like to volunteer for."});
 			return;
 		}
 		saveVolunteerInfo( volunteer, clearEntries);
@@ -113,13 +114,13 @@
 
 		if ( volunteer.name.length == 0)
 		{
-			alert( "Please enter the name of the volunteer.");
+			Dialog.Alert( {title:"Missing Name", text: "Please enter the name of the volunteer."});
 			return;
 		}
 
 		if ( volunteer.desiredRoles.length == 0)
 		{
-			alert( "Please select at least one position that " + volunteer.name + " would like to volunteer for.");
+			Dialog.Alert( {title: "Missing Position", text: "Please select at least one position that " + volunteer.name + " would like to volunteer for."});
 			return;
 		}
 
@@ -182,7 +183,7 @@
 
 		if ( newDate.length < 10)
 		{
-			alert( "That is not a valid date.");
+			Dialog.Alert( {text: "That is not a valid date."});
 			return;
 		}
 		
@@ -198,8 +199,8 @@
 			{
 				if ( date == newDate)
 				{
-					alert( "The date " + newDate + " is already in the list.");
 					invalidDate = true;
+					Dialog.Alert( {text: "The date " + newDate + " is already in the list."});
 				}
 			});
 

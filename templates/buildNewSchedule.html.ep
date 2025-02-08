@@ -6,8 +6,11 @@
 </head>
 
 <script src="/scheduler.js"> </script>
+<script src="/Dialog.js"> </script>
 
 <script>
+	var setDialogListeners = false;
+    var buildScheduleURL;
 
 	//==============================================================================
 	//	function makeSchedule()
@@ -23,12 +26,70 @@
 
 		if (( startDate.length < 10) || ( endDate.length < 10))
 		{
-			alert( 'Please enter both a start date and an end date for the schedule');
+			Dialog.Alert( {text: 'Please enter both a start date and an end date for the schedule'});
 			return;
 		}
 
-		let url = 'buildSchedule?startDate=' + startDate + '&endDate=' + endDate + "&sendSchedules=" + sendSchedules;
-		window.location.replace( url);
+		var ws;
+		var url = 'ws://' + window.location.host + '/checkDates';
+		if ( window.location.protocol == 'https:')
+		{
+			url = 'wss://' + window.location.host + '/checkDates';
+		}
+
+		ws = new WebSocket( url);
+
+		ws.onopen = (event) => 
+		{
+			ws.send( JSON.stringify( {"start" : startDate, "end": endDate}));
+		};
+
+		ws.onerror = (event) =>
+		{
+			ws.close();
+			ws = new WebSocket( url);
+			ws.onopen = (event) => 
+			{
+				ws.send( JSON.stringify( {"start" : startDate, "end": endDate}));
+			};
+		};
+
+		ws.onmessage = (msg) =>
+		{
+			var reply = JSON.parse( msg.data);
+			
+			var dates = reply.dates;
+
+			ws.close();
+
+			buildScheduleURL = 'buildSchedule?startDate=' + startDate + '&endDate=' + endDate + "&sendSchedules=" + sendSchedules;
+
+			if ( dates.length == 0)
+			{
+				window.location.replace( buildScheduleURL);
+			}
+			else
+			{
+				var dateOrDates = (dates.length > 1) ? 'dates' : 'date';
+				var thatOrThose = (dates.length > 1) ? 'those' : 'that';
+				var message = "<p>The dates that you selected will overwrite an existing schedule for the following " + dateOrDates + ":</p><ul>";
+
+				dates.forEach( (date) =>
+					{
+						message = message + "<li>" + date + "</li>";
+					});
+				message += "</ul><br>Do you wish to create a new schedule for " + thatOrThose + " " + dateOrDates + "?";
+
+				Dialog.Confirm( {text: message, title: "Note:"}).then( (answer) =>
+					{
+						if ( answer)
+						{
+							window.location.replace( buildScheduleURL);
+						}
+					});
+			}
+
+		};
 	}
 </script>
 
@@ -36,6 +97,18 @@
 <body>
 	<div id="navbar">
 	</div>
+	<!-- removed >
+	<dialog id="ConfirmReschedule">
+       <p>The dates that you selected will overwrite an existing schedule for the following dates:</p>
+       <div id="dateList">
+	   </div>
+	   <br>Do you wish to create a new schedule for those dates?
+	   <div id="buttonHolder">
+		   <button id="yes">Yes</button>
+		   <button id="no" autofocus>No</button>
+	   </div>
+	</dialog>
+	</ -->
 
 	<h1>Generate a Schedule</h1>
 

@@ -2,6 +2,8 @@
 //  Javascript routines common to all pages
 //
 
+//-->import {Dialog} from './Dialog.js';
+
 //==============================================================================
 //  function loadNavbar()
 //==============================================================================
@@ -229,7 +231,7 @@ function saveVolunteerInfo( volunteer, callback)
 		}
 		else
 		{
-			alert( "A problem arose trying to add " + volunteer.name + " to the list!!");
+			Dialog.Alert( {title: 'WARNING!', text: "A problem arose trying to add " + volunteer.name + " to the list!!"});
 		}
 		ws.close();
 	};
@@ -360,3 +362,4 @@ function hideNavbar()
 }
 
 window.addEventListener( "pageshow", loadNavbar);
+//-->export { loadNavbar,showVolunteerInfo,saveVolunteerInfo,showAddedAlert,showHelp,hideEditDates,showEditDates,hideEditSchedule,showEditSchedule,hideConfirmSave,showConfirmSave,hideConfirmDelete,showConfirmDelete,hideNavbar}
