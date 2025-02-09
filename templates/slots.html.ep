@@ -4,7 +4,8 @@
 	<link rel="stylesheet" href="site.css">
 </head>
 
-<script type="module" src="scheduler.js"> </script>
+<script src="scheduler.js"> </script>
+<script src="Dialog.js"> </script>
 
 <script>
 
@@ -188,18 +189,35 @@
 				});
 	}
 
-//==============================================================================
-//  window.onload
-//		When window loads, load navbar, init slot list and show info for first
-//		slot entry.
-//==============================================================================
-function refreshDisplay()
-{
-	document.getElementById('itemList').selectedIndex = 0;
-	showPosition();
-}
+	//==============================================================================
+	//	function saveEntry()
+	//		This function adds the information for this position
+	//==============================================================================
+	function saveEntry()
+	{
+		var title = document.getElementById('title').value
 
-window.addEventListener( "pageshow", refreshDisplay);
+		if ( title.length == 0)
+		{
+			Dialog.Alert( {title: "Missing Position", text: "Please enter the name of the position."});
+			return;
+		}
+	
+		showConfirmSave();
+	}
+
+	//==============================================================================
+	//  window.onload
+	//		When window loads, load navbar, init slot list and show info for first
+	//		slot entry.
+	//==============================================================================
+	function refreshDisplay()
+	{
+		document.getElementById('itemList').selectedIndex = 0;
+		showPosition();
+	}
+
+	window.addEventListener( "pageshow", refreshDisplay);
 
 
 </script>
@@ -256,7 +274,7 @@ window.addEventListener( "pageshow", refreshDisplay);
 	<label for="count">Number of volunteers needed:</label>
 	<input type="number" id="count" name="count" min="1" max="20" step="1"></input>
 	<br>
-	<button type="button" onclick="showConfirmSave()">Save Changes</button>
+	<button type="button" onclick="saveEntry()">Save Changes</button>
 	<button type="button" onclick="showConfirmDelete()">Delete Position</button>
 </div>
 </body>

@@ -76,6 +76,13 @@ option:checked {
   font-weight: 450;
 }
 
+#gearMenu
+{
+	float:right;
+	margin-top: -3px;
+	margin-right: .5em;
+}
+
 .nameList, #itemList
 {
 	margin-left: 5vw;
@@ -245,6 +252,46 @@ option:checked {
 	border: solid 2px white;
 	box-shadow: 10px 10px 5px rgba( 0, 0, 0, .68);
 	z-index: 4;
+}
+
+#instructions
+{
+	width: 90%;
+	margin-left: 5%;
+	font-weight: bold;
+	font-size: 105%;
+	color: #c00000;
+	background-color: white;
+	padding-left: 1em;
+}
+
+.cfgTable
+{
+	width: 80%;
+	padding-left:10%;
+}
+.cfgLeft
+{
+	padding-left: 5em;
+}
+
+.cfginput
+{
+	max-width: 50em;
+	width: 25em;
+}
+
+#buttonRow
+{
+	padding-top:  3vh;
+	padding-left: 30%;
+}
+
+#buttonRow input
+{
+	margin-left:2em;
+	margin-right: 2em;
+	width: 8em;
 }
 
 .editPanel
