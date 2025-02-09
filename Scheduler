@@ -320,7 +320,8 @@ sleep 5;
 		my $self = shift;
 		my $base_url = $self->url_for( '/editVolunteer')->to_abs;
 
-		sendUpdateRequest( $base_url);
+		my %configInfo = getConfigInfo();
+		$self->stash( %configInfo);
 		$self->render( 'editConfig');
 	};
 

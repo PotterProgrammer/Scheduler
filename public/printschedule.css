@@ -12,6 +12,16 @@ body
 	column-count: 2;
 }
 
+#schedule
+{
+	margin-top: 5vh;
+}
+
+#scheduleDates
+{
+	margin-bottom:2vh;
+}
+
 #scheduledDate 
 {
 	color: blue;

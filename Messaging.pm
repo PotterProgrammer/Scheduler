@@ -5,7 +5,7 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( makeCalendarFor sendEmail sendReminders sendSchedules sendUpdateRequest);
+@EXPORT = qw( makeCalendarFor getConfigInfo sendEmail sendReminders sendSchedules sendUpdateRequest);
 
 use warnings;
 use strict;
@@ -21,11 +21,6 @@ use SaveRestore;
 use Time::HiRes;
 
 
-##-->use Email::Sender::Simple qw(try_to_sendmail);
-##-->use Email::Simple;
-##-->use Email::Simple::Creator;
-##-->use Email::Sender::Transport::SMTP;
-##-->use Email::Sender::Transport::SMTP::TLS;
 use WWW::Twilio::API;
 use WWW::Twilio::TwiML;
 use URI::Escape;
@@ -48,18 +43,9 @@ my $email_pwd;
 my $email_uid;
 my $email_smtp;
 my $email_port;
-my $email_use_ssl = 0;
-my $email_use_tls = 0;
-my $AlwaysTwilio;
 my $TwilioAccount;
 my $TwilioAuth;
-my $TwilioGender;
-my $TwilioIntro;
 my $TwilioNumber;
-my $callerIDNumber;
-my $logging;
-my $max_retries = 3;
-my $delayBetweenRetries = 45;
 my $uid;
 my $pwd;
 
@@ -106,16 +92,6 @@ sub loadConfig()
 				$email_port=int($1);
 				next;
 			}
-			if ( m/EmailSSL=(.*)/)
-			{
-				$email_use_ssl= int($1);
-				next;
-			}
-			if ( m/EmailTLS=(.*)/)
-			{
-				$email_use_tls=int($1);
-				next;
-			}
 			if ( m/EmailUID=(.*)/)
 			{
 				$email_uid=$1;
@@ -146,21 +122,6 @@ sub loadConfig()
 				$TwilioNumber=$1;
 				next;
 			}
-			if ( m/TwilioGender=(.*)/)
-			{
-				$TwilioGender=$1;
-				next;
-			}
-			if ( m/TwilioIntro=(.*)/)
-			{
-				$TwilioIntro=$1;
-				next;
-			}
-			if ( m/TwilioAlways=(.*)/)
-			{
-				$AlwaysTwilio=$1;
-				next;
-			}
 			if ( m/AdminName=(.*)/)
 			{
 				$adminName = $1;
@@ -181,28 +142,38 @@ sub loadConfig()
 				$adminTextNumber = $1;
 				next;
 			}
-			if ( m/Logging=(.*)/)
-			{
-				$logging = $1;
-				next;
-			}
-			if ( m/MaxRetries=(.*)/)
-			{
-				$max_retries = $1;
-				next;
-			}
-			if ( m/DelayBetweenRetries=(.*)/)
-			{
-				$delayBetweenRetries = $1;
-				next;
-			}
-			if (m/CallerIDNumber=(.*)/i)
-			{
-				$callerIDNumber = $1;
-			}
 		}
 		close CFG;
 	}
+}
+
+#------------------------------------------------------------------------------
+#  sub getConfigInfo()
+#  		This function returns the current data from the Config file
+#------------------------------------------------------------------------------
+sub getConfigInfo()
+{
+	if ( !defined( $email_uid))
+	{
+		loadConfig();
+	}
+
+	my %configInfo = (
+						'EmailServer' => $email_smtp , 
+						'EmailPort' => $email_port, 
+						'EmailUID' => $email_uid, 
+						'EmailPWD' => $email_pwd , 
+						'EmailSender' => $emailSender, 
+						'TwilioAcct' => $TwilioAccount, 
+						'TwilioAuth' => $TwilioAuth , 
+						'TwilioPhone' => $TwilioNumber, 
+						'AdminName' => $adminName , 
+						'AdminEmail' => $adminEmail , 
+						'AdminPhone' => $adminPhone , 
+						'AdminText' => $adminTextNumber , 
+					 );
+
+	return %configInfo;
 }
 
 #------------------------------------------------------------------------------
