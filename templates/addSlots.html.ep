@@ -5,8 +5,26 @@
 </head>
 
 <script src="scheduler.js"> </script>
+<script src="Dialog.js"> </script>
 
 <script>
+
+	//==============================================================================
+	//	function saveEntry()
+	//		This function adds the information for this position
+	//==============================================================================
+	function saveEntry()
+	{
+		var title = document.getElementById('title').value
+
+		if ( title.length == 0)
+		{
+			Dialog.Alert( {title: "Missing Position", text: "Please enter the name of the position."});
+			return;
+		}
+	
+		showConfirmSave();
+	}
 
 	//==============================================================================
 	//	function addEntry()
@@ -173,7 +191,7 @@ window.addEventListener( "pageshow", refreshDisplay);
 	<label for="count">Number of volunteers needed:</label>
 	<input type="number" id="count" name="count" min="1" max="20" step="1"></input>
 	<br>
-	<button type="button" onclick="showConfirmSave()">Save Position</button>
+	<button type="button" onclick="saveEntry()">Save Position</button>
 </div>
 </body>
 
