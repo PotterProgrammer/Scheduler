@@ -180,14 +180,11 @@ warn join ":", @{app->renderer->classes};
 			##
 			if ( !$incomplete)
 			{
-	print "HERE!!\n";
 				##
 				##  Does the user want notifications to be sent?
 				##
 				if ( defined( $sendSchedules) && $sendSchedules !~/false/)
 				{
-print "SendSchedules = $sendSchedules\n";
-sleep 5;
 					##
 					##  If so, send out notifications automatically
 					##
@@ -205,7 +202,6 @@ sleep 5;
 				}
 			}
 
-			print " **** THERE ****\n";
 			@Schedule = readSchedule( $startDate, $endDate);
 			$self->stash( incomplete=>$incomplete, sentSchedules=>$sendSchedules, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
 			print "Viewing schedule...\n";
@@ -394,6 +390,36 @@ sleep 5;
 		$self->stash( volunteers=>\@Volunteers);
 
 		$self->render( 'volunteers');
+	};
+
+	#------------------------------------------------------------------------------
+	#	post '/saveConfig'
+	#		This call saves the newly defined configuration settings
+	#------------------------------------------------------------------------------
+	post '/saveConfig' => sub
+	{
+		my $self = shift(@_);
+		if ( $self->param('submit') =~ /Save/)
+		{
+			my %config;
+
+			$config{"EmailServer"} = $self->param( "EmailServer");
+			$config{"EmailPort"} = $self->param( "EmailPort");
+			$config{"EmailUID"} = $self->param( "EmailUID");
+			$config{"EmailPWD"} = $self->param( "EmailPWD");
+			$config{"EmailSender"} = $self->param( "EmailSender");
+			$config{"TwilioAcct"} = $self->param( "TwilioAcct");
+			$config{"TwilioAuth"} = $self->param( "TwilioAuth");
+			$config{"TwilioPhone"} = $self->param( "TwilioPhone");
+			$config{"AdminName"} = $self->param( "AdminName");
+			$config{"AdminEmail"} = $self->param( "AdminEmail");
+			$config{"AdminPhone"} = $self->param( "AdminPhone");
+			$config{"AdminText"} = $self->param( "AdminText");
+
+			saveConfig( %config);
+		}
+
+		$self->render( "index");
 	};
 
 	#------------------------------------------------------------------------------

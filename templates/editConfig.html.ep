@@ -29,8 +29,9 @@
 			<td class="cfgLeft">TwilioAcct:</td><td><input type="text" name="TwilioAcct" value="<%= $TwilioAcct %>"  title="Twilio Account number" class="cfginput"><br></td></tr>
 			<td class="cfgLeft">TwilioAuth:</td><td><input type="text" name="TwilioAuth" value="<%= $TwilioAuth %>"  title="Twilio authorization code" class="cfginput"><br></td></tr>
 			<td class="cfgLeft">TwilioPhone:</td><td><input type="tel" name="TwilioPhone" value="<%== $TwilioPhone %>"  title="Registered Twilio phone number that messages are sent from." class="cfginput"><br></td></tr>
+			<td class="cfgLeft">Admin Name:</td><td><input type="text" name="AdminName" value="<%= $AdminName %>"  title="This is the name of the schedule administrator." class="cfginput"><br></td></tr>
 			<td class="cfgLeft">Admin Phone:</td><td><input type="text" name="AdminPhone" value="<%= $AdminPhone %>"  title="This is the phone number of the schedule administrator." class="cfginput"><br></td></tr>
-			<td class="cfgLeft">Admin Text:</td><td><input type="text" name="AdminTextg" value="<%= $AdminPhone %>"  title="This is the text number of the schedule administrator." class="cfginput"><br></td></tr>
+			<td class="cfgLeft">Admin Text:</td><td><input type="text" name="AdminText" value="<%= $AdminText %>"  title="This is the text number of the schedule administrator." class="cfginput"><br></td></tr>
 			<td class="cfgLeft">Admin Email:</td><td><input type="text" name="AdminEmail" value="<%= $AdminEmail %>"  title="This is the email address of the schedule administrator." class="cfginput"><br></td></tr>
 			</table>
 

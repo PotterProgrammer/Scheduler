@@ -5,7 +5,7 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( makeCalendarFor getConfigInfo sendEmail sendReminders sendSchedules sendUpdateRequest);
+@EXPORT = qw( makeCalendarFor getConfigInfo saveConfig sendEmail sendReminders sendSchedules sendUpdateRequest);
 
 use warnings;
 use strict;
@@ -30,6 +30,7 @@ use utf8;
 use utf8::all;
 
 sub makeCalendarFor($$$);
+sub saveConfig(%);
 sub sendReminders($);
 sub sendSchedules($$$);
 
@@ -48,6 +49,7 @@ my $TwilioAuth;
 my $TwilioNumber;
 my $uid;
 my $pwd;
+my $configName = "$HOME/.scheduler.cfg";
 
 
 #------------------------------------------------------------------------------
@@ -76,9 +78,9 @@ sub unhidden($)
 #------------------------------------------------------------------------------
 sub loadConfig()
 {
-	if ( -e "$HOME/.scheduler.cfg")
+	if ( -e $configName)
 	{
-		open( CFG, "$HOME/.scheduler.cfg");
+		open( CFG, $configName);
 		while( <CFG>)
 		{
 			chomp;
@@ -147,6 +149,44 @@ sub loadConfig()
 	}
 }
 
+#------------------------------------------------------------------------------
+#  sub saveConfig( %config)
+#  		This routine writes the provided config values to file and updates the
+#  		current configuration values in memory
+#------------------------------------------------------------------------------
+sub saveConfig(%)
+{
+	my %config = @_;
+
+	open( CFG, ">", $configName);
+
+	print CFG "EmailServer=" . $config{"EmailServer"} ."\n";
+	$email_smtp = $config{"EmailServer"};
+	print CFG "EmailPort=" . $config{"EmailPort"} . "\n";
+	$email_port = $config{"EmailPort"};
+	print CFG "EmailUID=" . $config{"EmailUID"} . "\n";
+	$email_uid = $config{"EmailUID"};
+	print CFG "EmailPWD=" . hidden( $config{"EmailPWD"}) . "\n";
+	$email_pwd = $config{"EmailPWD"};
+	print CFG "EmailSender=" . $config{"EmailSender"} . "\n";
+	$emailSender = $config{"EmailSender"};
+	print CFG "TwilioAcct=" . $config{"TwilioAcct"} . "\n";
+	$TwilioAccount = $config{"TwilioAcct"};
+	print CFG "TwilioAuth=" . hidden( $config{"TwilioAuth"}) . "\n";
+	$TwilioAuth = $config{"TwilioAuth"};
+	print CFG "TwilioPhone=" . $config{"TwilioPhone"} . "\n";
+	$TwilioNumber = $config{"TwilioPhone"};
+	print CFG "AdminName=" . $config{"AdminName"} . "\n";
+	$adminName = $config{"AdminName"};
+	print CFG "AdminEmail=" . $config{"AdminEmail"} . "\n";
+	$adminEmail = $config{"AdminEmail"};
+	print CFG "AdminPhone=" . $config{"AdminPhone"} . "\n";
+	$adminPhone = $config{"AdminPhone"};
+	print CFG "AdminText=" . $config{"AdminText"} . "\n";
+	$adminTextNumber = $config{"AdminText"};
+
+	close CFG;
+}
 #------------------------------------------------------------------------------
 #  sub getConfigInfo()
 #  		This function returns the current data from the Config file
