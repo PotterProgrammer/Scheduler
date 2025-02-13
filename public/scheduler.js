@@ -361,5 +361,69 @@ function hideNavbar()
 	document.getElementById('navbar').hidden = true;
 }
 
+//==============================================================================
+//  function makeABackup()
+//		This function calls the server to make a backup and then provides a
+//		download link.
+//==============================================================================
+function makeABackup()
+{
+	if ( !("WebSocket" in window))
+	{
+		alert('This browser does not support WebSockets!');
+		return;
+	}
+
+	ws = new WebSocket("./backup");
+	ws.onopen = function()
+	{
+		alert( "Requesting a backup!");
+		ws.send( "Backup");
+	};
+
+	ws.onmessage = function (evt)
+	{
+		alert( "Starting download");
+		var data = evt.data;
+		var anchor = document.createElement('a');
+		anchor.href = "/" + data;
+		anchor.download = data;
+		document.body.appendChild( anchor);
+		anchor.click();
+		document.body.removeChild( anchor);
+	}
+}
+
+//==============================================================================
+//  function restoreFromBackup()
+// 		This function downloads a previously saved backup and attempts to restore it.
+//==============================================================================
+function restoreFromBackup()
+{
+	alert( "Restoring!");
+	if ( !("WebSocket" in window))
+	{
+		alert('This browser does not support WebSockets!');
+		return;
+	}
+
+	ws = new WebSocket("<%= url_for('backup')->to_abs %>");
+	ws.onopen = function()
+	{
+		ws.send( "Backup");
+	};
+
+	ws.onmessage = function (evt)
+	{
+		var data = evt.data;
+		var anchor = document.createElement('a');
+		anchor.href = "/" + data;
+		anchor.download = 'backup.tar';
+		document.body.appendChild( anchor);
+		anchor.click();
+		document.body.removeChild( anchor);
+	}
+}
+
 window.addEventListener( "pageshow", loadNavbar);
 //-->export { loadNavbar,showVolunteerInfo,saveVolunteerInfo,showAddedAlert,showHelp,hideEditDates,showEditDates,hideEditSchedule,showEditSchedule,hideConfirmSave,showConfirmSave,hideConfirmDelete,showConfirmDelete,hideNavbar}

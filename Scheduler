@@ -422,6 +422,35 @@ warn join ":", @{app->renderer->classes};
 		$self->render( "index");
 	};
 
+
+	#------------------------------------------------------------------------------
+	#	websocket '/backup'
+	#		This call stores the existing config and database in a tar file,
+	#		encrypts it, and then makes it available for download.
+	#------------------------------------------------------------------------------
+	websocket '/backup' => sub
+	{
+		my $ws = shift;
+
+		$ws->on (text => sub
+			{
+				$ws->inactivity_timeout(300);
+				my ($ws, $message) = @_;
+
+				print "Got a '$message' request\n";
+				if ( $message =~ m/Backup/)
+				{
+					my $backupFilename = SaveRestore::backupData();
+					$ws->send( $backupFilename);
+				}
+				else
+				{
+					$ws->send( "What??!");
+				}
+			}
+			);
+	};
+
 	#------------------------------------------------------------------------------
 	#  websocket '/checkDates'
 	#  		This call checks to see if the provided date range would conflict
