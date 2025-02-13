@@ -79,7 +79,7 @@ option:checked {
 #gearMenu
 {
 	float:right;
-	margin-top: -3px;
+	margin-top: -8px;
 	margin-right: .5em;
 }
 
@@ -428,3 +428,5 @@ option:checked {
 	float: none;
 	margin-right:0;
 }
+
+

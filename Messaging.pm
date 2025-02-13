@@ -49,7 +49,7 @@ my $TwilioAuth;
 my $TwilioNumber;
 my $uid;
 my $pwd;
-my $configName = "$HOME/.scheduler.cfg";
+our $ConfigName = "$HOME/.scheduler.cfg";
 
 
 #------------------------------------------------------------------------------
@@ -78,9 +78,9 @@ sub unhidden($)
 #------------------------------------------------------------------------------
 sub loadConfig()
 {
-	if ( -e $configName)
+	if ( -e $ConfigName)
 	{
-		open( CFG, $configName);
+		open( CFG, $ConfigName);
 		while( <CFG>)
 		{
 			chomp;
@@ -158,7 +158,7 @@ sub saveConfig(%)
 {
 	my %config = @_;
 
-	open( CFG, ">", $configName);
+	open( CFG, ">", $ConfigName);
 
 	print CFG "EmailServer=" . $config{"EmailServer"} ."\n";
 	$email_smtp = $config{"EmailServer"};

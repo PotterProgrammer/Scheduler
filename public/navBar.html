@@ -95,6 +95,20 @@ nav ul li a:hover
 	margin-bottom: .25em;
 }
 
+#gear
+{
+	height:1.9em;
+	width:1.9em;
+	margin-top: 0;
+	top: 2px;
+}
+
+.rightEdge
+{
+	left: 85vw;
+	width: 15vw;
+}
+
 </style>
 
 <nav id="mainMenu">
@@ -129,9 +143,13 @@ nav ul li a:hover
 		</div>
 	</div>
 	<a onclick="showHelp()" >Help</a>
-	<div id="gearMenu">
-		<a href="/config">
-			<img src="images/gear64.png">
-		</a>
+	<div class="submenu" id="gearMenu">
+		<span class="submenuButton">
+			<img id="gear" src="images/gear64.png">
+		</span>
+		<div class="submenuContent rightEdge">
+			<a href="/config">System Settings</a>
+			<a onclick="makeABackup();return false;" >Make Backup</a>
+		</div>
 	</div>
 </nav>
