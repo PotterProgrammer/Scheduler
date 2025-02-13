@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
 
 use warnings;
 use strict;
@@ -15,7 +15,10 @@ use open qw(:std :utf8);
 use utf8;
 use utf8::all;
 
+use Archive::Tar;
+use Messaging;
 
+our $DBFilename = "./schedule.db";
 my $dbh;
 my $verbose = 1;
 
@@ -40,9 +43,11 @@ sub updateScheduleReminded($);
 #------------------------------------------------------------------------------
 BEGIN
 {
+	$DBFilename = "./schedule.db";
+
 	if ( !defined( $dbh))
 	{
-		$dbh = DBI->connect( "dbi:SQLite:./schedule.db", "", "") or die "Sorry, couldn't open schedule database!\n";
+		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "") or die "Sorry, couldn't open schedule database!\n";
 		$dbh->{sqlite_unicode} = 1;
 	}
 
@@ -491,6 +496,23 @@ sub updateScheduleReminded($)
 	$sth->execute();
 }
 
+#------------------------------------------------------------------------------
+#  sub backupData()
+#  		This function backs up the current DB and config info into a file and
+#  		returns the filename.
+#------------------------------------------------------------------------------
+sub backupData()
+{
+		my $tar = Archive::Tar->new;
+		unlink( 'public/dataBackup.tar');
+		unlink( 'public/dataBackup.pbt');
+		$tar->add_files( $DBFilename, $Messaging::ConfigName);
+		$tar->write( 'public/dataBackup.tar');
+		print "Making a backup!\n";
+		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet --no-use-agent -o public/dataBackup.pbt -c public/dataBackup.tar");
+		unlink( 'public/dataBackup.tar');
+		return( 'dataBackup.pbt');
+}
 
 
 1;
