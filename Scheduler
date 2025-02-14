@@ -30,6 +30,7 @@ sub findVolunteer($$);
 	{
 		my ($self) = @_;
 
+		$self->stash( restored=>"no", textMessage=>'', title=>'');
 		$self->render( 'index');
 	};
 
@@ -42,6 +43,7 @@ warn join ":", @{app->static->paths};
 warn join ":", @{app->static->classes};
 warn join ":", @{app->renderer->paths};
 warn join ":", @{app->renderer->classes};
+		$self->stash( restored => "no", textMessage=>'', title=>'');
 		$self->render( 'index');
 	};
 
@@ -311,14 +313,85 @@ warn join ":", @{app->renderer->classes};
 		$self->redirect_to( '/index?messageSent=true');
 	};
 
+	#------------------------------------------------------------------------------
+	#	get '/config'
+	#		This call pulls up the page for editing system configuration settings
+	#------------------------------------------------------------------------------
 	get '/config' => sub
 	{
 		my $self = shift;
-		my $base_url = $self->url_for( '/editVolunteer')->to_abs;
 
 		my %configInfo = getConfigInfo();
 		$self->stash( %configInfo);
 		$self->render( 'editConfig');
+	};
+
+	#------------------------------------------------------------------------------
+	#	get '/restore'
+	#		This call routes to the page for restoring from a backup
+	#------------------------------------------------------------------------------
+	get '/restore' => sub
+	{
+		my $self = shift;
+
+		print "\n\nTHERE???\n\n";
+		$self->render( 'restoreBackup');
+	};
+
+	#------------------------------------------------------------------------------
+	#	post '/restore'
+	#		This call carries out the actual restore
+	#------------------------------------------------------------------------------
+	post '/restore' => sub
+	{
+		my $self = shift;
+	 
+		print "\n\n\nHere dude\n\n\n";
+		# Check file size
+		if ($self->req->is_limit_exceeded)
+		{
+			return $self->render(text => 'File is too big.', status => 200);
+		}
+	 
+		# Process uploaded file
+		my $filename = $self->param('filename');
+		my $size = $filename->size;
+		my $name = $filename->filename;
+		unlink( "dataBackup.pbt");
+		unlink( "dataBackup.tar");
+		print "The keys are: " . join( ", ", keys( %$filename)) . "\n";
+	##--> 	print "Asset=" . $filename->asset->slurp . "\n";
+		$filename->asset->move_to( "dataBackup.pbt");
+		if ( -e 'dataBackup.pbt')
+		{
+			system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o dataBackup.tar dataBackup.pbt");
+			if ( -e 'dataBackup.tar')
+			{
+				my $tar = Archive::Tar->new;
+				if ( $tar->read( 'dataBackup.tar'))
+				{
+					$tar->extract();
+					$self->stash( textMessage => "Restore completed!", title=>'Success', boxtime=>5);
+					print "\n\n\n\nRestored!!!\n\n\n";
+				}
+				else
+				{
+					$self->stash( textMessage => "Unable to read backup file!", title=>'Warning!', boxtime=>5);
+					print "\n\n\n\nRead error!!!\n\n\n";
+				}
+			}
+			else
+			{
+				$self->stash( textMessage => "Unable to read provided backup file!", title=>'Warning!', boxtime=>5);
+					print "\n\n\n\nRead error dude!!!\n\n\n";
+			}
+		}
+
+		SaveRestore::closeDB();
+		SaveRestore::initDB();
+
+		$self->stash( restored=>'yes');
+		$self->render( 'index');
 	};
 
 	#------------------------------------------------------------------------------
@@ -419,6 +492,7 @@ warn join ":", @{app->renderer->classes};
 			saveConfig( %config);
 		}
 
+		$self->stash( restored=>"no", title=>'', textMesage=>'');
 		$self->render( "index");
 	};
 
