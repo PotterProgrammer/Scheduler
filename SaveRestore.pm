@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded initDB closeDB);
 
 use warnings;
 use strict;
@@ -38,13 +38,11 @@ sub updateSchedule($);
 sub updateScheduleReminded($);
 
 #------------------------------------------------------------------------------
-#  BEGIN
-#  		Make sure that we have a DB with appropriate tables ready to go
+#  sub initDB()
+#  		This routine loads the DB and makes sure it is properly set up.
 #------------------------------------------------------------------------------
-BEGIN
+sub initDB()
 {
-	$DBFilename = "./schedule.db";
-
 	if ( !defined( $dbh))
 	{
 		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "") or die "Sorry, couldn't open schedule database!\n";
@@ -117,16 +115,36 @@ BEGIN
 }
 
 #------------------------------------------------------------------------------
-#  END
-#  		Make sure DB is disconnected at shutdown
+#  sub closeDB()
+#  		This routine closes the DB.
 #------------------------------------------------------------------------------
-END
+sub closeDB()
 {
 	if ( defined( $dbh))
 	{
 		print "Disconneting!\n";
 		$dbh->disconnect();
+		undef $dbh;
 	}
+}
+
+#------------------------------------------------------------------------------
+#  BEGIN
+#  		Make sure that we have a DB with appropriate tables ready to go
+#------------------------------------------------------------------------------
+BEGIN
+{
+	$DBFilename = "./schedule.db";
+	initDB();
+}
+
+#------------------------------------------------------------------------------
+#  END
+#  		Make sure DB is disconnected at shutdown
+#------------------------------------------------------------------------------
+END
+{
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -509,7 +527,7 @@ sub backupData()
 		$tar->add_files( $DBFilename, $Messaging::ConfigName);
 		$tar->write( 'public/dataBackup.tar');
 		print "Making a backup!\n";
-		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet --no-use-agent -o public/dataBackup.pbt -c public/dataBackup.tar");
+		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o public/dataBackup.pbt -c public/dataBackup.tar");
 		unlink( 'public/dataBackup.tar');
 		return( 'dataBackup.pbt');
 }
