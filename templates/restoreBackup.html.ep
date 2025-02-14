@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<h1>Restore from Backup</h1>
+
+	<div id="viewSchedule">
+		<p>This process will restore the scheduling environment (including volunteers, positions, schedules and settings) to the state that it was in when the backup file was created.</p>
+		<p>Note that this will erase <b><u>all</u></b> currently entered information, including schedules, replacing it with the contents of the backup file!</p>
+		<p>Are you sure you wish to continue?</p>
+		<br>
+		<button onclick="document.getElementById('filename').click();">Yes</button>
+		<button onclick="window.location='/'">No</button>
+		<form action = "/restore" method="post" enctype="multipart/form-data" hidden>
+			<input id="filename" type="file" name="filename" onchange="document.getElementById('sendBackup').click();" hidden/>
+			<button id="sendBackup" type="submit" hidden/>
+		</form>
+	</div>
+</body>
+
+</html>

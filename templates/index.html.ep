@@ -6,6 +6,7 @@
 </head>
 
 <script src="/scheduler.js"> </script>
+<script src="/Dialog.js"> </script>
 
 <script>
 
@@ -48,8 +49,19 @@ function showAlert()
 	}
 	else
 	{
-		resetToIndex();
+		ShowMessages();
 	}
+
+
+}
+
+function ShowMessages()
+{
+% if ( defined( $textMessage) && $textMessage ne '' && defined( $title))
+% {
+		Dialog.Alert( { text: "<%= $textMessage %>", title: "<%= $title %>"}).then( (answer) => {resetToIndex();});
+		% undef $textMessage;
+% }
 }
 
 window.addEventListener( "pageshow", showAlert);
