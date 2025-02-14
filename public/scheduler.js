@@ -377,13 +377,11 @@ function makeABackup()
 	ws = new WebSocket("./backup");
 	ws.onopen = function()
 	{
-		alert( "Requesting a backup!");
 		ws.send( "Backup");
 	};
 
 	ws.onmessage = function (evt)
 	{
-		alert( "Starting download");
 		var data = evt.data;
 		var anchor = document.createElement('a');
 		anchor.href = "/" + data;
