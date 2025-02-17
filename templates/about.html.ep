@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+<script src="/Dialog.js"> </script>
+
+<script>
+
+</script>
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<h1>Scheduler</h1>
+
+
+	<div id="aboutDialog">
+		<h4>Scheduler</h4>
+		Version: <%= $version %>
+		<p>
+		By Garry F. Taylor
+		<br>
+		Copyright 2025
+		</p>
+	</div>
+
+
+</body>
+
+</html>
+
