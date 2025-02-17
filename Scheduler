@@ -17,6 +17,7 @@ use open qw(:std :utf8);
 use utf8;
 use utf8::all;
 
+my $VERSION = '0.1.1';
 
 my @Slots;
 my @Volunteers;
@@ -338,6 +339,14 @@ warn join ":", @{app->renderer->classes};
 		$self->render( 'restoreBackup');
 	};
 
+	get '/about' => sub
+	{
+		my $self = shift;
+
+		$self->stash( version => $VERSION);
+		$self->render( 'about');
+	};
+
 	#------------------------------------------------------------------------------
 	#	post '/restore'
 	#		This call carries out the actual restore
@@ -492,7 +501,7 @@ warn join ":", @{app->renderer->classes};
 			saveConfig( %config);
 		}
 
-		$self->stash( restored=>"no", title=>'', textMesage=>'');
+		$self->stash( restored => "no", textMessage=>'', title=>'');
 		$self->render( "index");
 	};
 
