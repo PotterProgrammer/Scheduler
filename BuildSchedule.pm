@@ -48,7 +48,8 @@ sub scheduleSomeone($$@);
 ##
 ##		Slot:  {title} => String naming the slot to be filled (e.g. "techBooth")
 ##			   {dayOfWeek} => {M,T,W,Th,F,S,Su}
-##			   {time} => hh:mm
+##			   {startTime} => hh:mm  Time when the position begins
+##			   {endTime} => hh:mm	Time when the position ends
 ##			   {numberNeeded} => Int specifying number of volunteers to fill slot
 ##			   {filled} => 0|1
 ##			   {volunteers} => [name1, name2 ...]
@@ -66,7 +67,7 @@ sub scheduleSomeone($$@);
 ##		@Volunteers: list of volunteers
 ##
 ##		Schedule:	{date} => Date of the position
-##					{time} => Time of the position
+##					{time} => Start time of the position
 ##					{title} => Title of the position being filled
 ##					{name} => Name of person filling position
 ##
@@ -185,7 +186,7 @@ sub scheduleSlots($$)
 			##
 			##  Remove names which are unavailable on this date
 			##
-			@names = removeUnavailables( $date, @names);
+			@names = removeUnavailables( $date, $slot->{startTime}, $slot->{endTime}, @names);
 
 			##
 			##  Sort the remaining names based on how often they've volunteered thus far
@@ -274,24 +275,29 @@ print "\n\n ***********  Moving $name->{name} to the front of the list!!\n";
 	return @sortedList;
 }
 
+
+
 #------------------------------------------------------------------------------
-#  sub removeUnavailables( $date, @names)
+#  sub removeUnavailables( $date, $startTime, $endTime, @names)
 #  		This function looks through the list of names and generates a list of
 #  		all names that are available on the given date.
 #------------------------------------------------------------------------------
-sub removeUnavailables( $@)
+sub removeUnavailables( $$$@)
 {
-	my ( $date, @names) = @_;
+	my ( $date, $startTime, $endTime, @names) = @_;
 	my @availables;
 
 	foreach my $name (@names)
 	{
+		print "Checking to see if $name->{name} is unavailable on $date from $startTime - $endTime\n";
 		##
 		##  Is this person unavailable?
 		##
 		if (  defined( $name->{daysUnavailable}) &&
 			  length( $name->{daysUnavailable}) && 
-			  $name->{daysUnavailable} =~ m/$date/ )
+			  isUnavailable( $name->{daysUnavailable}, $date, $startTime, $endTime)
+##-->			  $name->{daysUnavailable} =~ m/$date/ )
+		   )
 		{
 			##
 			##  If so, add their name to the "unavailable" list
@@ -308,6 +314,62 @@ sub removeUnavailables( $@)
 	}
 
 	return @availables;
+}
+
+#------------------------------------------------------------------------------
+#  sub isUnavailable( $daysUnavailable, $neededDate, $neededStart, $neededEnd)
+#  		This functions checks to see if the needed date and time range overlaps
+#  		with a specified day when the person is unavailable.  It returns true
+#  		if the person is unavailable at the needed time.
+#------------------------------------------------------------------------------
+sub isUnavailable( $$$$)
+{
+	my ($daysUnavailable, $neededDate, $neededStart, $neededEnd) = @_;
+ 	my $isUnavailable = 0;
+
+	##
+	##  First see if there are any dates on the unavailable list that match the
+	##  date when the person is needed.
+	##
+	my @matchingDates = ( $daysUnavailable =~ m/($neededDate[^, ]*)/g);
+	
+	##
+	##  Now look to see if any of the matching dates have a time constraint
+	##  that overlaps with the needed time
+	##
+	foreach my $dateInQuestion (@matchingDates)
+	{
+		##
+		##  If the date has no start time or end time attached 
+		##  (YYYY-MM-DD vs YYYY-MM-DDS:hh:mmE:hh:mm) then the person is
+		##  unavailable, since they are unavailable for the whole day.
+		##
+		if ( $dateInQuestion !~ /S:(\d\d:\d\d)E:(\d\d:\d\d)/)
+		{
+			$isUnavailable = 1;
+		}
+		else
+		{
+			##
+			##  Extract the start and end dates when the person is unavailable
+			##
+			my $unavailableStart = $1;
+			my $unavailableEnd = $2;
+
+			##
+			##  Does the needed start and end fall within the times when the
+			##	person is unavailable?
+			##
+			if (  ( $neededStart ge $unavailableStart && ( $neededStart le $unavailableEnd)) ||
+		  		  ( $neededEnd ge $unavailableStart && ( $neededEnd le $unavailableEnd)))
+			{
+				print "\n*** Task from $neededStart to $neededEnd on $neededDate conflicts on $dateInQuestion! ***\n\n";
+				$isUnavailable = 1;
+			}
+		}
+	}
+
+	return $isUnavailable;
 }
 
 #------------------------------------------------------------------------------
@@ -338,7 +400,7 @@ sub fillSlot( $$$@)
 			##
 			my %schedule;
 			$schedule{date} = $date;
-			$schedule{time} = $slot->{time};
+			$schedule{time} = $slot->{startTime};
 			$schedule{title} = $slot->{title};
 			$schedule{name} = $names[0]->{name};
 			push( @slotSchedule, \%schedule);
@@ -356,7 +418,7 @@ sub fillSlot( $$$@)
 			##
 			##  Mark the person as unavailable for this date (to prevent schduling two separate tasks on the same date)
 			##
-			$names[0]->{daysUnavailable} .= ",$date";
+			$names[0]->{daysUnavailable} .= ",${date}S:$slot->{startTime}E:$slot->{endTime}";
 
 			shift( @names);
 		}
@@ -365,7 +427,7 @@ sub fillSlot( $$$@)
 			print "\n\n No one available for $slot->{title} on $date!!\n\n\n\a";
 			my %schedule;
 			$schedule{date} = $date;
-			$schedule{time} = $slot->{time};
+			$schedule{time} = $slot->{startTime};
 			$schedule{title} = $slot->{title};
 			$schedule{name} = "—unfilled—";
 			push( @slotSchedule, \%schedule);
@@ -573,7 +635,7 @@ sub scheduleSomeone( $$@)
 		print "\n\n No one available for $slot->{title} on $date!!\n\n\n\a";
 		my %schedule;
 		$schedule{date} = $date;
-		$schedule{time} = $slot->{time};
+		$schedule{time} = $slot->{startTime};
 		$schedule{title} = $slot->{title};
 		$schedule{name} = "—unfilled—";
 		push( @slotSchedule, \%schedule);
@@ -592,7 +654,7 @@ sub scheduleSomeone( $$@)
 		##
 		my %schedule;
 		$schedule{date} = $date;
-		$schedule{time} = $slot->{time};
+		$schedule{time} = $slot->{startTime};
 		$schedule{title} = $slot->{title};
 		$schedule{name} = $names[0]->{name};
 		push( @slotSchedule, \%schedule);

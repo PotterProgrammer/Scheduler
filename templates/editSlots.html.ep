@@ -54,61 +54,12 @@
 			var reply = JSON.parse( msg.data);
 			document.getElementById('title').value = reply.title;
 			document.getElementById('dayNeeded').value = reply.dayOfWeek;
-			document.getElementById('time').value = reply.time;
+			document.getElementById('startTime').value = reply.startTime;
+			document.getElementById('endTime').value = reply.endTime;
 			document.getElementById('count').value = reply.numberNeeded;
 			ws.close();
 		};
 	}
-
-
-//-->	//==============================================================================
-//-->	//	function addEntry()
-//-->	//		This function adds the provided values as a new volunteer position
-//-->	//==============================================================================
-//-->	function addEntry()
-//-->	{
-//-->		//
-//-->		//  Call server to get info for the current position
-//-->		//
-//-->		var title = document.getElementById('title').value
-//-->		var dayOfWeek = document.getElementById('dayNeeded').value;
-//-->		var time = document.getElementById('time').value;
-//-->		var numberNeeded = document.getElementById('count').value;
-//-->		
-//-->		var ws;
-//-->		var url;
-//-->
-//-->		if ( window.location.protocol == 'https:')
-//-->		{
-//-->			url = 'wss://' + window.location.host + '/addPosition';
-//-->		}
-//-->		else
-//-->		{
-//-->			url = 'ws://' + window.location.host + '/addPosition';
-//-->		}
-//-->		ws = new WebSocket( url);
-//-->
-//-->		ws.onopen = (event) => 
-//-->		{
-//-->			ws.send( JSON.stringify( {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}));
-//-->		};
-//-->
-//-->		ws.onerror = (event) =>
-//-->		{
-//-->			ws.close();
-//-->			ws = new WebSocket( url);
-//-->			ws.onopen = (event) => 
-//-->			{
-//-->				ws.send( selectedItemNumber);
-//-->			};
-//-->		};
-//-->
-//-->		ws.onmessage = () =>
-//-->		{
-//-->			ws.close();
-//-->			window.location.reload();
-//-->		};
-//-->	}
 
 
 	//==============================================================================
@@ -124,7 +75,8 @@
 		var selectedItem = itemList.value;
 		var title = document.getElementById('title').value
 		var dayOfWeek = document.getElementById('dayNeeded').value;
-		var time = document.getElementById('time').value;
+		var startTime = document.getElementById('startTime').value;
+		var endTime = document.getElementById('endTime').value;
 		var numberNeeded = document.getElementById('count').value;
 		
 		var ws;
@@ -142,7 +94,7 @@
 
 		ws.onopen = (event) => 
 		{
-			ws.send( JSON.stringify( {'replace': selectedItem, with: {'title': title, 'dayOfWeek': dayOfWeek, 'time': time, 'numberNeeded': numberNeeded}}));
+			ws.send( JSON.stringify( {'replace': selectedItem, with: {'title': title, 'dayOfWeek': dayOfWeek, 'startTime': startTime, 'endTime': endTime, 'numberNeeded': numberNeeded}}));
 		};
 
 		ws.onerror = (event) =>
@@ -196,12 +148,27 @@
 	function saveEntry()
 	{
 		var title = document.getElementById('title').value
+		var startTime = document.getElementById('startTime').value;
+		var endTime = document.getElementById('endTime').value;
 
 		if ( title.length == 0)
 		{
 			Dialog.Alert( {title: "Missing Position", text: "Please enter the name of the position."});
 			return;
 		}
+
+		if ( startTime == "" || endTime == "")
+		{
+			Dialog.Alert( {title: "Missing Time", text: "Please supply both a starting and ending time for this position."});
+			return;
+		}
+
+		if ( endTime <= startTime)
+		{
+			Dialog.Alert( {title: "Invalid Time", text: "The ending time must come after the start time for this position."});
+			return;
+		}
+
 	
 		showConfirmSave();
 	}
@@ -268,8 +235,11 @@
 		<option value="Saturday">Saturday</option>
 	</select>
 	<br>
-	<label for="time">Time when service needed:</label>
-	<input type="time" id="time" name="time"></input>
+	<label for="startTime">Start time for service needed:</label>
+	<input type="time" id="startTime" name="startTime"></input>
+	<br>
+	<label for="endTime">End time for service needed:</label>
+	<input type="time" id="endTime" name="endTime"></input>
 	<br>
 	<label for="count">Number of volunteers needed:</label>
 	<input type="number" id="count" name="count" min="1" max="20" step="1"></input>

@@ -420,7 +420,7 @@ sub sendReminders($)
 			my $name = $scheduledVolunteer->{name};
 			my $firstName = ($name =~ m/^([^\s]*)/) ? $1 : $name;
 			my $date = $scheduledVolunteer->{date};
-			my $time = $scheduledVolunteer->{time};
+			my $time = $scheduledVolunteer->{startTime};
 			my $position = $scheduledVolunteer->{title};
 			$date =~ s/(\d+)-(.*)/$2-$1/;
 
@@ -604,7 +604,7 @@ sub sendSchedules($$$)
 						$scheduledDates .= '<li><span class="scheduledDate">' . $printableDate . '</span>';
 						$scheduledDates .= '<span class="scheduledSeparator">' . $dash . '</span>';
 						$scheduledDates .= '<span class="scheduledRole">' . $schedule->{title}. '</span>';
-						$scheduledDates .= 'at <span class="scheduledTime">' . $schedule->{time}. '</span>';
+						$scheduledDates .= 'at <span class="scheduledTime">' . $schedule->{startTime}. '</span>';
 						$scheduledDates .= '</li>';
 					}
 
@@ -649,7 +649,7 @@ sub sendSchedules($$$)
 					{
 						my $printableDate = $schedule->{date};
 						$printableDate =~ s/(\d+)-(.*)/$2-$1/;
-						$scheduledDates .= " * $printableDate:  $schedule->{title}  $schedule->{time}\n";
+						$scheduledDates .= " * $printableDate:  $schedule->{title}  $schedule->{startTime}\n";
 					}
 
 					my $text  = $textTemplate;
@@ -714,7 +714,7 @@ sub makeCalendarFor( $$$)
 		foreach my $schedule ( @schedules)
 		{
 			my $event = Data::ICal::Entry::Event->new();
-			$schedule->{time} =~ m/(\d+):(\d+)/;
+			$schedule->{startTime} =~ m/(\d+):(\d+)/;
 			my ( $hour, $minute) = ($1, $2);
 			$schedule->{date} =~ m/(\d+)-(\d+)-(\d+)/;
 			my ( $year, $month, $day) = ( $1, $2, $3);
