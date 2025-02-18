@@ -64,9 +64,9 @@ warn join ":", @{app->renderer->classes};
 	};
 
 	#------------------------------------------------------------------------------
-	#  get '/slots'
+	#  get '/editSlots'
 	#------------------------------------------------------------------------------
-	get '/slots' => sub
+	get '/editSlots' => sub
 	{
 		my $self = shift;
 
@@ -74,7 +74,7 @@ warn join ":", @{app->renderer->classes};
 
 		$self->stash( slots=>\@Slots);
 
-		$self->render( "slots");
+		$self->render( "editSlots");
 
 	};
 
@@ -206,9 +206,9 @@ warn join ":", @{app->renderer->classes};
 			}
 
 			@Schedule = readSchedule( $startDate, $endDate);
-			$self->stash( incomplete=>$incomplete, sentSchedules=>$sendSchedules, startDate=>$startDate, endDate=>$endDate, schedule=>\@Schedule);
 			print "Viewing schedule...\n";
-			$self->render( "viewSchedule");
+			my $url = $self->url_for( "/viewTheSchedule");
+			$self->redirect_to( $url->query( {incomplete=>$incomplete, sentSchedules=>$sendSchedules, start=>$startDate, end=>$endDate} ));
 		}
 	};
 
@@ -280,9 +280,11 @@ warn join ":", @{app->renderer->classes};
 		my $self = shift;
 		my $start = $self->param( "start");
 		my $end = $self->param( "end");
+		my $incomplete = $self->param( "incomplete");
+		my $sentSchedules = $self->param( "sentSchedules");
 
 		@Schedule = readSchedule( $start, $end);
-		$self->stash( incomplete=>undef, sentSchedules=>undef,startDate=>$start, endDate=>$end, schedule=>\@Schedule);
+		$self->stash( incomplete=>$incomplete, sentSchedules=>$sentSchedules, startDate=>$start, endDate=>$end, schedule=>\@Schedule);
 		$self->render( "viewSchedule");
 	};
 
@@ -587,7 +589,8 @@ warn join ":", @{app->renderer->classes};
 						##
 						$self->send( { json=> {	title => $Slots[$posIndex]->{title},
 												dayOfWeek =>$Slots[$posIndex]->{dayOfWeek},
-												time => $Slots[$posIndex]->{time}, 
+												startTime => $Slots[$posIndex]->{startTime}, 
+												endTime => $Slots[$posIndex]->{endTime}, 
 												numberNeeded => $Slots[$posIndex]->{numberNeeded}
 											  }
 									  }

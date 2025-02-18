@@ -97,7 +97,8 @@ sub initDB()
 	$dbh->do( "create table if not exists position 
 				  ( title text,
 					dayOfWeek text,
-					time text,
+					startTime text,
+					endTime text,
 					numberNeeded int,
 					primary key( 'title')
 				  )");
@@ -254,8 +255,8 @@ sub removeSlot($)
 
 #------------------------------------------------------------------------------
 #  sub removeVolunteer( $name)
-#		This routine removes the named individual's entry from the volunteer,
-#		the "position" table.
+#		This routine removes the named individual's entries from the
+#		"volunteer", the "dates_unavailable", and the "dates_desired" tables.
 #------------------------------------------------------------------------------
 sub removeVolunteer($)
 {
@@ -284,11 +285,12 @@ sub removeVolunteer($)
 sub saveSlot($)
 {
 	my $slot = $_[0];
-	my $sth = $dbh->prepare( "insert or replace into position (title, dayOfWeek,time, numberNeeded) values (?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into position (title, dayOfWeek, startTime, endTime, numberNeeded) values (?,?,?,?,?)");
 	$sth->bind_param( 1, $slot->{title});
 	$sth->bind_param( 2, $slot->{dayOfWeek});
-	$sth->bind_param( 3, $slot->{time});
-	$sth->bind_param( 4, $slot->{numberNeeded});
+	$sth->bind_param( 3, $slot->{startTime});
+	$sth->bind_param( 4, $slot->{endTime});
+	$sth->bind_param( 5, $slot->{numberNeeded});
 	$sth->execute();
 }
 
@@ -468,7 +470,7 @@ sub saveSchedule(@)
 	foreach my $slot (@schedules)
 	{
 		$sth->bind_param( 1, $slot->{date});
-		$sth->bind_param( 2, $slot->{time});
+		$sth->bind_param( 2, $slot->{startTime});
 		$sth->bind_param( 3, $slot->{title});
 		if ( defined( $slot->{name}) && (length( $slot->{name}) > 0))
 		{
