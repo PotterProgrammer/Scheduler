@@ -62,6 +62,7 @@ sub scheduleSomeone($$@);
 ##					 {daysDesired} => [ date1, date2 ...] (where date = YYYY-MM-DD
 ##					 {daysUnavailable} => [ date1, date2 ...] (where date = YYYY-MM-DD
 ##					 {desiredRoles} => [ 'techBooth', 'greeter'...]
+##					 {roleCount} => { position => count,...} Hash of number of times person has served in a given position (total).
 ##					 {timesScheduled} => Int indicating how many times this person has been scheduled for this session
 ##
 ##		@Volunteers: list of volunteers
@@ -150,7 +151,14 @@ sub scheduleSlots($$)
 	##
 	foreach my $person ( @Volunteers)
 	{
-		$volunteerCount{ $person->{name}} = 0;
+		##
+		##  Indicate that the person has served 0 times for
+		##  each slot title
+		##
+		foreach my $slot (@Slots)
+		{
+			$volunteerCount{ $person->{name}}->{$slot->{title}} = 0;
+		}
 	}
 
 	##
@@ -191,7 +199,7 @@ sub scheduleSlots($$)
 			##
 			##  Sort the remaining names based on how often they've volunteered thus far
 			##
-			@names = orderByCount( \%volunteerCount, @names);
+			@names = orderByCount( $slot->{title}, \%volunteerCount, @names);
 
 			##
 			##  Did anyone volunteer specifically for this date?
@@ -217,19 +225,20 @@ sub scheduleSlots($$)
 
 
 #------------------------------------------------------------------------------
-#  sub orderByCount( \%volunteerCount, @names)
+#  sub orderByCount( $slotName, \%volunteerCount, @names)
 #  		This function sorts the list of names placing those who have
 #  		volunteered most at the end of the list and returns the new list.  (The
 #  		original list is untouched.)
 #------------------------------------------------------------------------------
-sub orderByCount($@)
+sub orderByCount($$@)
 {
-	my ($volunteerCount, @names) = @_;
+	my ($slotName, $volunteerCount, @names) = @_;
 	
 	##
 	##  Sort the names provide based on how often they've been scheduled already
 	##
-	@names = sort { $volunteerCount->{$a->{name}} <=> $volunteerCount->{$b->{name}}} @names;
+##-->	@names = sort { $volunteerCount->{$a->{name}} <=> $volunteerCount->{$b->{name}}} @names;
+	@names = sort { $volunteerCount->{$a->{name}}->{$slotName} <=> $volunteerCount->{$b->{name}}->{$slotName} } @names;
 
 	return @names;
 }
@@ -411,9 +420,9 @@ sub fillSlot( $$$@)
 			}
 
 			##
-			##  Make note that this person was scheduled for a task
+			##  Make note that this person was scheduled for this task during this run
 			##
-			$volunteerCount->{$names[0]->{name}}++;
+			$volunteerCount->{$names[0]->{name}}->{$slot->{title}}++;
 
 			##
 			##  Mark the person as unavailable for this date (to prevent schduling two separate tasks on the same date)

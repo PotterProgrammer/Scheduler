@@ -207,7 +207,7 @@
 	<h1>View Schedule</h1>
 
 	<div id="viewSchedule">
-		<p id="scheduleDates">Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b>
+		<div id="scheduleDates"><div id="heading">Here is the current schedule for <b><%== $startDate %></b> through <b><%== $endDate %></b></div></div>
 		% if ( defined( $incomplete))
 	    % {
 		% 	if ( $incomplete)
@@ -230,17 +230,32 @@
 		<br>
 
 		<div id="schedule">
+		<div id="pageStart">
 		% my $lastDay = '';
 		% my $lastPosition = '';
         % my $separator = '';
+		% my $dayCount = -1;
+		% my $type='entry';
 		% foreach my $scheduledSlot (@{$schedule})
 		% {
 		%   if ( $scheduledSlot->{date} ne $lastDay)
 		%	{
 		%	   $lastDay = $scheduledSlot->{date};
 		%      $lastPosition = '';
-			   <%== $separator %><h2 id="scheduledDate"> <%== $lastDay %> </h2>
+		%	   $dayCount++;
+		%	   if ( $dayCount == 2)
+		%	   {
+		%	   	  $type='columnTop';
+		%      }
+		%	   if ( $dayCount == 4)
+		%	   {
+		%	   	  $separator = "</div>\n". $separator. "<div id=\"pageStart\">\n";
+		%	   	  $dayCount = 0;
+		%	   }
+			   <%== $separator %><h2 id="scheduledDate" class="<%== $type %>"> <%== $lastDay %> </h2>
+		%      $type = 'entry';
 		%      $separator = "\n<br>\n";
+		%      
 		%   }
 		%   if ( $scheduledSlot->{title} ne $lastPosition)
 		%   {
