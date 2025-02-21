@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer saveSlot saveSchedule updateSchedule updateScheduleReminded initDB closeDB);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded initDB closeDB);
 
 use warnings;
 use strict;
@@ -14,6 +14,7 @@ use DBI;
 use open qw(:std :utf8);
 use utf8;
 use utf8::all;
+use JSON;
 
 use Archive::Tar;
 use Messaging;
@@ -237,7 +238,7 @@ sub readVolunteers(@)
 
 #------------------------------------------------------------------------------
 #  sub removeSlot( $positionTitle)
-#		This routine removess the information with the provided title from
+#		This routine removes the information with the provided title from
 #		the "position" table.
 #------------------------------------------------------------------------------
 sub removeSlot($)
@@ -306,12 +307,13 @@ sub saveVolunteer($)
 	##
 	##  First, update the volunteer table
 	##
-	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles, contact) values (?,?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles, contact ) values (?,?,?,?,?)");
 	$sth->bind_param( 1, $volunteer->{name});
 	$sth->bind_param( 2, $volunteer->{email});
 	$sth->bind_param( 3, $volunteer->{phone});
 	$sth->bind_param( 4, $volunteer->{desiredRoles});
 	$sth->bind_param( 5, $volunteer->{contact});
+	
  print "Storing the volunteer values $volunteer->{name}, $volunteer->{email}, $volunteer->{phone}, $volunteer->{desiredRoles}, $volunteer->{contact}\n";
 	$sth->execute();
 
