@@ -14,7 +14,6 @@ use DBI;
 use open qw(:std :utf8);
 use utf8;
 use utf8::all;
-use JSON;
 
 use Archive::Tar;
 use Messaging;
