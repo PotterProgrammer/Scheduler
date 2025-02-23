@@ -45,7 +45,7 @@ sub initDB()
 {
 	if ( !defined( $dbh))
 	{
-		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "") or die "Sorry, couldn't open schedule database!\n";
+		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "", {AutoCommit =>1}) or die "Sorry, couldn't open schedule database!\n";
 		$dbh->{sqlite_unicode} = 1;
 	}
 
@@ -471,7 +471,7 @@ sub saveSchedule(@)
 	foreach my $slot (@schedules)
 	{
 		$sth->bind_param( 1, $slot->{date});
-		$sth->bind_param( 2, $slot->{startTime});
+		$sth->bind_param( 2, $slot->{time});
 		$sth->bind_param( 3, $slot->{title});
 		if ( defined( $slot->{name}) && (length( $slot->{name}) > 0))
 		{
