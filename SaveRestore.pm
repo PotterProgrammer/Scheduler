@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded initDB closeDB);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded scheduleReminder unscheduleReminder initDB closeDB);
 
 use warnings;
 use strict;
@@ -34,6 +34,8 @@ sub removeSlot($);
 sub saveSchedule(@);
 sub saveSlot($);
 sub saveVolunteer($);
+sub scheduleReminder($$$);
+sub unscheduleReminder();
 sub updateSchedule($);
 sub updateScheduleReminded($);
 
@@ -535,5 +537,106 @@ sub backupData()
 		return( 'dataBackup.pbt');
 }
 
+
+#------------------------------------------------------------------------------
+#  sub scheduleReminder( $weekday, $time, $port)
+#  		This function schedules a recurring call to '/sendReminders' at the
+#  		indicated port.
+#------------------------------------------------------------------------------
+sub scheduleReminder($$$)
+{
+	my ( $weekday, $time, $port) = @_;
+	my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
+	my $crontabMatch = $crontabEntryHeader;
+	$crontabMatch =~ s/\n/./g;
+
+	##
+	##  Break the time in to hour and minute
+	##
+	my ( $hour, $minute) = split( ':', $time);
+	my %weekdays = ( sunday=>0, monday=>1, tuesday=>2, wednesday=>3, thursday=>4, friday=>5, saturday=>6);
+	$weekday =~ tr/A-Z/a-z/;
+
+	my $newLine = sprintf( "%02d %02d * * %02d curl http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, $port);
+	
+	##
+	##  Read in the current crontab
+	##
+	my $crontab = `crontab -l`;
+	
+	##
+	##  Is there currently an entry for sendReminders?
+	##
+	if ( $crontab =~ m/$crontabMatch(.*?)/sm)
+	{
+		print "Matched $1\n";
+		$crontab =~ s/$crontabMatch(.*?)$/$crontabEntryHeader$newLine/sm;
+	}
+	else
+	{
+		$crontab .= "\n$crontabEntryHeader$newLine\n";
+	}
+
+	##
+	##  Store the new crontab
+	##
+	open( my $CRONFILE, '>', 'my_crontab') || die "Can't open crontab file! $!\n";
+	print $CRONFILE $crontab;
+	close $CRONFILE;
+
+	##
+	##  Remove the old crontab
+	##
+	system( "crontab -r");
+	
+	##
+	## 	Set new crontab in place
+	##
+	system( "crontab my_crontab");
+}
+
+#------------------------------------------------------------------------------
+#  sub unscheduleReminder( $weekday, $time, $port)
+#  		This function unschedules a recurring call to '/sendReminders'.
+#------------------------------------------------------------------------------
+sub unscheduleReminder()
+{
+	my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
+	my $crontabMatch = $crontabEntryHeader;
+	$crontabMatch =~ s/\n/./g;
+
+	##
+	##  Read in the current crontab
+	##
+	my $crontab = `crontab -l`;
+	
+	##
+	##  Is there currently an entry for sendReminders?
+	##
+	if ( $crontab =~ m/$crontabMatch.*?/sm)
+	{
+		##
+		##  If so, remove the entry
+		##
+		$crontab =~ s/$crontabMatch(.*?)$.*$//sm;
+
+		##
+		##  Store the new crontab
+		##
+		open( my $CRONFILE, '>', 'my_crontab') || die "Can't open crontab file! $!\n";
+		print $CRONFILE $crontab;
+		close $CRONFILE;
+
+		##
+		##  Remove the old crontab
+		##
+		system( "crontab -r");
+		
+		##
+		## 	Set new crontab in place
+		##
+		system( "crontab my_crontab");
+	}
+}
 
 1;
