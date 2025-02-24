@@ -7,7 +7,9 @@ use strict;
 use lib "./";
 
 use Mojolicious::Lite;
-##-->plugin 'Subprocess';
+plugin 'Subprocess';
+
+use Date::Calc qw(:all);
 
 use Messaging;
 use SaveRestore;
@@ -177,6 +179,26 @@ warn join ":", @{app->renderer->classes};
 		{
 			my $incomplete = buildScheduleForDates( $startDate, $endDate);
 			my $rendered = 0;
+
+			print "Here goes...\n";
+			$self->subprocess( sub()
+				{
+					##
+					##  To keep things from overflowing remove Schedule
+					##  entries that are more than 90 days old
+					##
+					print "Purging...\n";
+					my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime( time);
+					$year += 1900;
+					$mon ++;
+					my ( $keepyear, $keepmonth, $keepday) = Add_Delta_Days( $year, $mon, $mday, -91);
+					my $clearBefore = sprintf( "%04d-%02d-%02d", $keepyear, $keepmonth, $keepday);
+					clearSavedSchedule( "2000-01-01", $clearBefore);
+				}, sub()
+				{
+					print "Cleanup finished...\n";
+				}
+				);
 
 			##
 			##  Was a complete schedule built?
@@ -821,6 +843,58 @@ warn join ":", @{app->renderer->classes};
 					}
 				 );
 	};
+
+
+	#------------------------------------------------------------------------------
+	#  websocket '/scheduleWeeklyReminders'
+	#  		This call sets or clears a time to send weekly reminders to those
+	#  		scheduled to volunteer within the next week.
+	#------------------------------------------------------------------------------
+	websocket '/scheduleReminders' => sub
+	{
+		my $self = shift;
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+
+					print "Dump:\n";
+						foreach my $key (keys( %{$json}))
+						{
+							print "Key: $key => " . $json->{$key} . "\n";
+						}
+						print "$json->{enabled}\n";
+						if ( $json->{enabled} == 1)
+						{
+							my $weekday = $json->{weekday};
+							my $time = $json->{time};
+
+							##
+							##  Set a recurring task to send reminders to the indicated port
+							##
+							scheduleReminder( $weekday, $time, $self->tx->local_port);
+						}
+						else
+						{
+							##
+							##  Disable automatic sending of reminders
+							##
+							unscheduleReminder();
+						}
+
+						##
+						##  Send back info
+						##
+						$self->send( { json=> {	status => "OK" }});
+					}
+				 );
+		
+	};
+
+
 
 	@Slots = readSlots();
 
