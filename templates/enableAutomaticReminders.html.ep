@@ -53,6 +53,11 @@ function saveChanges()
 	var	enabled = document.getElementById( 'enableReminders').checked;
 	var weekday = document.getElementById('dayNeeded').value;
 	var time = document.getElementById( 'sendAt').value;
+	if ( time == "")
+	{
+		Dialog.Alert( {title: "Missing Value", text: "Please enter a proper value for the time." });
+		return;
+	}
 
 	ws.onopen = (event) => 
 	{
