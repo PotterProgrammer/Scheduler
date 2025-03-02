@@ -363,6 +363,28 @@ warn join ":", @{app->renderer->classes};
 		$self->render( 'restoreBackup');
 	};
 
+	#------------------------------------------------------------------------------
+	#	get '/enableAutomaticReminders' 
+	#		This call routes to the page for enabling/disabling automatic reminders
+	#------------------------------------------------------------------------------
+	get '/enableAutomaticReminders' => sub
+	{
+		my $self = shift;
+
+		my ( $enabled, $hour, $minute, $weekday, $crontab) = readScheduledReminder();
+		my $time = sprintf( "%02d:%02d", $hour, $minute);
+		if ( !defined( $weekday))
+		{
+			$weekday="";
+		}
+		$self->stash( enabled=>$enabled, time=>$time, weekday=>$weekday);
+		$self->render( 'enableAutomaticReminders');
+	};
+
+	#------------------------------------------------------------------------------
+	#	get '/about' 
+	#		This displays the "about" info
+	#------------------------------------------------------------------------------
 	get '/about' => sub
 	{
 		my $self = shift;
@@ -371,6 +393,7 @@ warn join ":", @{app->renderer->classes};
 		$self->render( 'about');
 	};
 
+	
 	#------------------------------------------------------------------------------
 	#	post '/restore'
 	#		This call carries out the actual restore
@@ -844,6 +867,34 @@ warn join ":", @{app->renderer->classes};
 				 );
 	};
 
+	websocket '/updateReminders' => sub
+	{
+		my $self = shift;
+		my $port = $self->tx->local_port;
+
+		##
+		##  See if we received a message
+		##
+		$self->on( json => sub
+					{
+						my ($self, $json) = @_;
+						my $status = "";
+
+						if ( $json->{enabled} eq "true")
+						{
+							$status = "Automatic reminders are enabled.";
+							scheduleReminder( $json->{weekday}, $json->{time}, $port);
+						}
+						else
+						{
+							$status = "Automatic reminders are disabled.";
+							unscheduleReminder();
+						}
+
+						$self->send( {json => { status => $status}});
+					}
+				 );
+	};
 
 	#------------------------------------------------------------------------------
 	#  websocket '/scheduleWeeklyReminders'
