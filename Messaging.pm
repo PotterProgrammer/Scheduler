@@ -333,8 +333,8 @@ sub sendSMSTwilio($$)
 		}
 		
 		if ( !defined( $status))
-			{
-			logCall( "Unable to send TXT message!", "Twilio said: " . $response->{message} . "\n" . $response->{content} );
+		{
+			print "*** ERROR ***   Unable to send TXT message!", "Twilio said: " . $response->{message} . "\n" . $response->{content} . "\n";
 
 			sendEmail( 'webmaster@stjamesbg.org', 'St.James PhoneTree Alert', 'St. James Phone Tree Alert!', "Trying to send a message to $to returned the following error: " .  $response->{content});
 			$rc = 1;
