@@ -6,3 +6,5 @@ templates/*.html
 *.xcf
 *.db.backup
 *.cfg
+local/*
+vendor/*
