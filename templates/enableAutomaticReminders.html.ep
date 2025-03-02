@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<script src="/scheduler.js"> </script>
+<script src="/Dialog.js"></script>
+
+<script>
+
+//==============================================================================
+//  function watchCheckbox()
+//		This function enables or disables the form entries based on the setting
+//		of checkbox
+//==============================================================================
+function watchCheckbox()
+{
+	var fieldsetId = document.getElementById( "reminderInfo");
+	var checkbox = document.getElementById( "enableReminders");
+	if ( checkbox.checked == true)
+	{
+		fieldsetId.disabled = false;
+	}
+	else
+	{
+		fieldsetId.disabled = true;
+	}
+}
+
+//==============================================================================
+//  function saveChanges()
+//		This function updates the reminder settings with the new values.
+//==============================================================================
+function saveChanges()
+{
+	var ws;
+	var url;
+
+	if ( window.location.protocol == 'https:')
+	{
+		url = 'wss://';
+	}
+	else
+	{
+		url = 'ws://';
+	}
+	url +=  window.location.host + '/updateReminders';
+
+	ws = new WebSocket( url);
+
+	var	enabled = document.getElementById( 'enableReminders').checked;
+	var weekday = document.getElementById('dayNeeded').value;
+	var time = document.getElementById( 'sendAt').value;
+
+	ws.onopen = (event) => 
+	{
+		ws.send( JSON.stringify( {'enabled': enabled, 'weekday': weekday, 'time': time} ));
+	};
+
+	ws.onerror = (event) =>
+	{
+		ws.close();
+		ws = new WebSocket( url);
+		ws.onopen = (event) => 
+		{
+			ws.send( JSON.stringify( {'enabled': enabled, 'weekday': weekday, 'time': time} ));
+		};
+	};
+
+	ws.onmessage = (msg) =>
+	{
+		var reply = JSON.parse( msg.data);
+		ws.close();
+		Dialog.Alert( {title: "Changes Saved", text: reply.status });
+	};
+}
+</script>
+
+
+<body>
+	<div id="navbar">
+	</div>
+
+	<h1>Automatically Send Reminders</h1>
+
+	<div>
+		<div class="introduction">
+			Scheduler can automatically send reminders each week to the people who are scheduled 
+			to volunteer that week.  If you wish to make use of that feature, select the checkbox below and choose the day of the week
+			and the time for when you wish the reminders to be sent.
+		</div>
+
+		<div class="simpleForm">
+			<input type="checkbox" id="enableReminders" onclick="watchCheckbox()" <%= ($enabled) ? "checked" : "" %>>Send automatic Reminders</button>
+			<fieldset id="reminderInfo" <%= (!$enabled) ? "disabled" : "" %>>
+				<label for="dayNeeded">Send reminders every:</label>
+				<select name="dayNeeded" id="dayNeeded">
+					<option value="Sunday" <%= ($weekday eq "Sunday") ? "selected" : "" %> >Sunday</option>
+					<option value="Monday" <%= ($weekday eq "Monday") ? "selected" : "" %> >Monday</option>
+					<option value="Tuesday" <%= ($weekday eq "Tuesday") ? "selected" : "" %> >Tuesday</option>
+					<option value="Wednesday" <%= ($weekday eq "Wednesday") ? "selected" : "" %>>Wednesday</option>
+					<option value="Thursday" <%= ($weekday eq "Thursday") ? "selected" : "" %>>Thursday</option>
+					<option value="Friday" <%= ($weekday eq "Friday") ? "selected" : "" %>>Friday</option>
+					<option value="Saturday" <%= ($weekday eq "Saturday") ? "selected" : "" %>>Saturday</option>
+				</select>
+				<br>
+				<label for="sendAt">Send the reminders at:</label>
+				<input type="time" id="sendAt" name="sendAt" value="<%= $time %>"></input>
+				<br>
+	
+			</fieldset>
+			<div class="buttonHolder">
+				<button onclick="saveChanges()">Save Changes</button>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

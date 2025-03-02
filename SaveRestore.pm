@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded scheduleReminder unscheduleReminder initDB closeDB);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded scheduleReminder unscheduleReminder readScheduledReminder initDB closeDB);
 
 use warnings;
 use strict;
@@ -21,6 +21,11 @@ use Messaging;
 our $DBFilename = "./schedule.db";
 my $dbh;
 my $verbose = 1;
+
+my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
+my $crontabMatch = $crontabEntryHeader;
+$crontabMatch =~ s/\n/./g;
+
 
 
 sub checkScheduledDates($$);
@@ -546,30 +551,26 @@ sub backupData()
 sub scheduleReminder($$$)
 {
 	my ( $weekday, $time, $port) = @_;
-	my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
-	my $crontabMatch = $crontabEntryHeader;
-	$crontabMatch =~ s/\n/./g;
 
 	##
 	##  Break the time in to hour and minute
 	##
 	my ( $hour, $minute) = split( ':', $time);
-	my %weekdays = ( sunday=>0, monday=>1, tuesday=>2, wednesday=>3, thursday=>4, friday=>5, saturday=>6);
-	$weekday =~ tr/A-Z/a-z/;
+	my %weekdays = ( Sunday=>0, Monday=>1, Tuesday=>2, Wednesday=>3, Thursday=>4, Friday=>5, Saturday=>6);
 
 	my $newLine = sprintf( "%02d %02d * * %02d curl http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, $port);
 	
 	##
 	##  Read in the current crontab
 	##
-	my $crontab = `crontab -l`;
+	my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
 	
 	##
 	##  Is there currently an entry for sendReminders?
 	##
-	if ( $crontab =~ m/$crontabMatch(.*?)/sm)
+	if ( $enabled)
 	{
-		print "Matched $1\n";
+		printf( "Replacing old Crontab of $day at %02d:%02d with  $weekday at %02d:%02d\n", $hr, $min, $hour, $minute);
 		$crontab =~ s/$crontabMatch(.*?)$/$crontabEntryHeader$newLine/sm;
 	}
 	else
@@ -596,19 +597,15 @@ sub scheduleReminder($$$)
 }
 
 #------------------------------------------------------------------------------
-#  sub unscheduleReminder( $weekday, $time, $port)
+#  sub unscheduleReminder()
 #  		This function unschedules a recurring call to '/sendReminders'.
 #------------------------------------------------------------------------------
 sub unscheduleReminder()
 {
-	my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
-	my $crontabMatch = $crontabEntryHeader;
-	$crontabMatch =~ s/\n/./g;
-
 	##
 	##  Read in the current crontab
 	##
-	my $crontab = `crontab -l`;
+	my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
 	
 	##
 	##  Is there currently an entry for sendReminders?
@@ -637,6 +634,43 @@ sub unscheduleReminder()
 		##
 		system( "crontab my_crontab");
 	}
+}
+
+#------------------------------------------------------------------------------
+#  sub readScheduledReminder()
+#  		This routine reads the crontab to see if a schedule reminder is set and
+#  		if so sets "enabled" to true.  It returns the following:
+#		( $enabled, $hour, $minute, $weekday, $crontab)
+#		Where "weekday" is one of "Sunday, Monday, ..." and $crontab is the
+#		entire contents of the current crontab.
+#------------------------------------------------------------------------------
+sub readScheduledReminder()
+{
+	my $enabled = 0;
+	my $hour = 0;
+	my $minute = 0;
+	my $day = 0;
+	my $weekday;
+	my @dayName = qw( Sunday Monday Tuesday Wednesday Thursday Friday Saturday );
+
+	##
+	##  Read in the current crontab
+	##
+	my $crontab = `crontab -l`;
+	
+	##
+	##  Is there currently an entry for sendReminders?
+	##
+	if ( $crontab =~ m/$crontabMatch(.*?)$/sm)
+	{
+		my $matched = $1;
+		$matched =~ /^\s*(\d+)\s+(\d+)\s+.\s+.\s+(\d+)/;
+		($minute, $hour, $day) = ($1, $2, $3);
+		$weekday = $dayName[$day];
+		$enabled = 1;
+	}
+
+	return( $enabled, $hour, $minute, $weekday, $crontab);
 }
 
 1;

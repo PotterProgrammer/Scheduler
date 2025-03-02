@@ -364,6 +364,67 @@ option:checked {
 	margin-top: 1px;
 }
 
+.introduction
+{
+	width: 60%;
+	margin-left: 20%;
+	margin-right: 20%;
+	text-align: left;
+}
+
+.simpleForm
+{
+	width:30%;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:5%;
+}
+
+.simpleForm .buttonHolder
+{
+	width: 12em;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:12%;
+}
+
+
+#reminderInfo
+{
+	margin-top: 1em;
+	line-height:1.8em;
+}
+
+#reminderInfo:disabled
+{
+	color: lightgray;
+	border-color:lightgray;
+}
+	
+#reminderInfo select:enabled
+{
+	background-color:white;
+}
+#reminderInfo select:disabled
+{
+	background-color:lightgray;
+	color:gray;
+}
+
+#reminderInfo input
+{
+	font-size: 12pt;
+	font-weight: 400;
+	background-color: white;
+}
+
+#reminderInfo input:disabled
+{
+	color:gray;
+	background-color:lightgray;
+}
+
+
 #genSchedule
 {
 	width: 60%;
