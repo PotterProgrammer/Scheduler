@@ -418,15 +418,48 @@ warn join ":", @{app->renderer->classes};
 		print "The keys are: " . join( ", ", keys( %$filename)) . "\n";
 	##--> 	print "Asset=" . $filename->asset->slurp . "\n";
 		$filename->asset->move_to( "dataBackup.pbt");
+		SaveRestore::closeDB();
+
 		if ( -e 'dataBackup.pbt')
 		{
 			system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o dataBackup.tar dataBackup.pbt");
 			if ( -e 'dataBackup.tar')
 			{
 				my $tar = Archive::Tar->new;
+				$Archive::Tar::INSECURE_EXTRACT_MODE = 1;
 				if ( $tar->read( 'dataBackup.tar'))
 				{
 					$tar->extract();
+		
+					##
+					##  Do we have a schedule for sending reminders?
+					##
+					if ( -e 'reminderSchedule.txt')
+					{
+						open( my $FILE, '<', 'reminderSchedule.txt') || die "Couldn't open reminder schedule! $!\n";
+						my $data = <$FILE>;
+						close $FILE;
+						$data =~ m/(\d)\s+(\d+:\d+)\s+(\S+)/;
+						
+						##
+						##  Were reminders scheduled?
+						##
+						if ( $1)
+						{
+							##
+							##  If so, schedule them as before
+							##
+							scheduleReminder( $3, $2, $self->tx->local_port);
+						}
+						else
+						{
+							##
+							##  If not, unschedule them
+							##
+							unscheduleReminder();
+						}
+					}
+
 					$self->stash( textMessage => "Restore completed!", title=>'Success', boxtime=>5);
 					print "\n\n\n\nRestored!!!\n\n\n";
 				}
@@ -443,7 +476,6 @@ warn join ":", @{app->renderer->classes};
 			}
 		}
 
-		SaveRestore::closeDB();
 		SaveRestore::initDB();
 
 		$self->stash( restored=>'yes');

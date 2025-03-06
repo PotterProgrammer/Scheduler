@@ -532,13 +532,29 @@ sub updateScheduleReminded($)
 sub backupData()
 {
 		my $tar = Archive::Tar->new;
+		
+		##
+		##  Remove old files
+		##
 		unlink( 'public/dataBackup.tar');
 		unlink( 'public/dataBackup.pbt');
-		$tar->add_files( $DBFilename, $Messaging::ConfigName);
-		$tar->write( 'public/dataBackup.tar');
+		unlink( 'reminderSchedule.txt');
+
+		##
+		##  Store the current reminder schedule
+		##
+		my ( $enabled, $hour, $minute, $weekday, $crontab) = readScheduledReminder();
+		open( my $FILE, '>', 'reminderSchedule.txt') || die "Couldn't save reminder schedule! $!\n";
+		printf $FILE "%d %02d:%02d  %s\n", $enabled, $hour, $minute, $weekday;
+		close $FILE;
+
 		print "Making a backup!\n";
+		$tar->add_files( $DBFilename, $Messaging::ConfigName, 'reminderSchedule.txt');
+		$tar->write( 'public/dataBackup.tar');
+
 		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o public/dataBackup.pbt -c public/dataBackup.tar");
 		unlink( 'public/dataBackup.tar');
+		unlink( 'reminderSchedule.txt');
 		return( 'dataBackup.pbt');
 }
 
