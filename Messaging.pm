@@ -49,7 +49,7 @@ my $TwilioAuth;
 my $TwilioNumber;
 my $uid;
 my $pwd;
-our $ConfigName = "$HOME/.scheduler.cfg";
+our $ConfigName = ".scheduler.cfg";
 
 
 #------------------------------------------------------------------------------
