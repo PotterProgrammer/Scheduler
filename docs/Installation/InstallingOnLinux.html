@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title>Installing Scheduler on a Linux System</title>
+	<style type="text/css">
+		@page { size: 8.5in 11in; margin: 0.79in }
+		
+		body {font-family: "Arial",sans-serif; margin-left:.25in; margin-right: .25in;}
+		p { font-size:12pt; line-height:125%; margin-bottom: 0in; page-break-before: auto }
+		h1 { color: #0010cc; margin-bottom: 0.08in; background: transparent; page-break-after: avoid; font-size: 20pt; font-weight: bold }
+		h3 { color: #0010cc; margin-top: 0.8in; margin-bottom: -0.1in; background: transparent; page-break-after: avoid; font-size: 18pt; font-weight: bold }
+		h4 { color: #0010cc; margin-top: 0.3in; margin-bottom: -0.1in; background: transparent; page-break-after: avoid; font-size: 14pt; font-weight: bold }
+		h5 { color: #0010cc; margin-top: 0.3in; margin-bottom: -0.1in; background: transparent; page-break-after: avoid; font-size: 12pt; font-weight: bold }
+		a:link { color: #000080; text-decoration: underline }
+		a:visited { color: #800000; text-decoration: underline }
+		indented-block { display:block; padding-left: 0.25in;}
+		terminal-text {display:block;border: solid 3px gray; background-color: black; color: white; font-family: "Lucida Console", fixed; font-size:10pt; margin:.1in; min-width:35em; max-width:60em; padding-left:0.5em;}
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr">
+<h1> Installing Scheduler on a Linux System</h1>
+<p >To run Scheduler on a Linux system, you will need to do the following:</p>
+<ol>
+	<li>Make sure that Perl is installed on your system.</li>
+	<li>Download the Scheduler code to your system.</li>
+	<li>Install the needed Perl modules to your system.</li>
+</ol>
+<br/>
+
+<p >Scheduler uses Gmail to send out email notifications to volunteers, and uses Twilio
+to send out text messages to volunteers.  If you wish to make use of these features 
+</p>
+<indented-block>
+	<h5 >For Gmail you will need to:</h5>
+	<ol>
+		<li>Set up a Google account.</li>
+		<li>Create a Google project.</li>
+		<li>Get the Google API key for that project.</li>
+	</ol>
+	
+	<h5 >For Twilio you will need to:</h5>
+	<ol>
+		<li>Set up a Twilio account.</li>
+		<li>Get the Twilio information.</li>
+	</ol>
+</indented-block>
+<br/>
+
+<p >Scheduler runs as a web server.  When it is
+running, you should be able to access it from any machine that is on
+the same local network as the system where it is running.  If you
+wish to be able to access it from outside your office (or allow
+volunteers to access it to make updates to their available dates)
+then you will need to make your local machine visible on the
+internet.</p>
+<h3>Make sure that Perl is installed on your system</h3>
+<p>Perl is probably already installed on your system, as it is installed by
+default on most unix distributions. To see if Perl is installed on your system,
+open a terminal session, and at the prompt, type:
+<terminal-text> perl -v </terminal-text>
+If you see something that starts off like:
+<terminal-text> This is perl 5, version 34, subversion 0 (v5.34.0)</terminal-text>
+then you have Perl installed on your system.  (The version number doesn't have to match.)</p>
+<p>
+If, on the other hand, you see something like:
+<terminal-text>Command 'perl' not found</terminal-text>
+then Perl is not installed on your system, and you need to install it before you
+can run Scheduler.</p>
+<h4>Installing Perl</h4>
+<p>
+To install Perl on your system, the recommended method is to use the package
+manager associated with your system.  The two most common are <b>yum</b>, which
+is used on RedHat based systems, like RHEL, Fedora and CentOs, and <b>apt</b>,
+which is used on Debian based systems like Debian, Ubuntu, and Mint.  (It is
+worth mentioning that instead of apt, your system might have <b>apt-get</b>
+installed.  <b>Apt</b> is a newer version, but <b>apt</b> and <b>apt-get</b> have similar
+functionality.)  Note that to use either <b>apt</b> or <b>yum</b> to install
+packages, you will either need to be logged in as the root user, or you will
+need to run each command using <b>sudo</b>.  The examples here will use <b>sudo</b>.
+If you are unsure if your system uses <b>apt</b> or <b>yum</b> you may simply try typing
+each command at the command prompt.</p>
+<indented-block>
+	<h5>Using yum</h5>
+	<p>First it is recommended that you update the list of the latest versions
+	of software that is stored on your computer.  To do so, open a terminal
+	session and type:
+	<terminal-text>sudo yum check-update</terminal-text>
+	Once that has been done, you can then install the latest packaged version of Perl
+	by typing the following:
+	<terminal-text>sudo yum install perl</terminal-text>
+	This will direct the yum program to download Perl and any additional
+	required libraries that are needed by Perl.  Once the packages are
+	downloaded they will be installed, along with any of the needed
+	dependencies.</p>
+	<br>
+	<h5>Using apt</h5>
+	<p>If your system has <b>apt-get</b> installed, you
+	may simply substitute "apt-get" for "apt" in these instructions.  Before
+	installing a new package, it is recommended that you first update your
+	computer's list of available packages and versions.  To do so, open a
+	terminal session and type:
+	<terminal-text>sudo apt update</terminal-text>
+	The system will reach out to other systems on the internet to get a list of
+	the latest package versions that are currently available for your system.
+	When that is finished, you can then install Perl by typing:</p>
+	<terminal-text>sudo apt install perl</terminal-text>
+</indented-block>
+<h3>Download the Scheduler code to your system</h3>
+<h3>Install the needed Perl modules to your system</h3>
+<p>In addition to Perl itself, your system will also need to have some
+additional Perl modules. Perl modules are reusable components that are not part
+of the base installation that make it easier to carry out specific tasks.  The
+first step is to make sure you have a Perl tool named <b>cpanm</b>.
+<h4>cpanm</h4>
+<p>To install the needed Perl modules, you will need to use a Perl tool named
+<b>cpanm</b>.  Much like <b>apt</b> or <b>yum</b>, <b>cpanm</b> is a package
+manager that handles the work of downloading, testing, and installing Perl
+modules.  To see if it is already on your system, open a terminal session
+and type:</p>
+<terminal-text>cpanm</terminal-text>
+If you see something like:
+<terminal-text>
+	Usage: cpanm [options] Module [...]<br>
+	Try `cpanm --help` or `man cpanm` for more options.
+</terminal-text>
+then it is already installed on your system.  If not, you will need to install
+<b>cpanm</b>.
+<indented-block>
+	<h4>Installing cpanm</h4>
+	<p>Installing <b>cpanm</b> is easy, but you first need to see if your system
+	includes a <b>make</b> command.  You can do this by opening a terminal
+	session and typing:
+	<terminal-text>make</terminal-text>
+	If you see something like:
+	<terminal-text>
+		make: *** No targets specified and no makefile found. Stop.
+	</terminal-text>
+	then it is already installed.  If not, use either <b>apt</b> or <b>yum</b>
+	to install <b>make</b> by typing either:
+	<ul>
+		<li>sudo apt install make</li>
+		<li>sudo yum install make</li>
+	</ul>
+	as appropriate for your system.</p>
+	<p>Once <b>make</b> is installed on your system, you are ready to install
+	<b>cpanm</b>.  To do so, in a terminal session, type:
+	<terminal-text>
+		curl -L https://cpanmin.us | sudo perl - App::cpanminus
+	</terminal-text>
+	<b>Cpanm</b> should now be installed on your system.</p>
+</indented-block>
+</body>
+</html>
