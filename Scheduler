@@ -912,7 +912,7 @@ warn join ":", @{app->renderer->classes};
 						my ($self, $json) = @_;
 						my $status = "";
 
-						if ( $json->{enabled} eq "true")
+						if ( $json->{enabled} eq "true" || $json->{enabled} == 1)
 						{
 							$status = "Automatic reminders are enabled.";
 							scheduleReminder( $json->{weekday}, $json->{time}, $port);
