@@ -39,16 +39,20 @@
 
 	<div id="genSchedule">
 		<p>This will send copies of the schedule for the dates that you enter below to the appropriate volunteers.</p>
+	<!-- /div>
+	<div id="viewSchedule" -->
 
-		<div id="dateEntry">
+		<fieldset id="dateEntry">
+			<div class="entryline">
 			<label for="startDate">Start Date of Schedule:</label>
 			<input type="date" id="startDate" value="startDate" name="start"></input>
-			<br>
+			</div>
+			<div class="entryline">
 			<label for="endDate">End Date of Schedule: </label>
 			<input type="date" id="endDate" value="endDate" name="end" ></input>
-			<br>
+			</div>
 			<button type="button" onClick="sendTheSchedule()">Send Schedule</button>
-		</div>
+		</fieldset>
 	</div>
 
 

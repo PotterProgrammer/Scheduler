@@ -42,7 +42,7 @@ to send out text messages to volunteers.  If you wish to make use of these featu
 	<h5 >For Twilio you will need to:</h5>
 	<ol>
 		<li>Set up a Twilio account.</li>
-		<li>Get the Twilio information.</li>
+		<li>Get the needed Twilio information.</li>
 	</ol>
 </indented-block>
 <br/>
@@ -150,5 +150,14 @@ then it is already installed on your system.  If not, you will need to install
 	</terminal-text>
 	<b>Cpanm</b> should now be installed on your system.</p>
 </indented-block>
+<h4>Use cpanm to install needed modules</h4>
+<p>To install the needed Perl modules, in a terminal session, switch to the
+directory to where you downloaded the Scheduler components from github.  In that
+directory, type the following command:</p>
+<terminal-text>sudo cpanm --installdeps .</terminal-text>
+<p><b>Cpanm</b> will download, build, test and install many modules.  Depending upon the
+speed of your system and internet connection, this may take 10-20 minutes.
+Once the process runs to completion without errors, Scheduler is installed on
+your system and is ready to configure and run.</p>
 </body>
 </html>
