@@ -121,18 +121,21 @@
 		<p>This will generate a schedule for the dates listed below, using the list of positions to fill and volunteers which you have previously entered.</p>
 		<p>If you have not already entered the positions to be filled and the available volunteers, please do so before pressing the "Build Schedule" button.</p>
 
-		<div id="dateEntry">
+		<fieldset id="dateEntry">
+			<div id="entryline">
 			<label for="startDate">Start Date of Schedule:</label>
 			<input type="date" id="startDate" value="startDate" name="startDate"></input>
-			<br>
+			</div>
+			<div id="entryline">
 			<label for="endDate">End Date of Schedule: </label>
 			<input type="date" id="endDate" value="endDate" name="endDate" ></input>
-			<br>
-			<label class="labeledCheckbox" for="sendSchedules">Automatically Send Schedules:
+			</div>
+			<div id="entryline">
+				<label class="labeledCheckbox" for="sendSchedules">Automatically Send Schedules:</label>
 				<input type="checkbox" id="sendSchedules" name="sendSchedules"></input>
-			</label>
+			</div>
 			<button type="button" onClick="makeSchedule()">Build Schedule</button>
-		</div>
+		</fieldset>
 	</div>
 
 

@@ -140,16 +140,25 @@ option:checked {
 	justify-content: center;
 }
 
-#dateEntry
-{
-	width: 20em;
-}
-
 #dateEntry input
 {
-	float: right;
+	margin-left: 1em;
 }
 
+#dateEntry label
+{
+	float:left;
+}
+
+fieldset,#dateEntry
+{
+	width: 20em;
+	margin-left: auto;
+	margin-right: auto;
+	border: none;
+	text-align: center;
+	line-height:200%;
+}
 
 #overlay
 {
@@ -477,15 +486,6 @@ option:checked {
 	margin-left: 2em;
 	font-size: 100%;
 	margin-bottom: 0;
-}
-
-.labeledCheckbox
-{
-	line-height: 1.6;
-	display: grid;
-	grid-template-columns: auto 1.5em;
-	gap: 0.5em;
-	margin-top:1.5em;
 }
 
 .scheduledVolunteer 
