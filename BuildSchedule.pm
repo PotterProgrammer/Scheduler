@@ -121,7 +121,15 @@ sub buildScheduleForDates($$)
 		print "\n\n*** NOT ALL SLOTS WERE FILLED!!! ***\n\n"
 	}
 	
+	##
+	##  Clear any previous schedules on the indicated dates
+	##
 	clearSavedSchedule( $startDate, $endDate);
+
+	
+	##
+	##  Save the new schedule
+	##
 	saveSchedule( @Schedule);
 	
 	return( $scheduleIncomplete);
