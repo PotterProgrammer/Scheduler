@@ -32,15 +32,17 @@
 	<div id="viewSchedule">
 		<p>For which days would you like to see the schedule?
 		<br>
-		<div id="dateEntry">
-			<label for="startDate">Start Date of Schedule:</label>
-			<input type="date" id="startDate" value="startDate" name="startDate"></input>
-			<br>
-			<label for="endDate">End Date of Schedule: </label>
-			<input type="date" id="endDate" value="endDate" name="endDate" ></input>
-			<br>
+		<fieldset id="dateEntry">
+			<div class="entryline">
+				<label for="startDate">Start Date of Schedule:</label>
+				<input type="date" id="startDate" value="startDate" name="startDate"></input>
+			</div>
+			<div class="entryline">
+				<label for="endDate">End Date of Schedule: </label>
+				<input type="date" id="endDate" value="endDate" name="endDate" ></input>
+			</div>
 			<button type="button" onClick="showSchedule()" ontouchstart="showSchedule()">Show Schedule</button>
-		</div>
+		</fieldset>
 	</div>
 </body>
 
