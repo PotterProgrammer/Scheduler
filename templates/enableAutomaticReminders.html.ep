@@ -98,7 +98,10 @@ function saveChanges()
 		</div>
 
 		<div class="simpleForm">
-			<input type="checkbox" id="enableReminders" onclick="watchCheckbox()" <%= ($enabled) ? "checked" : "" %>>Send automatic Reminders</button>
+			<div id="enableButton">
+				<input type="checkbox" id="enableReminders" onclick="watchCheckbox()" <%= ($enabled) ? "checked" : "" %>/>
+				<label for="enableReminders">Send automatic reminders</label>
+			</div>
 			<fieldset id="reminderInfo" <%= (!$enabled) ? "disabled" : "" %>>
 				<label for="dayNeeded">Send reminders every:</label>
 				<select name="dayNeeded" id="dayNeeded">

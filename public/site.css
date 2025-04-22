@@ -397,11 +397,23 @@ fieldset,#dateEntry
 	margin-top:12%;
 }
 
+#enableButton
+{
+	width: 20em;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+#enableReminders
+{
+	margin-right: .5em;
+}
 
 #reminderInfo
 {
 	margin-top: 1em;
 	line-height:1.8em;
+	text-align: left;
 }
 
 #reminderInfo:disabled
