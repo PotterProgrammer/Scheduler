@@ -224,7 +224,6 @@ sub getConfigInfo()
 sub sendEmail(@)
 {
 	my ( $to, $from, $subj, $message, @attachments) = @_;
-##--> my $transport;
 
 	if ( !defined( $email_uid))
 	{
@@ -275,22 +274,6 @@ sub sendSMSTwilio($$)
 	my $rc = 0;
 	my @pieces;
 
-##-->	while ( $message =~ s/(.{1,150})\s+//sm)
-##-->	{
-##-->		my $nextMessage = $1;
-##-->
-##-->		if ( $nextMessage =~ s/<BREAK>(.*)//sm)
-##-->		{
-##-->			$message = "$1 $message";
-##-->		}
-##-->		push( @pieces, $nextMessage);
-##-->	}
-##-->
-##-->	while ( $message =~ s/<BREAK>(.*)//sm)
-##-->	{
-##-->		push( @pieces, $message);
-##-->		$message = $1;
-##-->	}
 	push( @pieces, $message);
 
 	if ( !defined( $TwilioAccount))
@@ -310,9 +293,8 @@ sub sendSMSTwilio($$)
 		chomp $message;
 		
 		##
-		##  Twilio changed the API from SMS/Messages to Messages
+		##  Send message via Twilio
 		##
-##-->	 my $response = $twilio->POST(	'SMS/Messages',
 		print "Sending to $to\n";
 		my $response = $twilio->POST(	'Messages',
 									To   => $to,
@@ -336,7 +318,7 @@ sub sendSMSTwilio($$)
 		{
 			print "*** ERROR ***   Unable to send TXT message!", "Twilio said: " . $response->{message} . "\n" . $response->{content} . "\n";
 
-			sendEmail( 'webmaster@stjamesbg.org', 'St.James PhoneTree Alert', 'St. James Phone Tree Alert!', "Trying to send a message to $to returned the following error: " .  $response->{content});
+			sendEmail( $adminEmail, 'Scheduler Program Alert', 'Scheduler Program Alert!', "Trying to send a message to $to returned the following error: " .  $response->{content});
 			$rc = 1;
 		}
 		else
@@ -345,9 +327,8 @@ sub sendSMSTwilio($$)
 			while( $status =~ /queued|sending/)
 			{
 				##
-				##  Twilio changed the API from SMS/Messages to Messages
+				##  Get the response
 				##
-##-->			 $response = $twilio->GET( 'SMS/Messages', Sid=>$sid);
 				$response = $twilio->GET( "Messages/$sid", AccountSid=> $TwilioAccount, Sid=>$sid);
 				$response->{content} =~ m/<Status>(.*?)<\/Status>/i;
 				$status = $1;
@@ -460,7 +441,7 @@ sub sendReminders($)
 				##
 				if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
 				{
-					sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Service reminder', $email, 'email/reminder.png');
+					sendEmail( $volunteerEmail, $emailSender, 'Service reminder', $email, 'email/reminder.png');
 					print "Sent\n";
 				}
 				else
@@ -626,7 +607,7 @@ sub sendSchedules($$$)
 					##
 					if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
 					{
-						sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', "New Schedule for $printableStart $enDash $printableEnd", $email, 'email/scheduling.png');
+						sendEmail( $volunteerEmail, $emailSender, "New Schedule for $printableStart $enDash $printableEnd", $email, 'email/scheduling.png');
 						print "Sent\n";
 					}
 					else
@@ -831,7 +812,7 @@ sub sendUpdateRequest($)
 				##
 				if ( defined( $volunteerEmail) && $volunteerEmail =~ m/\S\@\S/)
 				{
-					sendEmail( $volunteerEmail, 'Scheduling Assistant at St. James', 'Any Information updates for volunteering?', $email, 'email/scheduling.png');
+					sendEmail( $volunteerEmail, $emailSender, 'Any Information updates for volunteering?', $email, 'email/scheduling.png');
 					print "Sent\n";
 				}
 				else
