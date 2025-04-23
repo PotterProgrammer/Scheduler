@@ -298,16 +298,23 @@ fieldset,#dateEntry
 	color: #c00000;
 	background-color: white;
 	padding-left: 1em;
+	margin-bottom: 0;
 }
 
 .cfgTable
 {
-	width: 80%;
-	padding-left:10%;
+	margin-left: auto;
+	margin-right: auto;
 }
 .cfgLeft
 {
 	padding-left: 5em;
+}
+
+.cfgHead
+{
+	padding-left: 3em;
+	padding-top: 1.15em;
 }
 
 .cfginput
@@ -319,7 +326,9 @@ fieldset,#dateEntry
 #buttonRow
 {
 	padding-top:  3vh;
-	padding-left: 30%;
+	margin-left: auto;
+	margin-right: auto;
+	width: 23em;
 }
 
 #buttonRow input
@@ -329,6 +338,15 @@ fieldset,#dateEntry
 	width: 8em;
 }
 
+#submitbtn
+{
+	float: left;
+}
+
+#resetbtn
+{
+	float: right;
+}
 .editPanel
 {
 	position: relative;
