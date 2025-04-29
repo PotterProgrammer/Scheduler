@@ -69,6 +69,15 @@ sub findVolunteer($$);
 		}
 	};
 
+	get '/logoff' => sub
+	{
+		my $self = shift;
+		my $cookie = Mojo::Cookie::Response->new( name=>'UID', value=> '', expires=>1);
+		$self->res->cookies( $cookie);
+
+		$self->redirect_to( '/login');
+	};
+
 
 	#------------------------------------------------------------------------------
 	#  EVERY page below here first gets autothenticated by this routine
