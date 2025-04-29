@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="/site.css">
+</head>
+
+<body>
+	<div id="xoverlay">
+
+		<h1>Scheduler</h1>
+		<div  class="loginForm">
+			<form method="post" action='/login'>
+				<label for="user">Login Name:</label>
+				<input class="form-control" id="user" name="user" type="text" size="40" />
+				<br/> 
+				<label for="password" style="margin-right:1em">Password:</label>
+				<input class="form-control" id="password" name="password" type="password" size="40" />
+				<br/> 
+				<input class="btn btn-primary" type="submit" value="Sign In">
+				<br/>  <br/>
+			</form>
+
+			% if (defined( flash 'error') ) {
+				<div class="error" style="color: red">
+					<center><b> <%= flash 'error' %> </b></center>
+				</div>
+			%}
+		</div>
+
+	</div>
+</body>
+</html>
+

@@ -29,6 +29,93 @@ sub findVolunteer($$);
 
 #main:
 {
+	#------------------------------------------------------------------------------
+	#  get '/login' -- This is the main login screen
+	#------------------------------------------------------------------------------
+	get '/login' => sub
+	{
+		my $self = shift( @_);
+
+		$self->render( 'login');
+	};
+
+	#------------------------------------------------------------------------------
+	#  post '/login' -- This screen processes the login entry
+	#------------------------------------------------------------------------------
+	post '/login' => sub
+	{
+		my $self = shift;
+		my $username = $self->param( 'user');
+		my $password = $self->param( 'password');
+
+		if ( isAdmin( $username, $password))
+		{
+			my $cookie = Mojo::Cookie::Response->new( name=>'UID', value=> getAdminUID(), expires=>time() + 3600);
+			$self->res->cookies( $cookie);
+			print "Its: " .  $self->session->{lastCall} . "\n";
+			if ( defined( $self->session->{lastCall}))
+			{
+				$self->redirect_to( $self->session->{lastCall});
+			}
+			else
+			{
+				$self->render( '/');
+			}
+		}
+		else
+		{
+			$self->flash( error=> 'Invalid login name or password!');
+			$self->redirect_to( '/login');
+		}
+	};
+
+
+	#------------------------------------------------------------------------------
+	#  EVERY page below here first gets autothenticated by this routine
+	#------------------------------------------------------------------------------
+	under sub
+	{
+		my $self = shift;
+##-->		return 1;
+
+		##
+		##	Is the user already logged in as an admin?
+		##
+		if ( defined( $self->cookie( 'UID')) && ( isAdminUID( $self->cookie('UID'))))
+		{
+			return 1;
+		}
+		
+		##
+		##  Is this a user updating their page via the provided link?
+		## 
+		if ( defined( $self->param("user")) && defined( $self->param( "UID")))
+		{
+		print "Looking for user" .  $self->param("user") . " with ID ". $self->param( "UID") . "\n";
+			##
+			##  Does the user ID for the named user match the provided ID?
+			##
+			if ( isValidUserID( $self->param("user"), $self->param( "UID")))
+			{
+				return 1;
+			}
+
+			$self->render(  'not_found');
+			return undef;
+		}
+
+		##
+		##  Remember the page asked for
+		##
+		$self->session->{lastCall} = $self->{tx}->{req}->{url}->{path}->{path};
+		$self->redirect_to( 'login');
+
+		return undef;
+	};
+
+	#------------------------------------------------------------------------------
+	#  get '/'
+	#------------------------------------------------------------------------------
 	get '/' => sub
 	{
 		my ($self) = @_;
@@ -37,6 +124,9 @@ sub findVolunteer($$);
 		$self->render( 'index');
 	};
 
+	#------------------------------------------------------------------------------
+	#  get '/index'
+	#------------------------------------------------------------------------------
 	get '/index' => sub
 	{
 		print "there...\n";
@@ -502,15 +592,16 @@ warn join ":", @{app->renderer->classes};
 		##  Write the volunteer info to the database
 		##
 		print "******** Saving " . join( ',', map { ", $_: $json->info->{$_}\n"} keys( %{$json->{info}})) . " *****\n\n";
-		my $days = $json->{info}->{daysUnavailable};
-		print "I see: " . join( ',', $days);
+##-->		my $days = $json->{info}->{daysUnavailable};
+##-->		 "I see: " . join( ',', $days);
 		saveVolunteer( $json->{info});
 						
 
 		@Volunteers = readVolunteers();
 		$self->stash( volunteers=>\@Volunteers);
 
-		$self->render( 'volunteers');
+##-->		$self->render( 'volunteers');
+		$self->render( 'editVolunteers');
 	};
 
 	#------------------------------------------------------------------------------
@@ -560,6 +651,7 @@ warn join ":", @{app->renderer->classes};
 	post '/saveConfig' => sub
 	{
 		my $self = shift(@_);
+
 		if ( $self->param('submit') =~ /Save/)
 		{
 			my %config;
@@ -576,6 +668,8 @@ warn join ":", @{app->renderer->classes};
 			$config{"AdminEmail"} = $self->param( "AdminEmail");
 			$config{"AdminPhone"} = $self->param( "AdminPhone");
 			$config{"AdminText"} = $self->param( "AdminText");
+			$config{"AdminLogin"} = $self->param( "AdminLogin");
+			$config{"AdminPWD"} = $self->param( "AdminPWD");
 
 			saveConfig( %config);
 		}

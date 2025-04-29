@@ -4,7 +4,7 @@
 package SaveRestore;
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded scheduleReminder unscheduleReminder readScheduledReminder initDB closeDB);
+@EXPORT = qw( checkScheduledDates clearSavedSchedule backupData readReminderList getRoleVolunteerList readVolunteers readSlots readSchedule readScheduleFor removeSlot removeVolunteer saveVolunteer updateRoleCount saveSlot saveSchedule updateSchedule updateScheduleReminded scheduleReminder unscheduleReminder readScheduledReminder isValidUserID getAdminUID isAdminUID initDB closeDB);
 
 use warnings;
 use strict;
@@ -79,6 +79,7 @@ sub initDB()
 					 phone text,
 					 desiredRoles text,
 					 contact text,
+					 UID text,
 					 primary key( 'name')
 				   )");
 
@@ -309,16 +310,24 @@ sub saveVolunteer($)
 {
 	my $volunteer = $_[0];
 
-	print "Issuing the first insert.\n";
+	##
+	##  Does this volunteer have a UID?
+	##
+	if ( !defined( $volunteer->{UID}) || $volunteer->{UID} =~ /^\s*$/)
+	{
+		$volunteer->{UID} = generateUID();
+	}
+
 	##
 	##  First, update the volunteer table
 	##
-	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles, contact ) values (?,?,?,?,?)");
+	my $sth = $dbh->prepare( "insert or replace into volunteer (name, email, phone, desiredRoles, contact, UID ) values (?,?,?,?,?,?)");
 	$sth->bind_param( 1, $volunteer->{name});
 	$sth->bind_param( 2, $volunteer->{email});
 	$sth->bind_param( 3, $volunteer->{phone});
 	$sth->bind_param( 4, $volunteer->{desiredRoles});
 	$sth->bind_param( 5, $volunteer->{contact});
+	$sth->bind_param( 6, $volunteer->{UID});
 	
  print "Storing the volunteer values $volunteer->{name}, $volunteer->{email}, $volunteer->{phone}, $volunteer->{desiredRoles}, $volunteer->{contact}\n";
 	$sth->execute();
@@ -326,6 +335,7 @@ sub saveVolunteer($)
 	#------------------------------------------------------------------------------
 	#	Update entries in the dates_desired table
 	#------------------------------------------------------------------------------
+	#
 	##
 	##  First delete any existing entries in the table for this person
 	##
@@ -687,6 +697,79 @@ sub readScheduledReminder()
 	}
 
 	return( $enabled, $hour, $minute, $weekday, $crontab);
+}
+
+#------------------------------------------------------------------------------
+#	sub isValidUserID( $username, $id) 
+#		This routines checks the volunteer table to see if there is an entry
+#		for $username, and if so, if the stored UID matches the value provided
+#		in $id.  True is returned if the name is found and the ID matches.
+##------------------------------------------------------------------------------
+sub isValidUserID($$)
+{
+	my ($name, $id) = (@_);
+	
+	my $matches = $dbh->selectall_arrayref( "select UID from volunteer where name = ?", undef, $name);
+	
+	print "Looking for $name and got " . int( @$matches) . " matches\n";
+
+	print "Got " .  $matches->[0]->[0] . "\n";
+	if (( @$matches == 1) && ( $matches->[0]->[0] eq $id))
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+#------------------------------------------------------------------------------
+#	sub generateUID()
+#		This routine generates a random 10 character alpha-numeric string
+#------------------------------------------------------------------------------
+sub generateUID()
+{
+	my @chars = ( 'a'..'z', '0'..'9', 'A'..'Z');
+	my $id;
+	do 
+	{
+		$id = '';
+		for( 1..10)
+		{
+			$id .= $chars[ int rand( @chars)];
+		}
+	} while( (unpack( "%32W*", $id) % 42) == 0);
+
+	return $id;
+}
+
+#------------------------------------------------------------------------------
+#	sub getAdminUID()
+#		This routine generates a random 10 character alpha-numeric string
+#------------------------------------------------------------------------------
+sub getAdminUID()
+{
+	my @chars = ( 'a'..'z', '0'..'9', 'A'..'Z');
+	my $id;
+	do 
+	{
+		$id = '';
+		for( 1..10)
+		{
+			$id .= $chars[ int rand( @chars)];
+		}
+	} while( (unpack( "%32W*", $id) % 42) != 0);
+
+	return $id;
+}
+
+#------------------------------------------------------------------------------
+#	sub isAdminUID( $id) 
+#------------------------------------------------------------------------------
+sub isAdminUID( $)
+{
+	my $id = shift( @_);
+
+	return( !( unpack( "%32W*", $id) % 42));
 }
 
 1;

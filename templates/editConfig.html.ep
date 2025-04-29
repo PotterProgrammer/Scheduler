@@ -34,9 +34,13 @@
 
 			<tr><td class="cfgHead"><b>Administrator Contact Info:</b></td></tr>
 			<td class="cfgLeft"><label for="AdminName">Admin Name:</label></td><td><input type="text" id="AdminName" name="AdminName" value="<%= $AdminName %>"  title="This is the name of the schedule administrator." class="cfginput"><br></td></tr>
+			<td class="cfgLeft"><label for="AdminEmail">Admin Email:</label></td><td><input type="email" id="AdminEmail" name="AdminEmail" value="<%= $AdminEmail %>"  title="This is the phone number of the schedule administrator." class="cfginput"><br></td></tr>
 			<td class="cfgLeft"><label for="AdminPhone">Admin Phone:</label></td><td><input type="text" id="AdminPhone" name="AdminPhone" value="<%= $AdminPhone %>"  title="This is the phone number of the schedule administrator." class="cfginput"><br></td></tr>
 			<td class="cfgLeft"><label for="AdminText">Admin Text:</label></td><td><input type="text" id="AdminText" name="AdminText" value="<%= $AdminText %>"  title="This is the text number of the schedule administrator." class="cfginput"><br></td></tr>
-			<td class="cfgLeft"><label for="AdminEmail">Admin Email:</label></td><td><input type="text" id="AdminEmail" name="AdminEmail" value="<%= $AdminEmail %>"  title="This is the email address of the schedule administrator." class="cfginput"><br></td></tr>
+
+			<tr><td class="cfgHead"><b>Administrator Login Info:</b></td></tr>
+			<td class="cfgLeft"><label for="AdminLogin">Admin Login Name:</label></td><td><input type="text" id="AdminLogin" name="AdminLogin" value="<%= $AdminLogin %>"  title="This is the login ID of the schedule administrator." class="cfginput"><br></td></tr>
+			<td class="cfgLeft"><label for="AdminPWD">Admin Password:</label></td><td><input type="text" id="AdminPWD" name="AdminPWD" value="<%= $AdminPWD %>"  title="This is the login password of the schedule administrator." class="cfginput"><br></td></tr>
 			</table>
 
 			<div id="buttonRow">

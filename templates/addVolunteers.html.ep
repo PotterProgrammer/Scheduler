@@ -413,7 +413,7 @@
 			}
 		}
 
-		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays, "contact": contact};
+		var volunteer = { "name": name, "email": email, "phone": phone, "desiredRoles": positions, "daysUnavailable": unavailableDays, "daysDesired": desiredDays, "contact": contact, "UID": "<%= $volunteer->{'UID'} %>"};
 		return volunteer;
 	}
 	
@@ -422,7 +422,7 @@
 	{
 		% if ( $userMode)
 		% {
-		window.location.href = 'https://www.stjamesbg.org/';
+			history.back();
 		% }
 		% else
 		% {

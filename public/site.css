@@ -399,12 +399,18 @@ fieldset,#dateEntry
 	text-align: left;
 }
 
-.simpleForm
+.simpleForm, .loginForm
 {
 	width:30%;
 	margin-left:auto;
 	margin-right:auto;
 	margin-top:5%;
+}
+
+.loginForm
+{
+	line-height: 250%;
+	text-align: center;
 }
 
 .simpleForm .buttonHolder

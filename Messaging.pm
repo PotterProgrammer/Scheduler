@@ -5,7 +5,7 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( makeCalendarFor getConfigInfo saveConfig sendEmail sendReminders sendSchedules sendUpdateRequest);
+@EXPORT = qw( makeCalendarFor getConfigInfo saveConfig sendEmail sendReminders sendSchedules sendUpdateRequest isAdmin);
 
 use warnings;
 use strict;
@@ -39,6 +39,8 @@ my $adminName;
 my $adminEmail;
 my $adminPhone;
 my $adminTextNumber;
+my $adminLogin;
+my $adminPassword;
 my $emailSender;
 my $email_pwd;
 my $email_uid;
@@ -144,6 +146,16 @@ sub loadConfig()
 				$adminTextNumber = $1;
 				next;
 			}
+			if ( m/AdminLogin=(.*)/)
+			{
+				$adminLogin = $1;
+				next;
+			}
+			if ( m/AdminPWD=(.*)/)
+			{
+				$adminPassword = unhidden($1);
+				next;
+			}
 		}
 		close CFG;
 	}
@@ -184,6 +196,10 @@ sub saveConfig(%)
 	$adminPhone = $config{"AdminPhone"};
 	print CFG "AdminText=" . $config{"AdminText"} . "\n";
 	$adminTextNumber = $config{"AdminText"};
+	print CFG "AdminLogin=" . $config{"AdminLogin"} . "\n";
+	$adminLogin = $config{"AdminLogin"};
+	print CFG "AdminPWD=" . hidden( $config{"AdminPWD"}) . "\n";
+	$adminPassword = $config{"AdminPWD"};
 
 	close CFG;
 }
@@ -211,6 +227,8 @@ sub getConfigInfo()
 						'AdminEmail' => $adminEmail , 
 						'AdminPhone' => $adminPhone , 
 						'AdminText' => $adminTextNumber , 
+						'AdminLogin' => $adminLogin , 
+						'AdminPWD' => $adminPassword , 
 					 );
 
 	return %configInfo;
@@ -783,7 +801,7 @@ sub sendUpdateRequest($)
 			my $volunteerEmail = $volunteer->{email};
 			my $volunteerPhone = $volunteer->{phone};
 			my $contactMode = $volunteer->{contact};
-			my $url = "$baseURL\/?user=$name";
+			my $url = "$baseURL\/?user=$name\&UID=" . $volunteer->{UID};
 			$url =~ s/ /%20/g;
 
 
@@ -855,5 +873,25 @@ sub sendUpdateRequest($)
 			}
 		}
 	}
+}
+
+
+#------------------------------------------------------------------------------
+#	sub isAdmin( $user, $password)
+#		This subroutine returns true if the provided user and password match
+#		the admin user name and password.
+#------------------------------------------------------------------------------
+sub isAdmin( $$)
+{
+	my ($user, $pwd) = @_;
+
+	if ( !defined( $email_uid))
+	{
+		loadConfig();
+	}
+
+
+	print "User $user Pwd $pwd  AdminLogin $adminLogin AdminPassword $adminPassword\n";
+	return( ($user eq $adminLogin) && ( $pwd eq $adminPassword));
 }
 1;
