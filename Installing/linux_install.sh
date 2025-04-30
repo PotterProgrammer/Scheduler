@@ -44,7 +44,7 @@ sudo cpanm --installdeps .
 ##  Set up the program that starts Scheduler
 ##
 echo "Setting Scheduler to listen to port $PORT";
-./Scheduler daemon -l http://*:$PORT > startScheduler
+echo "./Scheduler daemon -l http://*:$PORT" > startScheduler
 chmod +x startScheduler
 
 ##
@@ -56,6 +56,7 @@ cp -p startup_scheduler.cfg .scheduler.cfg
 ##  Signal cron to restart the scheduler on reboot
 ##
 crontab -l > my_crontab
-echo "@reboot sleep 120 && $PWD/startScheduler" >> my_crontab
+printf "\n# Start Scheduler at Reboot\n@reboot sleep 120 && cd $PWD && ./startScheduler" >> my_crontab
 crontab ./my_crontab
 
+echo "Setup completed."
