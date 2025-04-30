@@ -5,7 +5,7 @@ package Messaging;
 
 require Exporter;
 @ISA = qw( Exporter);
-@EXPORT = qw( makeCalendarFor getConfigInfo saveConfig sendEmail sendReminders sendSchedules sendUpdateRequest isAdmin);
+@EXPORT = qw( makeCalendarFor getConfigInfo saveConfig sendEmail sendReminders sendSchedules sendUpdateRequest loadConfig isAdmin);
 
 use warnings;
 use strict;
@@ -890,8 +890,6 @@ sub isAdmin( $$)
 		loadConfig();
 	}
 
-
-	print "User $user Pwd $pwd  AdminLogin $adminLogin AdminPassword $adminPassword\n";
 	return( ($user eq $adminLogin) && ( $pwd eq $adminPassword));
 }
 1;

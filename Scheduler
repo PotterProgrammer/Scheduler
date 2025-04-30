@@ -445,6 +445,7 @@ warn join ":", @{app->renderer->classes};
 	{
 		my $self = shift;
 
+		loadConfig();
 		my %configInfo = getConfigInfo();
 		$self->stash( %configInfo);
 		$self->render( 'editConfig');
