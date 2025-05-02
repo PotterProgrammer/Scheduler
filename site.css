@@ -3,9 +3,82 @@ body
 {
 	color: white;
 	background-color: #0000a0;
+	font-family: Helvetica,Arial,sans-serif;
+	font-size: 14pt;
+}
+
+menu-bar
+{
+	display: block;
+	margin-left: -10px;
+	margin-right: 0;
+	width: 100%;
+	background-color:white;
+	padding-left: 1em;
+	padding-top: .5em;
+	padding-bottom: .25em;
+	zheight: 1.4em;
+	margin-bottom: 2em;
+}
+
+menu-bar a
+{
+	margin-right:2em;
+	color: #0000c0;
+	font-weight:500;
+	text-decoration: none;
+}
+
+command-line, pre
+{
+	display: block;
+	margin-left:5em;
+	margin-right:5em;
+	padding-top: .25em;
+	padding-left: 1em;
+	padding-bottom: .25em;
+	margin-top: .5em;
+	margin-bottom: .5em;
+	background-color: #e0e0e0;
+	color: black;
+	font-family: Consolas,Courier New,monospace;
+}
+
+color-blue
+{
+	color: blue;
+}
+
+h1,sub-title
+{
+	text-align:center;
+}
+
+h1
+{
+	font-size:24pt;
+}
+
+sub-title
+{
+	margin-top:-1em;
+	display:block;
+	font-size:18pt;
+	font-weight:500;
+}
+
+
+the-rest
+{
+	display: block;
 	margin-left:72pt;
 	margin-right:72pt;
-	font-family: Helvetica,Arial,sans-serif;
+}
+
+the-rest a
+{
+	color: #00ff00;
+	font-weight: 500;
 }
 
 ul

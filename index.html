@@ -5,17 +5,46 @@
 	</head>
 	
 	<body>
-	<h1>
-		Scheduler -- Scheduling software for weekly church volunteer positions
-	</h1>
+		<menu-bar>
+			<a href="#features">Features</a>
+			<a href="#installing">Installing</a>
+		</menu-bar>
+
+	<the-rest>
+	 
+		<h1>Scheduler</h1>
+		<sub-title>Automated Volunteer Scheduling</sub-title>
 	<p>
-		Scheduler is a program written to help manage a list of volunteers and to schedule them for needed positions. 
-		The way it works is that first you build a list of the positions that need to be filled each week, for instance four
-		people to help with communion, one person to read scripture, two greeters to meet people at the doors, etc.
-		Then you build a list of people who have volunteered to serve in certain positions.  Perhaps Mary would be a greeter,
-		but would also help with communion, while Tom woud like to read scripture. Then you ask the Scheduler program
-		to create a schedule of volunteers for a set of dates, and it automatically finds people to fill each slot.
+		At one point, our church was using a subscription based software service to handle
+		scheduling the volunteers who assisted with our weekly church services.  I wrote Scheduler to replace 
+		the service and provide easier to use software that placed no additional cost on the church.
+		We have been using that software for some time now, and I wanted to make this software freely
+		available so that other churches could handle their own scheduling more
+		easily and without the overhead of paying a third party software vendor
+		a monthly subscription.
 	</p>
+	<p>
+		Scheduler is a web based system that can be run on a church PC, or (if you set it up like in our church) 
+		you can run it on a dedicated computer called a Raspberry Pi that costs about $50-$80 and is the about the 
+		size of a deck of cards.  Currently, Scheduler is set up to run on a Linux system, but work is underway to have
+		it run on a Windows PC as well.  (I do not currently have access to a Mac, but it should be fairly easy to
+		port to run on a Mac as well, if someone is interested.)
+	</p>
+	<p>
+		To use Scheduler, you first you build a list of the positions that need
+		to be filled each week. For instance, you might need  four people to
+		help with communion, one person to read scripture, two greeters to meet
+		people at the doors, etc. Then you build a list of people who have
+		volunteered to serve in certain positions.  Perhaps Mary would be a
+		greeter, but would also help with communion, while Tom woud like to
+		read scripture. Once positions and volunteers have been entered, you
+		simply ask the Scheduler program to create a schedule of volunteers for
+		a set of dates, and it automatically finds people to fill each slot.
+		The schedule can be viewed online or printed, and volunteers can be
+		notified of their individual schedules.
+	</p>
+
+	<h2 id="features">Features</h2>
 	<p>Scheduler has the following features:
 		<ul>
 			<li>Scheduler is accessible via the web, so administrators and volunteers can access it
@@ -44,6 +73,89 @@
 				a small fee for each message sent.)</li>
 		</ul>
 	</p>
+	<h2 id="installing">Installing Scheduler</h2>
+	<p>
+		To set up Scheduler to run and be accessible via the web, you will need to:
+		<ul>
+			<li>Install the Scheduler software on a computer that has access to the internet.</li>
+			<li>Provide a link from the internet to the computer where Scheduler is running.</li>
+		</ul>
+		Technically, the last step is not required, but without it, Scheduler
+		will only be accessible from the location where Scheduler is installed.
+		To be able to run it remotely or have volunteers access it from home,
+		the last step is needed.
+	</p>
+	<h3>Installing Scheduler on a computer</h3>
+	<p>
+		Currently Scheduler may be installed on the following platforms:
+		<ul>
+			<li>Linux PC</li>
+			<li>Raspberry Pi</li>
+		</ul>
+		Though the installation methods are different for each, they each will be installing from the same code.
+		Details for installing on each platform are listed below.
+	</p>
+	<h4 id="linux_pc">Installing on Linux PC</h4>
+	<p>
+		To install Scheduler on a Linux machine, you will need to use an
+		account that has <b>sudo</b> privelege so that you can install the
+		needed pieces, if they are not already on your system.  Begin by making a directory
+		to store the Scheduler program and its needed files.  For instance
+		<command-line>mkdir Scheduler</command-line>
+		Next, download the Scheduler software from github using <a href="https://github.com/PotterProgrammer/Scheduler/archive/refs/heads/main.zip">this link</a>. 
+		Once the file is downloaded, you will need to unzip the contents of the file and place
+		them in the directory that you just created.  Note that the .zip file
+		that github builds places everything under a folder with the name of
+		the repository and the branch (in this case, "Scheduler-main").  It is
+		the contents of the Scheduler-main directory that we are interested in.
+		Once you have extracted the contents of the .zip file, change to the
+		directory where the code is located. The contents of the folder should
+		look something like this:
+		<pre>
+BuildSchedule.pm  email         public          sms
+cpanfile          Installing    SaveRestore.pm  startup_scheduler.cfg
+Dockerfile        LICENSE       Scheduler       templates
+docs              Messaging.pm  Session.vim
+			</pre>
+	</p>
+	<p>
+		To install the needed system components, switch to the
+		<b>Installing</b> directory. By default, the Scheduler web server
+		listens to port 3000 for incoming connections.  If you would prefer to
+		use a different port number, you can supply it when running the install
+		command.  Type either
+			<command-line>./linux_install.sh</command-line>
+		to install Scheduler to listen to the default port of 3000, or
+			<command-line>./linux_install.sh <color-blue>##</color-blue></command-line>
+		where <b>##</b> is the port number you wish to use instead.
+	</p>
+	<p>
+		The program will begin by making sure that your system has the pieces
+		needed to run the Scheduler on your system. The script uses <b>sudo</b> 
+		to install the components, and so sudo will ask you to enter your password
+		before it starts installing the needed pieces.  It will install some developer
+		related pieces like "make", the C++ compiler, and the Perl, as well as few system libraries.
+		Then, the script will install the Perl modules needed by Scheduler, if they are
+		not already on your system.  Finally, it will set up the <b>startScheduler</b>
+		script, which you will use to start Scheduler, and it will setup your
+		system to automatically launch Scheduler each time your system reboots.
+		Depending on your system and internet speed, this may go very quickly
+		or might take significantly longer.
+	</p>
+	<p>
+		If the script ran without errors, Scheduler is now installed on your system.
+	</p>
+	<h2>Running on a Raspberry Pi</h2>
+	<p>
+		Running Scheduler on a Raspberry Pi provides a means of running the
+		scheduler program on a computer that has low power requirements and
+		takes up very little space.  (Raspberry Pi computers typically use 13 -
+		25W of power.  While PCs and Macs may use hundreds of Watts.  Since the 
+		Raspberry Pi is about the size of a deck of cards and only weighs a few onces, 
+		it is very unobtrusive.  By running the Scheduler software on a Raspberry Pi,
+		you can easily and inexpensively leave it running 24-7 as a dedicated service.
+	</p>
+	</the-rest>
 	</body>
 </html>
 
