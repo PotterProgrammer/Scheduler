@@ -1,0 +1,20 @@
+
+body
+{
+	color: white;
+	background-color: #0000a0;
+	margin-left:72pt;
+	margin-right:72pt;
+	font-family: Helvetica,Arial,sans-serif;
+}
+
+ul
+{
+	margin-top:.5em;
+	margin-bottom: .5em;
+	width:85%;
+}
+li
+{
+	margin-top: .5em;
+}
