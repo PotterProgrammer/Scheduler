@@ -124,6 +124,19 @@ sub initDB()
 }
 
 #------------------------------------------------------------------------------
+#  sub openDB()
+#  		This routine opens the DB
+#------------------------------------------------------------------------------
+sub openDB()
+{
+	if ( !defined( $dbh))
+	{
+		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "", {AutoCommit =>1}) or die "Sorry, couldn't open schedule database!\n";
+		$dbh->{sqlite_unicode} = 1;
+	}
+}
+
+#------------------------------------------------------------------------------
 #  sub closeDB()
 #  		This routine closes the DB.
 #------------------------------------------------------------------------------
@@ -188,6 +201,8 @@ sub readVolunteers(@)
 		$query = "select * from volunteer order by name ASC";
 	}
 
+	openDB();
+
 	my $volunteers = $dbh->selectall_arrayref( $query, {Slice=>{}});
 
 	my $unavailable = $dbh->prepare( "select * from dates_unavailable where name=?");
@@ -240,6 +255,9 @@ sub readVolunteers(@)
 		##
 		$volunteer->{timesScheduled} = 0;
 	}
+
+	closeDB();
+
 	return( @$volunteers);
 }
 
@@ -256,9 +274,14 @@ sub removeSlot($)
 	{
 		print "*** Deleting position: $title\n";
 	}
+
+	openDB();
+
 	my $sth = $dbh->prepare( "delete from position where title = ?");
 	$sth->bind_param( 1, $title);
 	$sth->execute();
+
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -274,6 +297,9 @@ sub removeVolunteer($)
 	{
 		print "*** Deleting volunteer: $name\n";
 	}
+	
+	openDB();
+
 	my $sth = $dbh->prepare( "delete from volunteer where name = ?");
 	$sth->bind_param( 1, $name);
 	$sth->execute();
@@ -283,6 +309,8 @@ sub removeVolunteer($)
 	$sth = $dbh->prepare( "delete from dates_desired where name=?");
 	$sth->bind_param( 1, $name);
 	$sth->execute();
+	
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -293,6 +321,9 @@ sub removeVolunteer($)
 sub saveSlot($)
 {
 	my $slot = $_[0];
+
+	openDB();
+
 	my $sth = $dbh->prepare( "insert or replace into position (title, dayOfWeek, startTime, endTime, numberNeeded) values (?,?,?,?,?)");
 	$sth->bind_param( 1, $slot->{title});
 	$sth->bind_param( 2, $slot->{dayOfWeek});
@@ -300,6 +331,8 @@ sub saveSlot($)
 	$sth->bind_param( 4, $slot->{endTime});
 	$sth->bind_param( 5, $slot->{numberNeeded});
 	$sth->execute();
+
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -317,6 +350,8 @@ sub saveVolunteer($)
 	{
 		$volunteer->{UID} = generateUID();
 	}
+
+	openDB();
 
 	##
 	##  First, update the volunteer table
@@ -390,6 +425,9 @@ sub saveVolunteer($)
 			}
 		}
 	}
+
+	closeDB();
+
 	print "$volunteer->{name} added...\n";
 	
 }
@@ -403,7 +441,13 @@ sub getRoleVolunteerList($)
 {
 	my ($title) = @_;
 	$title = '%'. $title . '%';
+
+	openDB();
+
 	my @names = $dbh->selectall_array( "select name from volunteer where desiredRoles like ? order by name ASC", undef, $title);
+
+	closeDB();
+
 	@names = map { $_->[0]} @names;
 
 	print "I found the names: " . join( ', ', @names) . " for $title\n";
@@ -419,7 +463,13 @@ sub getRoleVolunteerList($)
 sub checkScheduledDates($$)
 {
 	my ( $startDate, $endDate) = @_;
+
+	openDB();
+
 	my @dates = $dbh->selectall_array( "Select distinct date from schedule where date >= ? and date <= ? order by date ASC", undef, $startDate, $endDate);
+
+	closeDB();
+
 	@dates = map { $_->[0]} @dates;
 	return @dates;
 }
@@ -433,7 +483,13 @@ sub clearSavedSchedule($$)
 {
 	my ($startDate, $endDate) = @_;
 	print "Removing schedule entries for dates between $startDate and $endDate\n";
+
+	openDB();
+
 	$dbh->do( "delete from schedule where date >= ? and date <= ?", undef, $startDate, $endDate);
+
+	closeDB();
+
 }
 
 #------------------------------------------------------------------------------
@@ -445,7 +501,13 @@ sub clearSavedSchedule($$)
 sub readScheduleFor($$$)
 {
 	my ( $name, $startDate, $endDate) = @_;
+
+	openDB();
+
 	my $schedule = $dbh->selectall_arrayref( "select * from schedule where name=? and date >= ? and date <= ? order by date ASC, title ASC", {Slice=>{}}, $name, $startDate, $endDate);
+
+	closeDB();
+
 	return( @$schedule);
 }
 
@@ -457,7 +519,13 @@ sub readScheduleFor($$$)
 sub readSchedule($$)
 {
 	my ($startDate, $endDate) = @_;
+
+	openDB();
+
 	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= ? and date <= ? order by date ASC, title ASC", {Slice=>{}}, $startDate, $endDate);
+
+	closeDB();
+
 	return( @$schedule);
 }
 
@@ -471,7 +539,13 @@ sub readReminderList($)
 {
 	my ($nDays) = @_;
 	my $endDate = "$nDays days";
+
+	openDB();
+
 	my $schedule = $dbh->selectall_arrayref( "select * from schedule where date >= date('now') and date <= date( 'now', ?) and reminded=0 order by date ASC, title ASC", {Slice=>{}}, $endDate);
+
+	closeDB();
+
 	return( @$schedule);
 }
 
@@ -483,6 +557,9 @@ sub readReminderList($)
 sub saveSchedule(@)
 {
 	my @schedules = @_;
+
+	openDB();
+
 	my $sth = $dbh->prepare( "insert or replace into schedule (date, time, title, name) values (?,?,?,?)");
 
 	foreach my $slot (@schedules)
@@ -500,6 +577,8 @@ sub saveSchedule(@)
 		}
 		$sth->execute();
 	}
+
+	closeDB();
 }
 	
 #------------------------------------------------------------------------------
@@ -510,12 +589,17 @@ sub saveSchedule(@)
 sub updateSchedule($)
 {
 	my $schedule = $_[0];
+
+	openDB();
+
 	my $sth = $dbh->prepare( "update schedule set name=? where date=? and title=? and name=?");
 	$sth->bind_param( 1, $schedule->{name});
 	$sth->bind_param( 2, $schedule->{date});
 	$sth->bind_param( 3, $schedule->{title});
 	$sth->bind_param( 4, $schedule->{oldName});
 	$sth->execute();
+
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -527,11 +611,15 @@ sub updateScheduleReminded($)
 {
 	my ( $scheduledPosition) = @_;
 
+	openDB();
+
 	my $sth = $dbh->prepare( "update schedule set reminded=1 where date=? and title=? and name=?");
 	$sth->bind_param( 1, $scheduledPosition->{date});
 	$sth->bind_param( 2, $scheduledPosition->{title});
 	$sth->bind_param( 3, $scheduledPosition->{name});
 	$sth->execute();
+
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -709,7 +797,11 @@ sub isValidUserID($$)
 {
 	my ($name, $id) = (@_);
 	
+	openDB();
+
 	my $matches = $dbh->selectall_arrayref( "select UID from volunteer where name = ?", undef, $name);
+
+	closeDB();
 	
 	print "Looking for $name and got " . int( @$matches) . " matches\n";
 
