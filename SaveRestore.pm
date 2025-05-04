@@ -672,7 +672,7 @@ sub scheduleReminder($$$)
 	my ( $hour, $minute) = split( ':', $time);
 	my %weekdays = ( Sunday=>0, Monday=>1, Tuesday=>2, Wednesday=>3, Thursday=>4, Friday=>5, Saturday=>6);
 
-	my $newLine = sprintf( "%02d %02d * * %02d curl http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, $port);
+	my $newLine = sprintf( "%02d %02d * * %02d curl -b UID=%s http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, getAdminUID(), $port);
 	
 	##
 	##  Read in the current crontab
