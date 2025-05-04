@@ -50,11 +50,12 @@ sub updateScheduleReminded($);
 #------------------------------------------------------------------------------
 sub initDB()
 {
-	if ( !defined( $dbh))
-	{
-		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "", {AutoCommit =>1}) or die "Sorry, couldn't open schedule database!\n";
-		$dbh->{sqlite_unicode} = 1;
-	}
+	openDB();
+##-->	if ( !defined( $dbh))
+##-->	{
+##-->		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "", {AutoCommit =>1}) or die "Sorry, couldn't open schedule database!\n";
+##-->		$dbh->{sqlite_unicode} = 1;
+##-->	}
 
 	##
 	##  Create Schedule table
@@ -121,6 +122,7 @@ sub initDB()
 				  )");
 	
 
+	closeDB();
 }
 
 #------------------------------------------------------------------------------
@@ -176,7 +178,9 @@ END
 #------------------------------------------------------------------------------
 sub readSlots()
 {
+	openDB();
 	my $positions = $dbh->selectall_arrayref( "select * from position order by title ASC", {Slice=>{}});
+	closeDB();
 	return( @$positions);
 }
 
