@@ -144,7 +144,7 @@ sub closeDB()
 {
 	if ( defined( $dbh))
 	{
-		print "Disconneting!\n";
+##-->		print "Disconneting!\n";
 		$dbh->disconnect();
 		undef $dbh;
 	}
