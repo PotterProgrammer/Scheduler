@@ -43,13 +43,21 @@ if %_showhelp% equ 1 (
 if NOT "%1" == "" ( set PORT=%1)
 
 
-if %skipPerl EQU 0 (
+if %_skipPerl% EQU 0 (
 :: Now, start by downloading Strawberry Perl
-   echo "Downloading Perl"
+   echo.
+   echo *******************
+   echo * Downloading Perl
+   echo *******************
+   echo.
    curl -L https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54001_64bit_UCRT/strawberry-perl-5.40.0.1-64bit-portable.zip -o strawberryPerl.zip
 
 :: Unpack perl
-   echo "Installing Perl"
+   echo.
+   echo ******************
+   echo * Installing Perl
+   echo ******************
+   echo.
    mkdir  StrawberryPerl
    cd StrawberryPerl
    tar -xf ..\strawberryPerl.zip 
@@ -57,7 +65,11 @@ if %skipPerl EQU 0 (
 )
 
 :: Use cpanm in Perl to install remaining pieces
-echo "Installing Perl modules.  (This may take a little while.)
+echo.
+echo ************************************************************
+echo * Installing Perl modules.  (This may take a little while.)
+echo ************************************************************
+echo.
 PATH=%CD%\StrawberryPerl\site\bin;%CD%\StrawberryPerl\perl\bin;%CD%\StrawberryPerl\c\bin;%PATH%
 
 :: Install troublesome pieces first
@@ -68,12 +80,27 @@ call cpanm --cpanfile windows_cpanfile --installdeps .
 
 
 :: Build program to start Scheduler
-echo "Setting up Scheduler launcher"
+echo.
+echo *******************************
+echo * Setting up Scheduler launcher
+echo *******************************
+echo.
 echo @echo off > launchScheduler.cmd
 echo PATH=%PATH% >>launchScheduler.cmd
 echo perl Scheduler daemon -l http://*:%PORT% >> launchScheduler.cmd
 
+:: Build helper program to do cleanup
+echo.
+echo *******************************
+echo * Setting up cleanup assistant
+echo *******************************
+echo.
+echo @echo off > clearSchedulesBefore.cmd
+echo PATH=%PATH% >>clearSchedulesBefore.cmd
+echo perl clearSchedulesBefore %* >> clearSchedulesBefore.cmd
+
 :: Set initial config file
 copy startup_scheduler.cfg .scheduler.cfg
 
+echo.
 echo Done

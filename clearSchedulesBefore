@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+
+
+use lib "./";
+
+use SaveRestore;
+
+sub usage()
+{
+	print STDERR << 'EOH';
+
+  clearSchedulesBefore -- Clear schedules before a certain date
+
+  usage:  clearSchedulesBefore date
+    
+    where:
+     
+     date    Is a value in the format "yyyy-mm-dd".  All schedules for dates
+             up to and including the provided date will be deleted.
+
+EOH
+	exit -1;
+}
+
+#main:
+{
+	if (( @ARGV != 1) || ($ARGV[0] =~ /^--?h/))
+	{
+		usage();
+	}
+
+	my $clearBefore = $ARGV[0];
+	chomp $clearBefore;
+
+	if ( $clearBefore !~ /\d\d\d\d-\d\d-\d\d/)
+	{
+		print "\n*** ERROR *** Invalid date:  $clearBefore !\n";
+		usage();
+	}
+
+	clearSavedSchedule( "2000-01-01", $clearBefore);
+}

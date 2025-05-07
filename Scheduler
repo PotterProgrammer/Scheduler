@@ -288,15 +288,22 @@ warn join ":", @{app->renderer->classes};
 			my $rendered = 0;
 
 			##
-			##  Clear schedules older than 90 days...
+			##  To keep things from overflowing remove Schedule
+			##  entries that are more than 90 days old
 			##
+			print "Purging old schedules...\n";
+			my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime( time);
+			$year += 1900;
+			$mon ++;
+			my ( $keepyear, $keepmonth, $keepday) = Add_Delta_Days( $year, $mon, $mday, -91);
+			my $clearBefore = sprintf( "%04d-%02d-%02d", $keepyear, $keepmonth, $keepday);
 
 			##
 			##  If in Windows, we can do this by running a separate process
 			##
 			if ( $^O =~ /Win/)
 			{
-				system( "cmd /c start \"Schedule Cleanup\" /min perl cleanSchedulesBefore $clearBefore");
+				system( "cmd /c start \"Schedule Cleanup\" /min perl clearSchedulesBefore $clearBefore");
 			}
 			else
 			{
@@ -305,16 +312,6 @@ warn join ":", @{app->renderer->classes};
 				##
 				$self->subprocess( sub()
 					{
-						##
-						##  To keep things from overflowing remove Schedule
-						##  entries that are more than 90 days old
-						##
-						print "Purging old schedules...\n";
-						my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime( time);
-						$year += 1900;
-						$mon ++;
-						my ( $keepyear, $keepmonth, $keepday) = Add_Delta_Days( $year, $mon, $mday, -91);
-						my $clearBefore = sprintf( "%04d-%02d-%02d", $keepyear, $keepmonth, $keepday);
 						clearSavedSchedule( "2000-01-01", $clearBefore);
 					}, sub()
 					{
