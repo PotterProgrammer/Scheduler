@@ -303,7 +303,7 @@ warn join ":", @{app->renderer->classes};
 			##
 			if ( $^O =~ /Win/)
 			{
-				system( "cmd /c start \"Schedule Cleanup\" /min perl clearSchedulesBefore $clearBefore");
+				system( "start \"Schedule Cleanup\" /min clearSchedulesBefore.cmd $clearBefore");
 			}
 			else
 			{
