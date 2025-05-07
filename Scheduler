@@ -7,7 +7,15 @@ use strict;
 use lib "./";
 
 use Mojolicious::Lite;
-plugin 'Subprocess';
+
+##
+##  Include Mojolicious::Subprocess (unless running
+##  on Windows, where it is not available)
+##
+if ( $^O !~ /Win/)
+{
+	plugin 'Subprocess';
+}
 
 use Date::Calc qw(:all);
 
@@ -110,7 +118,7 @@ sub findVolunteer($$);
 			}
 
 			$self->render(  'not_found');
-			return undef;
+			return;
 		}
 
 		##
@@ -119,7 +127,7 @@ sub findVolunteer($$);
 		$self->session->{lastCall} = $self->{tx}->{req}->{url}->{path}->{path};
 		$self->redirect_to( 'login');
 
-		return undef;
+		return;
 	};
 
 	#------------------------------------------------------------------------------
@@ -279,25 +287,41 @@ warn join ":", @{app->renderer->classes};
 			my $incomplete = buildScheduleForDates( $startDate, $endDate);
 			my $rendered = 0;
 
-			print "Here goes...\n";
-			$self->subprocess( sub()
-				{
-					##
-					##  To keep things from overflowing remove Schedule
-					##  entries that are more than 90 days old
-					##
-					print "Purging...\n";
-					my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime( time);
-					$year += 1900;
-					$mon ++;
-					my ( $keepyear, $keepmonth, $keepday) = Add_Delta_Days( $year, $mon, $mday, -91);
-					my $clearBefore = sprintf( "%04d-%02d-%02d", $keepyear, $keepmonth, $keepday);
-					clearSavedSchedule( "2000-01-01", $clearBefore);
-				}, sub()
-				{
-					print "Cleanup finished...\n";
-				}
-				);
+			##
+			##  Clear schedules older than 90 days...
+			##
+
+			##
+			##  If in Windows, we can do this by running a separate process
+			##
+			if ( $^O =~ /Win/)
+			{
+				system( "cmd /c start \"Schedule Cleanup\" /min perl cleanSchedulesBefore $clearBefore");
+			}
+			else
+			{
+				##
+				##  For everywhere else, we can simply do this as a subprocess
+				##
+				$self->subprocess( sub()
+					{
+						##
+						##  To keep things from overflowing remove Schedule
+						##  entries that are more than 90 days old
+						##
+						print "Purging old schedules...\n";
+						my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime( time);
+						$year += 1900;
+						$mon ++;
+						my ( $keepyear, $keepmonth, $keepday) = Add_Delta_Days( $year, $mon, $mday, -91);
+						my $clearBefore = sprintf( "%04d-%02d-%02d", $keepyear, $keepmonth, $keepday);
+						clearSavedSchedule( "2000-01-01", $clearBefore);
+					}, sub()
+					{
+						print "Cleanup finished...\n";
+					}
+					);
+			}
 
 			##
 			##  Was a complete schedule built?
@@ -312,13 +336,6 @@ warn join ":", @{app->renderer->classes};
 					##
 					##  If so, send out notifications automatically
 					##
-	##-->				$self->subprocess( sub
-	##-->					{
-	##-->						print "Sending new schedules...\n";
-	##-->						sendSchedules( $startDate, $endDate, $calendarURL);
-	##-->						print "Schedules sent...\n";
-	##-->					},sub { my ($self, @results) = @_; print "Done"});
-					
 					my $cmd =  "curl '" . $self->url_for( "/sendSchedule")->to_abs . "?start=${startDate}&end=${endDate}' &";
 					print "running $cmd\n";
 					system( $cmd);

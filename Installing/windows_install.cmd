@@ -69,8 +69,11 @@ call cpanm --cpanfile windows_cpanfile --installdeps .
 
 :: Build program to start Scheduler
 echo "Setting up Scheduler launcher"
-echo %PATH% >launchScheduler.cmd
+echo @echo off > launchScheduler.cmd
+echo PATH=%PATH% >>launchScheduler.cmd
 echo perl Scheduler daemon -l http://*:%PORT% >> launchScheduler.cmd
 
 :: Set initial config file
 copy startup_scheduler.cfg .scheduler.cfg
+
+echo Done
