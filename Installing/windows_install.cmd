@@ -8,12 +8,12 @@ set _skipPerl=0
 :parse_options
 set foundMatch=0
 
-if "%1" == "/?" ( set _showhelp=1 & shift & foundMatch=1)
-if "%1" == "/h" ( set _showhelp=1 & shift & foundMatch=1)
-if "%1" == "-h" ( set _showhelp=1 & shift & foundMatch=1)
-if "%1" == "--h" ( set _showhelp=1 & shift & foundMatch=1)
+if "%1" == "/?" ( set _showhelp=1 & shift & set foundMatch=1)
+if "%1" == "/h" ( set _showhelp=1 & shift & set foundMatch=1)
+if "%1" == "-h" ( set _showhelp=1 & shift & set foundMatch=1)
+if "%1" == "--h" ( set _showhelp=1 & shift & set foundMatch=1)
 
-if "%1" == "/skipPerl" ( set _skipPerl=1 & shift & foundMatch=1)
+if "%1" == "/skipPerl" ( set _skipPerl=1 & shift & set foundMatch=1)
 
 : If we parsed an option and a non-numeric option remains, go back and try again
 if NOT "%1" == "" (
