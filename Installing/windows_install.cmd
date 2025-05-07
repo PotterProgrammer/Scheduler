@@ -16,16 +16,18 @@ if "%1" == "--h" ( set _showhelp=1 & shift & set foundMatch=1)
 if "%1" == "/skipPerl" ( set _skipPerl=1 & shift & set foundMatch=1)
 
 : If we parsed an option and a non-numeric option remains, go back and try again
-if NOT "%1" == "" (
-	if %1 LT 1 (
-	   if %foundMatch% EQU 1 (
-   	     goto :parse_options
-	   ) else (
-		 echo Unrecognized option %1
-		 exit /b -1
-	   )
-	)
+if "%1" == "" ( goto :continueInstall)
+
+if %1 LT 1 (
+   if %foundMatch% EQU 1 (
+	 goto :parse_options
+   ) else (
+	 echo Unrecognized option %1
+	 exit /b -1
+   )
 )
+
+:contineInstall
 
 if %_showhelp% equ 1 (
    echo ^windows_install:  A batch file to install Scheduler on Windows
@@ -51,11 +53,11 @@ if %skipPerl EQU 0 (
    mkdir  StrawberryPerl
    cd StrawberryPerl
    tar -xf ..\strawberryPerl.zip 
+   cd ..
 )
 
 :: Use cpanm in Perl to install remaining pieces
 echo "Installing Perl modules.  (This may take a little while.)
-cd ..
 PATH=%CD%\StrawberryPerl\site\bin;%CD%\StrawberryPerl\perl\bin;%CD%\StrawberryPerl\c\bin;%PATH%
 
 :: Install troublesome pieces first
