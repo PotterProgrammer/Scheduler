@@ -27,7 +27,7 @@ if %1 LT 1 (
    )
 )
 
-:contineInstall
+:continueInstall
 
 if %_showhelp% equ 1 (
    echo ^windows_install:  A batch file to install Scheduler on Windows
@@ -61,10 +61,10 @@ echo "Installing Perl modules.  (This may take a little while.)
 PATH=%CD%\StrawberryPerl\site\bin;%CD%\StrawberryPerl\perl\bin;%CD%\StrawberryPerl\c\bin;%PATH%
 
 :: Install troublesome pieces first
-cpanm --force --cpanfile windows_forced_cpanfile --installdeps .
+call cpanm --force --cpanfile windows_forced_cpanfile --installdeps .
 
 :: Then install the rest
-cpanm --cpanfile windows_cpanfile --installdeps .
+call cpanm --cpanfile windows_cpanfile --installdeps .
 
 
 :: Build program to start Scheduler
