@@ -1,0 +1,2 @@
+requires 'Bit::Vector', '>=7.4';
+
