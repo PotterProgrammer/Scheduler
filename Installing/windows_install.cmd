@@ -89,6 +89,14 @@ echo @echo off > launchScheduler.cmd
 echo PATH=%PATH% >>launchScheduler.cmd
 echo perl Scheduler daemon -l http://*:%PORT% >> launchScheduler.cmd
 
+:: Build command to run Scheduler at login
+echo.
+echo *****************************************
+echo * Setting up Scheduler autostart program
+echo *****************************************
+echo.
+echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\launchScheduler.cmd" /tn Scheduler /delay 0002:00 >autostartScheduler.cmd
+
 :: Build helper program to do cleanup
 echo.
 echo *******************************
