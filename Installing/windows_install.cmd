@@ -110,5 +110,8 @@ echo perl clearSchedulesBefore %* >> clearSchedulesBefore.cmd
 :: Set initial config file
 copy startup_scheduler.cfg .scheduler.cfg
 
+:: Make a desktop shortcut to Scheduler
+perl makeWindowsShortcut %USERPROFILE%\Desktop\Scheduler.lnk %CD% launchScheduler.cmd
+
 echo.
 echo Done

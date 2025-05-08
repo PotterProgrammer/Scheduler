@@ -1,0 +1,17 @@
+#!/usr/bin/env perl
+
+use Win32::Shortcut;
+
+#main:
+{
+	my ( $shortcutName, $dest, $program) = @ARGV;
+
+	my $link = Win32::Shortcut->new();
+	$link->{'Path'} = "$dest\\$program";
+    $link->{'WorkingDirctory'} = $dest;
+    $link->{'Description'} = "Scheduler service";
+	$link->{'ShowCmd'} = SW_SHOWNORMAL;
+    $link->{'IconLocation'} = "$dest\\public\\favicon.ico";
+    $link->Save( $shortcutName);
+    $link->Close();
+}
