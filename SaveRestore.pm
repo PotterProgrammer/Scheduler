@@ -767,7 +767,7 @@ sub unscheduleReminder()
 		##
 		##  For Windows use schtasks to remove scheduled task
 		##
-		system( 'schtasks /Delete /TN "SendSchedulerReminders" 2>NUL:');
+		system( 'schtasks /Delete /TN "SendSchedulerReminders" /F 2>NUL:');
 	}
 	else
 	{
@@ -876,7 +876,7 @@ sub readWindowsScheduledReminder()
 	my $crontab = '';
 	my %dayName = ( SUN =>"Sunday", MON => "Monday", TUE => "Tuesday", WED => "Wednesday", THU => "Thursday", FRI => "Friday", SAT => "Saturday" );
 
-	my $taskQueryResult = `schtasks /query /tn "SendSchedulerReminders /Fo LIST /V`;
+	my $taskQueryResult = `schtasks /query /tn SendSchedulerReminders /Fo LIST /V`;
 
 	##
 	##  Was a task scheduled?
@@ -884,7 +884,7 @@ sub readWindowsScheduledReminder()
 	if ( $taskQueryResult !~ m/^ERROR/)
 	{
 		$enabled = 1;
-		$taskQueryResult =~ /Start Time:\s+(\d\d):(\d\d):\d\d ([AP]M)/;
+		$taskQueryResult =~ /Start Time:\s+(\d+):(\d\d):\d\d ([AP]M)/;
 		$hour = $1;
 		$minute = $2;
 		if ( $3 =~ /PM/)
