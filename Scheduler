@@ -17,7 +17,10 @@ if ( $^O !~ /Win/)
 	plugin 'Subprocess';
 }
 
+use Archive::Tar;
+use Crypt::OpenPGP;
 use Date::Calc qw(:all);
+use Data::Dumper;
 
 use Messaging;
 use SaveRestore;
@@ -93,7 +96,6 @@ sub findVolunteer($$);
 	under sub
 	{
 		my $self = shift;
-##-->		return 1;
 
 		##
 		##	Is the user already logged in as an admin?
@@ -473,7 +475,6 @@ warn join ":", @{app->renderer->classes};
 	{
 		my $self = shift;
 
-		print "\n\nTHERE???\n\n";
 		$self->render( 'restoreBackup');
 	};
 
@@ -516,7 +517,6 @@ warn join ":", @{app->renderer->classes};
 	{
 		my $self = shift;
 	 
-		print "\n\n\nHere dude\n\n\n";
 		# Check file size
 		if ($self->req->is_limit_exceeded)
 		{
@@ -527,24 +527,29 @@ warn join ":", @{app->renderer->classes};
 		my $filename = $self->param('filename');
 		my $size = $filename->size;
 		my $name = $filename->filename;
-		unlink( "dataBackup.pbt");
 		unlink( "dataBackup.tar");
-		print "The keys are: " . join( ", ", keys( %$filename)) . "\n";
-	##--> 	print "Asset=" . $filename->asset->slurp . "\n";
-		$filename->asset->move_to( "dataBackup.pbt");
 		SaveRestore::closeDB();
 
-		if ( -e 'dataBackup.pbt')
+		##
+		##  Decrypt the file data
+		##
+		my $pgp = Crypt::OpenPGP->new;
+		my $encrypted = $filename->asset->slurp;
+		my $backupData = $pgp->decrypt( Data => $encrypted, Passphrase => 'TryToBeTimely');
+
+		if ( defined ( $backupData))
 		{
-			system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o dataBackup.tar dataBackup.pbt");
-			if ( -e 'dataBackup.tar')
+			open( my $TAR, '>', "dataBackup.tar");
+			binmode( $TAR);
+			syswrite( $TAR, $backupData);
+			close( $TAR);
+
+			my $tar = Archive::Tar->new();
+			$Archive::Tar::INSECURE_EXTRACT_MODE = 1;
+			if ( $tar->read( 'dataBackup.tar'))
 			{
-				my $tar = Archive::Tar->new;
-				$Archive::Tar::INSECURE_EXTRACT_MODE = 1;
-				if ( $tar->read( 'dataBackup.tar'))
+				if ($tar->extract())
 				{
-					$tar->extract();
-		
 					##
 					##  Do we have a schedule for sending reminders?
 					##
@@ -579,15 +584,22 @@ warn join ":", @{app->renderer->classes};
 				}
 				else
 				{
-					$self->stash( textMessage => "Unable to read backup file!", title=>'Warning!', boxtime=>5);
+					$self->stash( textMessage => "Unable to read backup file contents!", title=>'Warning!', boxtime=>5);
 					print "\n\n\n\nRead error!!!\n\n\n";
 				}
 			}
 			else
 			{
-				$self->stash( textMessage => "Unable to read provided backup file!", title=>'Warning!', boxtime=>5);
-					print "\n\n\n\nRead error dude!!!\n\n\n";
+				$self->stash( textMessage => "Unable to read backup file!", title=>'Warning!', boxtime=>5);
+				print "\n\n\n\nTar read error!!!\n\n\n";
 			}
+
+			unlink( 'dataBackup.tar');
+		}
+		else
+		{
+			$self->stash( textMessage => "Unable to read provided backup file!", title=>'Warning!', boxtime=>5);
+			print "\n\n\n\nDecryption read error dude!!!\n\n\n";
 		}
 
 		SaveRestore::initDB();
@@ -616,15 +628,12 @@ warn join ":", @{app->renderer->classes};
 		##  Write the volunteer info to the database
 		##
 		print "******** Saving " . join( ',', map { ", $_: $json->info->{$_}\n"} keys( %{$json->{info}})) . " *****\n\n";
-##-->		my $days = $json->{info}->{daysUnavailable};
-##-->		 "I see: " . join( ',', $days);
 		saveVolunteer( $json->{info});
 						
 
 		@Volunteers = readVolunteers();
 		$self->stash( volunteers=>\@Volunteers);
 
-##-->		$self->render( 'volunteers');
 		$self->render( 'editVolunteers');
 	};
 
@@ -809,7 +818,6 @@ warn join ":", @{app->renderer->classes};
 		$self->on( json => sub
 					{
 						my ($self, $slot) = @_;
-	##-->					my $slot = {title=>$title, dayOfWeek=>$dayOfWeek, time=>$time, numberNeeded=>$numberNeeded};
 
 						saveSlot( $slot);
 

@@ -245,7 +245,6 @@ sub orderByCount($$@)
 	##
 	##  Sort the names provide based on how often they've been scheduled already
 	##
-##-->	@names = sort { $volunteerCount->{$a->{name}} <=> $volunteerCount->{$b->{name}}} @names;
 	@names = sort { $volunteerCount->{$a->{name}}->{$slotName} <=> $volunteerCount->{$b->{name}}->{$slotName} } @names;
 
 	return @names;
@@ -278,8 +277,6 @@ sub orderBySpecialRequest( $@)
 			##  If so, put them at the front of the list
 			##
 			unshift( @sortedList, $name);
-	
-print "\n\n ***********  Moving $name->{name} to the front of the list!!\n";
 		}
 		else
 		{
@@ -313,7 +310,6 @@ sub removeUnavailables( $$$@)
 		if (  defined( $name->{daysUnavailable}) &&
 			  length( $name->{daysUnavailable}) && 
 			  isUnavailable( $name->{daysUnavailable}, $date, $startTime, $endTime)
-##-->			  $name->{daysUnavailable} =~ m/$date/ )
 		   )
 		{
 			##

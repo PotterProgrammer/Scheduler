@@ -16,6 +16,7 @@ use utf8;
 use utf8::all;
 
 use Archive::Tar;
+use Crypt::OpenPGP;
 use Messaging;
 
 our $DBFilename = "./schedule.db";
@@ -51,11 +52,6 @@ sub updateScheduleReminded($);
 sub initDB()
 {
 	openDB();
-##-->	if ( !defined( $dbh))
-##-->	{
-##-->		$dbh = DBI->connect( "dbi:SQLite:$DBFilename", "", "", {AutoCommit =>1}) or die "Sorry, couldn't open schedule database!\n";
-##-->		$dbh->{sqlite_unicode} = 1;
-##-->	}
 
 	##
 	##  Create Schedule table
@@ -637,7 +633,6 @@ sub backupData()
 		##
 		##  Remove old files
 		##
-		unlink( 'public/dataBackup.tar');
 		unlink( 'public/dataBackup.pbt');
 		unlink( 'reminderSchedule.txt');
 
@@ -651,21 +646,15 @@ sub backupData()
 
 		print "Making a backup!\n";
 		$tar->add_files( $DBFilename, $Messaging::ConfigName, 'reminderSchedule.txt');
-		$tar->write( 'public/dataBackup.tar');
+		my $tarData = $tar->write();
 
-		#=======================================================================
-		#                                                  
-		#  TTTTT             DDDD                          
-		#    T    ooo        D   D  ooo                    
-		#    T   o   o       D   D o   o                   
-		#    T   o   o       D   D o   o   ..    ..    ..  
-		#    T    ooo        DDDD   ooo    ..    ..    ..  
-		#                                                  
-		#    Replace call to gpg for Windows environment with Crypt::OpenPGP
-		#=======================================================================
+		my $pgp = Crypt::OpenPGP->new( Compat => 'GnuPG');
+		my $encrypted = $pgp->encrypt( Data => $tarData, Passphrase => 'TryToBeTimely');
+		open( my $PBT, '>', 'public/dataBackup.pbt');
+		binmode( $PBT);
+		syswrite( $PBT, $encrypted);
+		close( $PBT);
 
-		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o public/dataBackup.pbt -c public/dataBackup.tar");
-		unlink( 'public/dataBackup.tar');
 		unlink( 'reminderSchedule.txt');
 		return( 'dataBackup.pbt');
 }
@@ -836,7 +825,7 @@ sub readUnixScheduledReminder()
 	my $hour = 0;
 	my $minute = 0;
 	my $day = 0;
-	my $weekday;
+	my $weekday = 'Sunday';
 	my @dayName = qw( Sunday Monday Tuesday Wednesday Thursday Friday Saturday );
 
 	##
@@ -872,7 +861,7 @@ sub readWindowsScheduledReminder()
 	my $enabled = 0;
 	my $hour = 0;
 	my $minute = 0;
-	my $weekday;
+	my $weekday = 'Sunday';
 	my $crontab = '';
 	my %dayName = ( SUN =>"Sunday", MON => "Monday", TUE => "Tuesday", WED => "Wednesday", THU => "Thursday", FRI => "Friday", SAT => "Saturday" );
 
