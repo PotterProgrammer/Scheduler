@@ -1,4 +1,5 @@
 requires 'Archive::Tar', '>=2.38';
+requires 'Crypt::OpenPGP', '>=1.19';
 requires 'Data::ICal', '>=0.24';
 requires 'Data::ICal::Entry::Event';
 requires 'Date::Calc', '>=6.4';
