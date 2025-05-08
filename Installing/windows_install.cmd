@@ -31,8 +31,10 @@ if %1 LT 1 (
 
 if %_showhelp% equ 1 (
    echo ^windows_install:  A batch file to install Scheduler on Windows
-   echo ^  usage:  windows_install [/?] [port_number]
+   echo ^  usage:  windows_install [/?] [skipPerl] [port_number]
    echo ^     where:
+   echo ^     skipPerl       indicates to skip installing Perl as part of the
+   echo ^                    installation.
    echo ^     port_number    is the number of the port that Scheduler should
    echo ^                    listen to for incoming connections.  If this is
    echo ^                    not specified, it defaults to 3000.
