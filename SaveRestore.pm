@@ -22,7 +22,7 @@ our $DBFilename = "./schedule.db";
 my $dbh;
 my $verbose = 1;
 
-my $crontabEntryHeader = "##############################\n##   Send Weekly Reminders  ##\n";
+my $crontabEntryHeader = "\n##############################\n##   Send Weekly Reminders  ##\n";
 my $crontabMatch = $crontabEntryHeader;
 $crontabMatch =~ s/\n/./g;
 
@@ -653,6 +653,17 @@ sub backupData()
 		$tar->add_files( $DBFilename, $Messaging::ConfigName, 'reminderSchedule.txt');
 		$tar->write( 'public/dataBackup.tar');
 
+		#=======================================================================
+		#                                                  
+		#  TTTTT             DDDD                          
+		#    T    ooo        D   D  ooo                    
+		#    T   o   o       D   D o   o                   
+		#    T   o   o       D   D o   o   ..    ..    ..  
+		#    T    ooo        DDDD   ooo    ..    ..    ..  
+		#                                                  
+		#    Replace call to gpg for Windows environment with Crypt::OpenPGP
+		#=======================================================================
+
 		system( "gpg --yes --no-tty --batch --passphrase TryToBeTimely --quiet -o public/dataBackup.pbt -c public/dataBackup.tar");
 		unlink( 'public/dataBackup.tar');
 		unlink( 'reminderSchedule.txt');
@@ -675,64 +686,48 @@ sub scheduleReminder($$$)
 	my ( $hour, $minute) = split( ':', $time);
 	my %weekdays = ( Sunday=>0, Monday=>1, Tuesday=>2, Wednesday=>3, Thursday=>4, Friday=>5, Saturday=>6);
 
-	my $newLine = sprintf( "%02d %02d * * %02d curl -b UID=%s http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, getAdminUID(), $port);
-	
 	##
-	##  Read in the current crontab
+	##  Are we running on Windows?
 	##
-	my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
-	
-	##
-	##  Is there currently an entry for sendReminders?
-	##
-	if ( $enabled)
+	if ( $^O =~ /Win/)
 	{
-		printf( "Replacing old Crontab of $day at %02d:%02d with  $weekday at %02d:%02d\n", $hr, $min, $hour, $minute);
-		$crontab =~ s/$crontabMatch(.*?)$/$crontabEntryHeader$newLine/sm;
+		#=======================================================
+		#  If so, use schtasks to schedule the reminder  
+		#=======================================================
+		my %days = ( Sunday=>"SUN", Monday=>"MON", Tuesday=>"TUE", Wednesday=>"WED", Thursday=>"THU", Friday=>"FRI", Saturday=>"SAT");
+
+		##
+		##  Generate the cmd to issue
+		##
+		my $cmd = sprintf( "schtasks /create /f /sc WEEKLY /d %s  /ST %02d:%02d /tn \"SendSchedulerReminders\" /tr \"" .
+			               "curl -b UID=%s http://localhost:%d/sendReminders\"", $days{$weekday}, $hour, $minute, getAdminUID(), $port);
+	
+		##
+		##  Run the schtasks command
+		##
+		system( $cmd);
 	}
 	else
 	{
-		$crontab .= "\n$crontabEntryHeader$newLine\n";
-	}
-
-	##
-	##  Store the new crontab
-	##
-	open( my $CRONFILE, '>', 'my_crontab') || die "Can't open crontab file! $!\n";
-	print $CRONFILE $crontab;
-	close $CRONFILE;
-
-	##
-	##  Remove the old crontab
-	##
-	system( "crontab -r");
+		my $newLine = sprintf( "%02d %02d * * %02d curl -b UID=%s http://localhost:%d/sendReminders", $minute, $hour, $weekdays{$weekday}, getAdminUID(), $port);
 	
-	##
-	## 	Set new crontab in place
-	##
-	system( "crontab my_crontab");
-}
-
-#------------------------------------------------------------------------------
-#  sub unscheduleReminder()
-#  		This function unschedules a recurring call to '/sendReminders'.
-#------------------------------------------------------------------------------
-sub unscheduleReminder()
-{
-	##
-	##  Read in the current crontab
-	##
-	my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
-	
-	##
-	##  Is there currently an entry for sendReminders?
-	##
-	if ( $crontab =~ m/$crontabMatch.*?/sm)
-	{
 		##
-		##  If so, remove the entry
+		##  Read in the current crontab
 		##
-		$crontab =~ s/$crontabMatch(.*?)$.*$//sm;
+		my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
+		
+		##
+		##  Is there currently an entry for sendReminders?
+		##
+		if ( $enabled)
+		{
+			printf( "Replacing old Crontab of $day at %02d:%02d with  $weekday at %02d:%02d\n", $hr, $min, $hour, $minute);
+			$crontab =~ s/$crontabMatch(.*?)$/$crontabEntryHeader$newLine/sm;
+		}
+		else
+		{
+			$crontab .= "$crontabEntryHeader$newLine\n";
+		}
 
 		##
 		##  Store the new crontab
@@ -754,6 +749,60 @@ sub unscheduleReminder()
 }
 
 #------------------------------------------------------------------------------
+#  sub unscheduleReminder()
+#  		This function unschedules a recurring call to '/sendReminders'.
+#------------------------------------------------------------------------------
+sub unscheduleReminder()
+{
+	##
+	##  Read in the current crontab
+	##
+	my ( $enabled, $hr, $min, $day, $crontab) = readScheduledReminder();
+	
+	##
+	##  Are we running in Windows?
+	##
+	if ( $^O =~ /Win/)
+	{
+		##
+		##  For Windows use schtasks to remove scheduled task
+		##
+		system( 'schtasks /Delete /TN "SendSchedulerReminders" 2>NUL:');
+	}
+	else
+	{
+		
+		##
+		##  Is there currently an entry for sendReminders?
+		##
+		if ( $crontab =~ m/$crontabMatch.*?/sm)
+		{
+			##
+			##  If so, remove the entry
+			##
+			$crontab =~ s/\s*$crontabMatch(.*?)$.*$//sm;
+
+			##
+			##  Store the new crontab
+			##
+			open( my $CRONFILE, '>', 'my_crontab') || die "Can't open crontab file! $!\n";
+			print $CRONFILE $crontab;
+			close $CRONFILE;
+
+			##
+			##  Remove the old crontab
+			##
+			system( "crontab -r");
+			
+			##
+			## 	Set new crontab in place
+			##
+			system( "crontab my_crontab");
+		}
+	}
+}
+
+#------------------------------------------------------------------------------
 #  sub readScheduledReminder()
 #  		This routine reads the crontab to see if a schedule reminder is set and
 #  		if so sets "enabled" to true.  It returns the following:
@@ -762,6 +811,26 @@ sub unscheduleReminder()
 #		entire contents of the current crontab.
 #------------------------------------------------------------------------------
 sub readScheduledReminder()
+{
+	if ( $^O =~ /Win/)
+	{
+		return readWindowsScheduledReminder();
+	}
+	else
+	{
+		return readUnixScheduledReminder();
+	}
+}
+
+#------------------------------------------------------------------------------
+#  sub readUnixScheduledReminder()
+#  		This routine reads the crontab to see if a schedule reminder is set and
+#  		if so sets "enabled" to true.  It returns the following:
+#		( $enabled, $hour, $minute, $weekday, $crontab)
+#		Where "weekday" is one of "Sunday, Monday, ..." and $crontab is the
+#		entire contents of the current crontab.
+#------------------------------------------------------------------------------
+sub readUnixScheduledReminder()
 {
 	my $enabled = 0;
 	my $hour = 0;
@@ -787,6 +856,49 @@ sub readScheduledReminder()
 		$enabled = 1;
 	}
 
+	return( $enabled, $hour, $minute, $weekday, $crontab);
+}
+
+#------------------------------------------------------------------------------
+#  sub readWindowsScheduledReminder()
+#  		This routine uses schtasks to see if a schedule reminder is set and
+#  		if so sets "enabled" to true.  It returns the following:
+#		( $enabled, $hour, $minute, $weekday, $crontab)
+#		Where "weekday" is one of "Sunday, Monday, ..." and $crontab is the
+#		the command scheduled.
+#------------------------------------------------------------------------------
+sub readWindowsScheduledReminder()
+{
+	my $enabled = 0;
+	my $hour = 0;
+	my $minute = 0;
+	my $weekday;
+	my $crontab = '';
+	my %dayName = ( SUN =>"Sunday", MON => "Monday", TUE => "Tuesday", WED => "Wednesday", THU => "Thursday", FRI => "Friday", SAT => "Saturday" );
+
+	my $taskQueryResult = `schtasks /query /tn "SendSchedulerReminders /Fo LIST /V`;
+
+	##
+	##  Was a task scheduled?
+	##
+	if ( $taskQueryResult !~ m/^ERROR/)
+	{
+		$enabled = 1;
+		$taskQueryResult =~ /Start Time:\s+(\d\d):(\d\d):\d\d ([AP]M)/;
+		$hour = $1;
+		$minute = $2;
+		if ( $3 =~ /PM/)
+		{
+			$hour += 12;
+		}
+
+		$taskQueryResult =~ /Days:\s+(\S+)/;
+		$weekday = $dayName{ $1};
+
+		$taskQueryResult =~ /Task To Run:\s+(.*)$/;
+		$crontab = $1;
+	}
+	
 	return( $enabled, $hour, $minute, $weekday, $crontab);
 }
 
