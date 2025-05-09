@@ -52,7 +52,7 @@ if %_skipPerl% EQU 0 (
    echo * Downloading Perl
    echo *******************
    echo.
-   curl -L https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54001_64bit_UCRT/strawberry-perl-5.40.0.1-64bit-portable.zip -o strawberryPerl.zip
+   curl -L https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_53822_64bit/strawberry-perl-5.38.2.2-64bit-portable.zip -o strawberryPerl.zip
 
 :: Unpack perl
    echo.
@@ -88,8 +88,10 @@ echo * Setting up Scheduler launcher
 echo *******************************
 echo.
 echo @echo off > launchScheduler.cmd
+echo pushd %CD% >> launchScheduler.cmd
 echo PATH=%PATH% >>launchScheduler.cmd
 echo perl Scheduler daemon -l http://*:%PORT% >> launchScheduler.cmd
+echo popd %CD% >> launchScheduler.cmd
 
 :: Build command to run Scheduler at login
 echo.
