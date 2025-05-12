@@ -49,6 +49,11 @@ color-blue
 	color: blue;
 }
 
+color-yellow
+{
+	color: yellow;
+}
+
 h1,sub-title
 {
 	text-align:center;
@@ -59,6 +64,26 @@ h1
 	font-size:24pt;
 }
 
+h2
+{
+	color: #00e000;
+	margin-left: -19pt;
+	margin-top: 48pt;
+}
+
+h3
+{
+	color:gold;
+	margin-top: 36pt;
+}
+
+h4
+{
+	color: bisque;
+	margin-left: -19pt;
+	margin-top: 30pt;
+}
+
 sub-title
 {
 	margin-top:-1em;
@@ -67,6 +92,11 @@ sub-title
 	font-weight:500;
 }
 
+indented-block
+{
+	display: block;
+	margin-left:36pt;
+}
 
 the-rest
 {

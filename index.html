@@ -26,8 +26,7 @@
 	<p>
 		Scheduler is a web based system that can be run on a church PC, or (if you set it up like in our church) 
 		you can run it on a dedicated computer called a Raspberry Pi that costs about $50-$80 and is the about the 
-		size of a deck of cards.  Currently, Scheduler is set up to run on a Linux system, but work is underway to have
-		it run on a Windows PC as well.  (I do not currently have access to a Mac, but it should be fairly easy to
+		size of a deck of cards.  (I do not currently have access to a Mac, but it should be fairly easy to
 		port to run on a Mac as well, if someone is interested.)
 	</p>
 	<p>
@@ -89,13 +88,43 @@
 	<p>
 		Currently Scheduler may be installed on the following platforms:
 		<ul>
-			<li>Linux PC</li>
-			<li>Raspberry Pi</li>
+			<li><a href="#windows_pc">Windows PC</a></li>
+			<li><a href="#linux_computer">Linux PC</a></li>
+			<li><a href="#raspberry_pi">Raspberry Pi</a></li>
 		</ul>
 		Though the installation methods are different for each, they each will be installing from the same code.
 		Details for installing on each platform are listed below.
 	</p>
-	<h4 id="linux_pc">Installing on Linux PC</h4>
+	<indented-block>
+	<h4 id="windows_pc">Installing on a Windows PC</h4>
+	<p>
+		To install Scheduler on a Windows machine, start by making a directory
+		where the Scheduler code will live.  Next, you will need to download the
+		Scheduler software from github using <a href="https://github.com/PotterProgrammer/Scheduler/archive/refs/heads/main.zip">this link</a>. 
+		Open the zip file and copy the contents of the Scheduler-main folder to
+		the directory on your machine that you set up for Scheduler. Next, open
+		a terminal session, and type the following:
+			<command-line>
+				chdir <color-blue>&lt;your-scheduler-directory&gt;</color-blue><br>
+				Installing\windows_install
+			</command-line>
+		where <color-yellow>&lt;your-scheduler-directory&gt;</color-yellow> is replaced by the name
+		of the directory you created.
+	</p>
+	<p>
+		This will start the installation process.  Scheduler is written in a
+		computer language named Perl.  So as part of the installation process,
+		the <b>windows-install</b> program will download a local copy of the
+		Perl language.  It will then install Perl modules needed by the
+		Scheduler program.  This step may take as much as 5-10 minutes.
+		Finally, the program will create the command to start Scheduler, a
+		desktop icon to start Scheduler, and a command that you can run (if you
+		wish) that will start Scheduler automatically on your computer whenever
+		you log on.  When the program ends (if not errors were indicated) then
+		Scheduler is installed and ready to run.
+	</p>
+
+	<h4 id="linux_computer">Installing on a Linux Computer</h4>
 	<p>
 		To install Scheduler on a Linux machine, you will need to use an
 		account that has <b>sudo</b> privelege so that you can install the
@@ -145,6 +174,46 @@ docs              Messaging.pm  Session.vim
 	<p>
 		If the script ran without errors, Scheduler is now installed on your system.
 	</p>
+
+	<h4 id="raspberry_pi">Installing on a Raspberry Pi</h4>
+	<p>
+		If you want to install Scheduler to run on a Raspberry Pi, you have two
+		options.  If you already have a Raspberry Pi that is running and you
+		simply want to add Scheduler to it, then you can follow the instructions
+		above for <a href="#linux_computer">Installing on a Linux Computer</a>.
+		If, however, you are starting with a Raspberry Pi that you intend to
+		dedicate to running Scheduler, then you may use this procedure.
+	</p>
+	<p>
+		Rather than using a hard drive, the Raspberry Pi uses a micro SD to
+		store the operating system and files.  So to install the OS, one
+		normally downloads an ISO and burns it to the SD card.  To make
+		installation easy for those looking to set up a Raspberry Pi for running
+		Scheduler, I have provided an ISO which has the lastest version of the
+		Raspberry Pi OS as well as Scheduler installed and ready to use.
+		You can find the latest full image at <a href="https://potterprogrammer.github.io.com/somehwere">this link</a>.
+		Download the image to your computer and unzip it.  
+	</p>
+	<p>
+		You will then need a program to burn the ISO image to the SD card.  An
+		excellent candidate for this task is the Imager application provided by
+		the Raspberry Pi group.  You can find the Imager program (which runs on
+		Windows, Linux, or Mac) <a href="https://www.raspberrypi.com/software/">
+		here</a> and directions for using it <a href="https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager">
+		here</a>.  If you are using the Image program to copy the ISO
+		to the SD card that when selecting the OS to install, you should scroll
+		to the bottom of the list and select "Custom OS" and then select the
+		unzipped Scheduler ISO that you downloaded.
+	</p>
+	<p>
+		Your new system will already have a user set up named
+		<b><i>scheduler</i></b> and its initial password will be <b><i>reschedule</i></b>.  It
+		is recommended that you change the password for the account.  When
+		logged into the Scheduler account, you will find the Sheduler program
+		installed in the Scheduler directory.  Scheduler will be already
+		configured to run as a service, listening to port 3000 by default.
+	</p>
+	</indented-block>
 	<h2>Running on a Raspberry Pi</h2>
 	<p>
 		Running Scheduler on a Raspberry Pi provides a means of running the
