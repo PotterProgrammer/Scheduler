@@ -44,7 +44,8 @@ sudo cpanm --installdeps .
 ##  Set up the program that starts Scheduler
 ##
 echo "Setting Scheduler to listen to port $PORT";
-echo "./Scheduler daemon -l http://*:$PORT" > startScheduler
+echo "cd $PWD" > startScheduler
+echo "./Scheduler daemon -l http://*:$PORT" >> startScheduler
 chmod +x startScheduler
 
 ##
@@ -53,10 +54,36 @@ chmod +x startScheduler
 cp -p startup_scheduler.cfg .scheduler.cfg
 
 ##
-##  Signal cron to restart the scheduler on reboot
+##  Make script to signal cron to restart the scheduler on reboot
 ##
-crontab -l > my_crontab
-printf "\n# Start Scheduler at Reboot\n@reboot sleep 120 && cd $PWD && ./startScheduler\n" >> my_crontab
-crontab ./my_crontab
+echo "crontab -l > my_crontab" > startSchedulerOnReboot
+echo 'printf "\n# Start Scheduler at Reboot\n@reboot sleep 120 && cd ' $PWD ' && ./startScheduler\n" >> my_crontab' >>startSchedulerOnReboot
+echo "crontab ./my_crontab" >> startSchedulerOnReboot
+chmod +x startSchedulerOnReboot
+
+
+##
+##  Set up desktop launcher
+##
+cat > Scheduler.desktop << END_LINK
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.1.1
+Name=Scheduler
+GenericName=Scheduler Service
+Exec=$PWD/startScheduler
+Icon=$PWD/public/scheduler.png
+Type=Application
+Categories=Application
+Comment=Web service to provide volunteer scheduling
+END_LINK
+
+##
+##  It appears some desktops look in ~/Desktop, and others look in
+##  ~/.local/share/applications, so put the launcher in both...
+##
+chmod +x Scheduler.desktop
+cp Scheduler.desktop ~/.local/share/applications
+cp Scheduler.desktop ~/Desktop
 
 echo "Setup completed."

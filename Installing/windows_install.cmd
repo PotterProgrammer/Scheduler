@@ -18,7 +18,7 @@ if "%1" == "/skipPerl" ( set _skipPerl=1 & shift & set foundMatch=1)
 : If we parsed an option and a non-numeric option remains, go back and try again
 if "%1" == "" ( goto :continueInstall)
 
-if %1 LT 1 (
+if %1 LSS 1 (
    if %foundMatch% EQU 1 (
 	 goto :parse_options
    ) else (
@@ -31,9 +31,9 @@ if %1 LT 1 (
 
 if %_showhelp% equ 1 (
    echo ^windows_install:  A batch file to install Scheduler on Windows
-   echo ^  usage:  windows_install [/?] [skipPerl] [port_number]
+   echo ^  usage:  windows_install [/?] [/skipPerl] [port_number]
    echo ^     where:
-   echo ^     skipPerl       indicates to skip installing Perl as part of the
+   echo ^     /skipPerl      indicates to skip installing Perl as part of the
    echo ^                    installation.
    echo ^     port_number    is the number of the port that Scheduler should
    echo ^                    listen to for incoming connections.  If this is
@@ -84,14 +84,14 @@ call cpanm --cpanfile windows_cpanfile --installdeps .
 :: Build program to start Scheduler
 echo.
 echo *******************************
-echo * Setting up Scheduler launcher
+echo * Setting up Scheduler script
 echo *******************************
 echo.
-echo @echo off > launchScheduler.cmd
-echo pushd %CD% >> launchScheduler.cmd
-echo PATH=%PATH% >>launchScheduler.cmd
-echo perl Scheduler daemon -l http://*:%PORT% >> launchScheduler.cmd
-echo popd %CD% >> launchScheduler.cmd
+echo @echo off > startScheduler.cmd
+echo pushd %CD% >> startScheduler.cmd
+echo PATH=%PATH% >>startScheduler.cmd
+echo perl Scheduler daemon -l http://*:%PORT% >> startScheduler.cmd
+echo popd %CD% >> startScheduler.cmd
 
 :: Build command to run Scheduler at login
 echo.
@@ -99,7 +99,7 @@ echo *****************************************
 echo * Setting up Scheduler autostart program
 echo *****************************************
 echo.
-echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\launchScheduler.cmd" /tn Scheduler /delay 0002:00 >autostartScheduler.cmd
+echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\startScheduler.cmd" /tn Scheduler /delay 0002:00 >autostartScheduler.cmd
 
 :: Build helper program to do cleanup
 echo.
@@ -115,7 +115,7 @@ echo perl clearSchedulesBefore %* >> clearSchedulesBefore.cmd
 copy startup_scheduler.cfg .scheduler.cfg
 
 :: Make a desktop shortcut to Scheduler
-perl makeWindowsShortcut %USERPROFILE%\Desktop\Scheduler.lnk %CD% launchScheduler.cmd
+perl makeWindowsShortcut %USERPROFILE%\Desktop\Scheduler.lnk %CD% startScheduler.cmd
 
 echo.
 echo Done
