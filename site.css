@@ -42,6 +42,7 @@ command-line, pre
 	background-color: #e0e0e0;
 	color: black;
 	font-family: Consolas,Courier New,monospace;
+	border: solid darkgray 3px;
 }
 
 color-blue

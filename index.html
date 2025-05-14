@@ -8,6 +8,8 @@
 		<menu-bar>
 			<a href="#features">Features</a>
 			<a href="#installing">Installing</a>
+			<a href="#starting">Starting Scheduler</a>
+			<a href="https://github.com/PotterProgrammer/Scheduler/raw/main/docs/Users%20Manual.pdf">User's Manual</a>
 		</menu-bar>
 
 	<the-rest>
@@ -27,7 +29,11 @@
 		Scheduler is a web based system that can be run on a church PC, or (if you set it up like in our church) 
 		you can run it on a dedicated computer called a Raspberry Pi that costs about $50-$80 and is the about the 
 		size of a deck of cards.  (I do not currently have access to a Mac, but it should be fairly easy to
-		port to run on a Mac as well, if someone is interested.)
+		port to run on a Mac as well, if someone is interested.)  You have the option of running it on a PC as
+		a program that you start and close only as needed, or you can run it continually so that it is always
+		available any time you wish to create, or edit a schedule, or volunteers wish to update their information.
+		Running Scheduler on a Raspberry Pi works particularly well for running the web service continually, as it has low
+		power requirements, takes up extremely minimal space, and can be run without a monitor or keyboard.
 	</p>
 	<p>
 		To use Scheduler, you begin by building a list of the positions that need
@@ -214,17 +220,23 @@ docs              Messaging.pm  Session.vim
 		configured to run as a service, listening to port 3000 by default.
 	</p>
 	</indented-block>
-	<h2>Running on a Raspberry Pi</h2>
+	<h2 id="starting">Starting Scheduler</h2>
 	<p>
-		Running Scheduler on a Raspberry Pi provides a means of running the
-		scheduler program on a computer that has low power requirements and
-		takes up very little space.  Raspberry Pi computers typically use 13 -
-		25W of power—about the same as charging a cell phone. PCs and Macs on
-		the other hand may use hundreds of Watts.  Since the Raspberry Pi is
-		about the size of a deck of cards and only weighs a few onces, it is
-		very unobtrusive.  By running the Scheduler software on a Raspberry Pi,
-		you can easily and inexpensively leave it running 24-7 as a dedicated
-		service.
+		Once Scheduler has been installed on your computer, it is ready to be started.
+		You have two choices.  You can run it as a program whenever you need it, or you 
+		can have it run whenever your computer is started.  (If you used the downloaded
+		image file to install Scheduler on a Raspberry Pi, then it is already set up to 
+		start Scheduler whenever the Raspberry Pi is powered up.)
+	</p>
+	<p>
+		If you would like to run it simply as needed, then see if there is a
+		Scheduler icon that was added to your desktop during the installation. (Depending
+		on your particular system, it may not have been.)  If the icon is on your desktop,
+		you can use that to start Scheduler.  If there is no Scheduler icon set up on your
+		desktop, then open a command prompt, change to the directory where you installed
+		Scheduler, and type:
+			<command-line>startScheduler<command-line>
+		and Scheduler will start.
 	</p>
 	</the-rest>
 	</body>
