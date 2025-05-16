@@ -99,7 +99,8 @@ echo *****************************************
 echo * Setting up Scheduler autoStart program
 echo *****************************************
 echo.
-echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\startScheduler.cmd" /tn Scheduler /delay 0002:00 >autoStartScheduler.cmd
+perl -pi -MCwd -e "s/__INSTALL_DIR__/getcwd();/e" Installing/autoStartOnWindows.xml
+echo schtasks /create  /xml Installing/autoStartOnWindows.xml /tn Scheduler /ru %USERNAME% /rp >autoStartScheduler.cmd
 
 :: Build helper program to do cleanup
 echo.
