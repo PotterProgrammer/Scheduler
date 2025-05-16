@@ -56,10 +56,10 @@ cp -p startup_scheduler.cfg .scheduler.cfg
 ##
 ##  Make script to signal cron to restart the scheduler on reboot
 ##
-echo "crontab -l > my_crontab" > startSchedulerOnReboot
+echo "crontab -l > my_crontab" > autoStartScheduler
 echo 'printf "\n# Start Scheduler at Reboot\n@reboot sleep 120 && cd ' $PWD ' && ./startScheduler\n" >> my_crontab' >>startSchedulerOnReboot
-echo "crontab ./my_crontab" >> startSchedulerOnReboot
-chmod +x startSchedulerOnReboot
+echo "crontab ./my_crontab" >> autoStartScheduler
+chmod +x autoStartScheduler
 
 
 ##

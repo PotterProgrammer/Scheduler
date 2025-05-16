@@ -96,10 +96,10 @@ echo popd %CD% >> startScheduler.cmd
 :: Build command to run Scheduler at login
 echo.
 echo *****************************************
-echo * Setting up Scheduler autostart program
+echo * Setting up Scheduler autoStart program
 echo *****************************************
 echo.
-echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\startScheduler.cmd" /tn Scheduler /delay 0002:00 >autostartScheduler.cmd
+echo schtasks /create  /sc onlogon /tr "cmd /c start /min \"Scheduler\" %CD%\startScheduler.cmd" /tn Scheduler /delay 0002:00 >autoStartScheduler.cmd
 
 :: Build helper program to do cleanup
 echo.
