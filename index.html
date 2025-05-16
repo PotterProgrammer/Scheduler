@@ -9,6 +9,7 @@
 			<a href="#features">Features</a>
 			<a href="#installing">Installing</a>
 			<a href="#starting">Starting Scheduler</a>
+			<a href="#connecting">Connecting to Scheduler</a>
 			<a href="https://github.com/PotterProgrammer/Scheduler/raw/main/docs/Users%20Manual.pdf">User's Manual</a>
 		</menu-bar>
 
@@ -246,6 +247,167 @@ docs              Messaging.pm  Session.vim
 		and your computer will be configured to start Scheduler for you 
 		automatically whenever your computer is rebooted.
 	</p>
+
+	<h2 id="connecting">Connecting to Scheduler</h2>
+	<p>
+		Once Scheduler has been started, you can connect to it
+		via a web browser to begin scheduling.  How you connect
+		will depend some on where you are connecting from, <a href="#local">
+		the computer where Scheduler is running</a>, <a href="#office">other
+		computers in the office network</a>, or <a href="#internet">via
+		the internet</a>.
+	</p>
+		<indented-block>
+		<h3 id="local">From the computer where Scheduler is running</h3>
+			<p>
+				No additional setup or information is needed to connect
+				to Scheduler from the machine where it is running.  Simply
+				start a web browser on that machine, and in the address
+				bar, type:
+				<command-line>localhost:3000/</command-line>
+				and you will be connected to the Scheduler server running
+				on that machine.
+			</p>
+		</h3>
+		<h3 id="office">From other computers in the office network</h3>
+			<p>
+				Some additional information (and perhaps setup) is needed
+				before you can connect to Scheduler from other computers in
+				the office.  You will need to find the IP address of the
+				computer that is running Scheduler, and you <u>may</u>
+				need to modify a firewall on the Scheduler computer to
+				allow incoming requests to be accepted.
+			</p>
+			<indented-block>
+			<h4>Getting the IP address of the Scheduler machine</h4>
+			<p>
+				The way that you do this is different, depending on
+				whether you are running Linux or Windows.  On a <b>Linux</b>
+				machine, open a command prompt and type:
+				<command-line>hostname -I </command-line>
+				and it should respond with an IP address (for example:
+				192.168.8.42).
+			</p>
+			<br>
+			<br>
+			<p>
+				For a <b>Windows</b> machine, here is how you can locate the 
+				IP address.  In the box with the magnifying
+				glass at the bottom of the screen, type in
+				<command-line>Network Connections</command-line>
+				and press Enter.  In the list that pops up, select
+				<b>Network Connections</b>.  In the Network Connections
+				app, double click on the Etherenet entry.  In the Ethernet
+				Status box that pops up, click on the <gray-button>Details</gray-button>
+				button.  In the Network Connection Details box that pops
+				up, find the IP address.  (In this example, it is 10.0.2.15 .)
+				<img class="screenshot" src="screenshot1.png"/>
+			</p>
+			<br>
+			<br>
+			<p>
+				If the computer that is running Scheduler does not have
+				a firewall in place, then you should be able to access 
+				Scheduler from other computers that are on the same local
+				network by starting a browser and typing:
+				<command-line>http://<color-red>IP Address</color-red>:3000</command-line>
+				where <color-red>IP Address</color-red> is replaced by the 
+				IP address of the machine where Scheduler is installed.  For
+				example, if Scheduler were running on the Windows machine from the
+				example above, you would type:
+				<command-line>http://10.0.2.15:3000</command-line>
+				in the address bar of the browser to connect to Scheduler.
+			</p>
+			<p>
+				If the connection fails, there is a good chance that there is a 
+				firewall installed on the machine where Scheduler is running.
+				A firewall is a security mechanism that blocks outside connections
+				from making their way into the system.  But they are typically
+				designed to allow you to specify rules to allow connection requests
+				on certain designated ports to take place.  (In the case of 
+				Scheduler, the default port is 3000.)  Since there is an 
+				assortment of different firewall software available, both 
+				as part of anti-virus and internet security packages, and
+				bundled as part of Windows, you will need to find the instructions
+				for how to modify your particular firewall so that it will
+				allow incoming TCP connections on port 3000.
+			</p>
+			</indented-block>
+		<h3 id="internet">From the Internet</h3>
+			<p>
+				Connecting your computer to the internet allows both you
+				and your volunteers to access Scheduler remotely at any
+				time.  This usually is not too difficult to do, but, depending
+				on how you connect to the internet, there are several
+				different ways that you can do this.  Also, depending on 
+				your internet provider, you may need their assistance as well.
+			</p>
+			<p>
+				Just as you had to determine an in-office address for your
+				computer and had to make sure that any firewalls on the PC
+				allowed it to be accessed at port 3000, you may need to take
+				similar steps to determine the "outside" address of your
+				computer, and you may need to define rules in your router to
+				allow it to direct incoming requests at a designated port 
+				to port 3000 on the machine that is running Scheduler.  
+			</p>
+			<indented-block>
+			<h4>If your internet provider made things easy...</h4>
+			<p>
+				To reach your computer running Scheduler via the internet,
+				you will need to have an a "real" IP address that the "outside
+				world" can use to connect to your computer.  Depending on your
+				internet provider, this may be easy, or complicated.  In some
+				cases, your office network may have what is referred to as a
+				"dedicated" IP address.  A dedicated IP address never changes,
+				which is good, but usually dedicated IP addresses require an
+				additional fee.
+			</p>
+			<p>
+				Many cable internet providers provide a "real" address to your
+				office network, but that address may sometimes change.  This is
+				sometimes referred to as a "dynamic" IP address.  If your
+				internet provider gives you a dyamic address, most of the time
+				you will used the same address to connect to Scheduler, but on
+				occassion you may need to change the IP address you are using.
+			</p>
+			<p>
+				If you are in either of these two situations, then you will need
+				to determine the "real" IP address that is associated with your router
+				and you will also need to modify the router configuration so that 
+				it forwards incoming requests for port 3000 to port 3000 on the
+				machine running Scheduler.  Since there are <u>many</u> different
+				routers, I cannot tell you the specifics of how to make this change
+				on your router.  You will need to either look on the internet or
+				seek help from your internet provider on the specifcs of how to
+				configure your particular monitor.  You will also need to determine the
+				real address that the internet will use to connect to your router.
+				This is very easy.  From a machine in your office, simply go to the 
+				website <a href="http://whatismyipaddress.com">http://whatismyipaddress.com</a>.
+				and it will show you the IP address used by your router.
+			</p>
+			<h4>And if they didn't...</h4>
+			<p>
+				A growing trend is for the internet provider not to give you a 
+				"real" IP address at all.  (Called CGNAT, this type of networking
+				allows the internet provider to let you access the internet, but
+				makes it more difficult for the internet to access your computer.)
+				If this is the type of internet connection that your internet provider
+				supplies, then you will need to take another approach.  There are
+				several different services that you can use to allow you to access
+				your computer remotely.  Basically you will need to have a "relayer"
+				running elsewhere on the internet that your computer will connect to.
+				To reach your computer, people will use the IP address of the relayer,
+				and it will forward the request to your computer.  One such service
+				which I have used for this purpose in the past is a service called
+				<a href="https://ngrok.com">ngrok</a>.  There is a nice blog 
+				<a href="https://www.donaldsimpson.co.uk/2017/01/30/using-ngrok-to-work-around-carrier-grade-nat-cgnat/">
+				here</a> which describes how it works and how to set it up.  If you
+				are taking this approach and follwing the examples, remember to use
+				port 3000 (not 80) when starting ngrok.
+			</p>
+			</indented-block>
+		</indented-block>
 	</the-rest>
 	</body>
 </html>

@@ -45,6 +45,11 @@ command-line, pre
 	border: solid darkgray 3px;
 }
 
+color-red
+{
+	color: red;
+}
+
 color-blue
 {
 	color: blue;
@@ -97,6 +102,22 @@ indented-block
 {
 	display: block;
 	margin-left:36pt;
+}
+
+gray-button
+{
+	display: inline;
+	color:black;
+	background-color: lightgray;
+	border: solid black 2px;
+	padding: 1px;
+}
+
+.screenshot
+{
+	width:75%;
+	margin-left: 12.5%;
+	margin-top: 3em;
 }
 
 the-rest
