@@ -8,7 +8,13 @@
 		<menu-bar>
 			<a href="#features">Features</a>
 			<a href="#installing">Installing</a>
-			<a href="#starting">Starting Scheduler</a>
+			<div class="submenu">
+				<button class="submenuButton">Starting Scheduler... ⏷</button>
+				<div class="submenuContent">
+					<a href="#starting">Manually</a><br>
+					<a href="#starting">Automatically</a>
+				</div>
+			</div>
 			<a href="#connecting">Connecting to Scheduler</a>
 			<a href="https://github.com/PotterProgrammer/Scheduler/raw/main/docs/Users%20Manual.pdf">User's Manual</a>
 		</menu-bar>
@@ -239,12 +245,18 @@ docs              Messaging.pm  Session.vim
 			<command-line>startScheduler</command-line>
 		and Scheduler will start.
 	</p>
+	<h2 id="autostarting">Starting Scheduler Automatically</h2>
 	<p>
 		If you would prefer to have Scheduler always start automatically whenever
-		your computer starts up, then open a commd prompt, change to the directory
+		your computer starts up, it is easy to do.  First, open a command prompt.
+		If you are running on Windows, select "Run as administrator" when
+		opening the command session.  At the command prompt, change to the directory
 		where you installed Scheduler, and type:
 			<command-line>autoStartScheduler</command-line>
-		and your computer will be configured to start Scheduler for you 
+		If you are running on Windows, you will be prompted by Windows to enter your 
+		password.  (This is because the Scheduler will start automatically, when the
+		computer starts, even if you have not logged in yet.)  When the
+		script finishes, your computer will be configured to start up Scheduler for you 
 		automatically whenever your computer is rebooted.
 	</p>
 
@@ -376,15 +388,22 @@ docs              Messaging.pm  Session.vim
 				to determine the "real" IP address that is associated with your router
 				and you will also need to modify the router configuration so that 
 				it forwards incoming requests for port 3000 to port 3000 on the
-				machine running Scheduler.  Since there are <u>many</u> different
-				routers, I cannot tell you the specifics of how to make this change
-				on your router.  You will need to either look on the internet or
-				seek help from your internet provider on the specifcs of how to
-				configure your particular monitor.  You will also need to determine the
-				real address that the internet will use to connect to your router.
-				This is very easy.  From a machine in your office, simply go to the 
-				website <a href="http://whatismyipaddress.com">http://whatismyipaddress.com</a>.
+				machine running Scheduler. It is easy to determine the address
+				that the internet sees for your router.  From a machine in your
+				office, simply go to the website 
+				<a href="http://whatismyipaddress.com">http://whatismyipaddress.com</a>,
 				and it will show you the IP address used by your router.
+			</p>
+			<p>
+				Since there are <u>many</u> different routers, and they are all
+				configured in a different manner, I cannot tell you the
+				specifics of how to make the change on your router, to tell 
+				it to forward incoming requests for port 3000 to port 3000
+				on the machine running Scheduler.  You will
+				need to either look on the internet or seek help from your
+				internet provider on the specifcs of how to configure your
+				particular router.  This is often in a section about the firewall,
+				or port forwarding.
 			</p>
 			<h4>And if they didn't...</h4>
 			<p>
