@@ -20,6 +20,7 @@
 			</div>
 			<a href="#connecting">Connecting to Scheduler</a>
 			<a href="https://github.com/PotterProgrammer/Scheduler/raw/main/docs/Users%20Manual.pdf" target="_blank">User's Manual</a>
+			<a style="float:right" href="#questions">Questions</a>
 		</menu-bar>
 
 	<the-rest>
@@ -431,7 +432,39 @@ docs              Messaging.pm  Session.vim
 			</p>
 			</indented-block>
 		</indented-block>
+		<h2 id="questions">Questions?</h2>
+		<p>
+			If you have questions or concerns you can either post an issue 
+			<a href="https://github.com/PotterProgrammer/Scheduler/issues" target="_blank">
+			here</a> on the github site where the code is hosted, or you can
+		<a onclick="contactMe()">click here</a> to send me an email.
+		</p>
 	</the-rest>
+	<script>
+		function contactMe()
+		{
+			const addr = descramble( 'qxbGWN[vNWWgeveNuexqqge@uqxbG.MNq!HljwgMW}ZMYgmlGge{20RlgHWbNA');
+			window.location.href = addr;
+		}
+
+		function descramble( text)
+		{
+			const moveTo    = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ: ?=&%';
+			const startFrom = 'xjMmgsuYbwyGqANvPeHWlhUfiCdLcIJVKTopSOtBXFRrZaEkQnDz[]!}#{';
+
+			let charMap = {};
+
+			for (let i = 0; i < startFrom.length; i++) 
+			{
+				charMap[startFrom[i]] = moveTo[i];
+			}
+
+			return text.replace(/./g, function(match) 
+				{
+					return charMap[match] || match;
+				});
+		}
+	</script>
 	</body>
 </html>
 
