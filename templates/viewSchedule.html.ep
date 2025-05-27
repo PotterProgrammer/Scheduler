@@ -86,6 +86,12 @@
 					volunteerList.appendChild( newName);
 				});
 
+				var newName = document.createElement('option');
+				var newNameText = document.createTextNode( "—unfilled—");
+				newName.appendChild( newNameText);
+				newName.setAttribute( "value", "—unfilled—");
+				volunteerList.appendChild( newName);
+
 			showEditSchedule();
 		};
 	}
