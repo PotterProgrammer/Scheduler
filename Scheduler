@@ -30,7 +30,7 @@ use open qw(:std :utf8);
 use utf8;
 use utf8::all;
 
-my $VERSION = '0.1.1';
+my $VERSION = '0.1.2';
 
 my @Slots;
 my @Volunteers;
